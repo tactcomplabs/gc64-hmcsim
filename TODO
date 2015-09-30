@@ -1,0 +1,93 @@
+HMC-SIM TODO LIST
+--------------------------------------------------------------------------------------------
+
+- decode bank to dram association 
+
+- add function to simulate "clock"
+  -- in progress: need to finish the xbar section; then add the finish the top-level stages
+  -- S1:	done
+  -- S2: 	done
+  -- S3:	done
+  -- S4:	finish hmcsim_process_rqst : add dram handlers to each command block
+  -- S5:	done
+  -- S5a:	done
+  -- S6:	done
+  -- look for 'todo'
+
+-- finish hmc_reset_device
+
+-- finish the packet processor 
+  - make sure and pay attention to the SLID value in the tail 
+    for response routing
+  - go back through the response routing and make sure this is true 
+  - probably done; but make sure 
+
+- add warm reset function for JTAG requests
+
+- add size to the build_memrequest for the payload 
+  -- maybe not, investigate
+
+- revise the link structure per page 19 of the spec; 
+  -- child device links are configured as host links to go upstream; 
+  -- parent links are configured as pass-thru's; 
+  -- possible mark devices as being connected to real host or uplink
+  -- i think we're good here, but double check 
+
+- future optimization
+  -- keep lists of root devices & child devices
+
+- add cache analysis functions
+
+
+--------------------------------------------------------------------------------------------
+Completed Items:
+--------------------------------------------------------------------------------------------
+- util function to determine if device is attached to a host [eg root device]
+  -- DONE
+
+- revise physical address decoding : see Table 9: Pg 31
+  -- DONE: this means fixing all the decode_vault logic
+  -- DONE: add a decode_quad function
+  -- DONE: wrap everything up with a top-level function: decode_qv
+  -- DONE: make sure all the functions in hmc_clock are correct now
+
+-- finish the hmc_bank_conflict code
+  -- DONE: make sure and mark the conflicts with HMC_RQST_CONFLICT
+  -- DONE: make sure and figure out the packet type
+
+- add functions to simplify writing the max request width
+  -- only support for default addressing modes
+  -- DONE : Checkin 119
+- add queue reorg function to hmc_clock
+  -- DONE
+- finalize the bank conflict methdology in hmc_clock_bank_conflicts from hmc_clock.c
+  -- look at the total number of banks and use that as the sliding window of possible values
+  -- DONE
+- update the host device cub id to be represented as num_devices+1
+  -- DONE
+- build funtions to send/recv packets
+  -- DONE
+- build functions to dump trace info 
+  -- DONE
+- build internal routing info for dev to dev xfers
+  -- DONE: handled in hmcsim_clock
+- add functions and handlers for HMC internal registers  
+-- 1) add handlers for request MODE_READ MODE_WRITE packets
+-- 2) add side-band functions to access registers 
+   -- DONE
+-- 3) add macros to decode the spec's notion of a register index versus the internal 
+      representation 
+   -- DONE
+-- 4) add auto setup of config regs within the hmc_init() function 
+   -- DONE
+-- 5) add to header file 
+   -- DONE
+- fix case where we have eight quads and four vaults; set pointers accordingly
+   -- DONE
+- add default config register writing for hmc_init(..) function; 
+  -- DONE
+- write the feature and version register
+  -- do this as a part of configuring the devices
+  -- DONE
+- fix vault layout in init : see page 31
+  -- DONE
