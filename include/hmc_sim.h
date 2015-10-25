@@ -236,6 +236,13 @@ extern int	hmcsim_recv( struct hmcsim_t *hmc, uint32_t dev, uint32_t link, uint6
 */
 extern int	hmcsim_clock( struct hmcsim_t *hmc );
 
+/*!     \fn uint64_t hmcsim_get_clock( struct hmcsim_t *hmc )
+        \brief Retrieves the current value of the HMC clock from the *hmc structure
+        \param *hmc is a pointer to a valid and initialized hmc structure.  Must not be null. 
+        \return The current clock value
+*/
+extern uint64_t hmcsim_get_clock( struct hmcsim_t *hmc );
+
 /*!	\fn int hmcsim_jtag_reg_read( struct hmcsim_t *hmc, uint32_t dev, uint64_t reg, uint64_t *result )
 	\brief Attempts to read the value from the specified HMC device register for the target device
 		using the side-band JTAG interface

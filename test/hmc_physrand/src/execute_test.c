@@ -62,6 +62,22 @@ extern int execute_test(	struct hmcsim_t *hmc,
 	long all_sent		= 0;
 	long all_recv		= 0;
 	int done		= 0;
+
+        uint64_t d_response_head;
+        uint64_t d_response_tail;
+        hmc_response_t d_type;
+        uint8_t d_length;
+        uint16_t d_tag;
+        uint8_t d_rtn_tag;
+        uint8_t d_src_link;
+        uint8_t d_rrp;
+        uint8_t d_frp;
+        uint8_t d_seq;
+        uint8_t d_dinv;
+        uint8_t d_errstat;
+        uint8_t d_rtc;
+        uint32_t d_crc;
+
 	/* ---- */
 
 	rtns = malloc( sizeof( int ) * hmc->num_links );
@@ -224,7 +240,7 @@ extern int execute_test(	struct hmcsim_t *hmc,
 			zero_packet( &(packet[0]) );
 
 			tag++;
-			if( tag == (UINT8_MAX-1) ){
+			if( tag == 2048 ){
 				tag = 0;
 			}	
 
@@ -272,6 +288,23 @@ packet_recv:
 				}else{ 
 					/* successfully received a packet */
 					printf( "SUCCESS : RECEIVED A SUCCESSFUL PACKET RESPONSE\n" );	
+                                        hmcsim_decode_memresponse( hmc,
+                                                                  &(packet[0]), 
+                                                                  &d_response_head,
+                                                                  &d_response_tail,
+                                                                  &d_type,
+                                                                  &d_length,
+                                                                  &d_tag,
+                                                                  &d_rtn_tag,
+                                                                  &d_src_link,
+                                                                  &d_rrp,
+                                                                  &d_frp,
+                                                                  &d_seq,
+                                                                  &d_dinv,
+                                                                  &d_errstat,
+                                                                  &d_rtc,
+                                                                  &d_crc );
+                                        printf( "RECV tag=%d; rtn_tag=%d\n", d_tag, d_rtn_tag );
 					all_recv++;
 				}
 

@@ -14,6 +14,15 @@
 #include "hmc_sim.h"
 
 
+/* ----------------------------------------------------- HMCSIM_GET_CLOCK */
+extern uint64_t hmcsim_get_clock( struct hmcsim_t *hmc ){
+  if( hmc == NULL ){ 
+    return 0x00ll;
+  }
+
+  return hmc->clk;
+}
+
 /* ----------------------------------------------------- HMCSIM_UTIL_IS_ROOT */
 /* 
  * HMCSIM_UTIL_IS_ROOT 
