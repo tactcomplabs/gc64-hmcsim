@@ -13,7 +13,6 @@
 #include <string.h>
 #include "hmc_sim.h"
 
-
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
 extern int hmcsim_trace( struct hmcsim_t *hmc, char *str );
 extern int hmcsim_trace_stall( 	struct hmcsim_t *hmc, 
@@ -744,7 +743,7 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 	 * clear the address array 
 	 * 
 	 */
-	for( i=0; i<hmc->num_banks; i++ ){
+	for( i=0; i<HMC_MAX_BANKS; i++ ){
 		addr[i]	= 0x00ll;
 	}
 
@@ -809,7 +808,7 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 					 * queue_depth is > MAX_BANKS
 					 *
 					 */
-					for( x=0; x<hmc->num_banks; x++ ){
+					for( x=0; x<HMC_MAX_BANKS; x++ ){
 
 						/* 
 						 * collect the first 'x' 
@@ -821,7 +820,7 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 							tmp = 
 						   	(hmc->devs[i].quads[j].vaults[k].rqst_queue[x].packet[0]>>24)
 						   	&0x3FFFFFFFF;
-							addr[x] = tmp;
+							addr[na] = tmp;
 
 							na++;
 						}
@@ -844,7 +843,7 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 						tmp = 
 						   (hmc->devs[i].quads[j].vaults[k].rqst_queue[x].packet[0]>>24)
 						   &0x3FFFFFFFF;
-						addr[x] = tmp;
+						addr[na] = tmp;
 						
 						na++;
 					}

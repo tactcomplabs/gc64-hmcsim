@@ -69,7 +69,7 @@ extern "C" {
 #define		HMC_MIN_CAPACITY	2
 #define		HMC_MAX_VAULTS		32
 #define		HMC_MIN_VAULTS		16
-#define		HMC_MAX_BANKS		16
+#define		HMC_MAX_BANKS		32
 #define		HMC_MIN_BANKS		8
 #define		HMC_MIN_DRAMS		20
 #define		HMC_MAX_DRAMS		20

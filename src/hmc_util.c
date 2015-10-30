@@ -304,16 +304,16 @@ extern int hmcsim_util_decode_vault( 	struct hmcsim_t *hmc,
 			switch( bsize )
 			{
 				case 32:
-					/* [10:9] */
-					tmp = (uint32_t)((addr>>9) & 0x3);
+					/* [6:5] */
+					tmp = (uint32_t)((addr>>5) & 0x3);
 					break;
 				case 64:
-					/* [11:10] */
-					tmp = (uint32_t)((addr>>10) & 0x3);
+					/* [7:6] */
+					tmp = (uint32_t)((addr>>6) & 0x3);
 					break;
 				case 128:
-					/* [12:11] */
-					tmp = (uint32_t)((addr>>11) & 0x3);
+					/* [8:7] */
+					tmp = (uint32_t)((addr>>7) & 0x3); // hkim
 					break;
 				default:
 					break;
