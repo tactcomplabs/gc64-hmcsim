@@ -503,9 +503,10 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 			
 				cur_bank += hmc->num_banks; 
 
+				cur_queue += hmc->queue_depth;	
 			}
 	
-			cur_queue += hmc->queue_depth;	
+			//cur_queue += hmc->queue_depth;	
 			//cur_vault += hmc->num_vaults;
 			cur_vault += 4;
 
