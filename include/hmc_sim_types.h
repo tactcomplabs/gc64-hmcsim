@@ -104,7 +104,8 @@ typedef enum{
 	EQ16,				/*! HMC-SIM: HMC_RQST_T: 16-BYTE ATOMIC EQUAL */
 	BWR8R,				/*! HMC-SIM: HMC_RQST_T: 8-BYTE ATOMIC BIT WRITE WITH RETURN */
 	SWAP16				/*! HMC-SIM: HMC_RQST_T: 16-BYTE ATOMIC SWAP */
-	
+
+	/* -- CMC Types */	
 
 }hmc_rqst_t;
 
