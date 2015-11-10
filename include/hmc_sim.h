@@ -294,6 +294,15 @@ extern int	hmcsim_util_set_all_max_blocksize( struct hmcsim_t *hmc, uint32_t bsi
 */
 extern int	hmcsim_util_get_max_blocksize( struct hmcsim_t *hmc, uint32_t dev, uint32_t *bsize );
 
+/*!
+        \fn int hmcsim_load_cmc( struct hmcsim_t *cmc, char *cmc_lib )
+        \brief Load the CMC library into the current simulation context
+        \param *hmc is a pointer to a valid and initialized hmc structure.  Must not be null.
+        \param *cmc_lib is a character string that contains the full path to the CMC library to load
+        \return 0 on success, nonzero otherwise 
+*/
+extern int      hmcsim_load_cmc( struct hmcsim_t *hmc, char *cmc_lib );
+
 #ifdef __cplusplus
 } /* extern C */
 #endif
