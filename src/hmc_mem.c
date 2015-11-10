@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_MEM_C_
- * 
- * HYBRID MEMORY CUBE SIMULATION LIBRARY 
- * 
+ *
+ * HYBRID MEMORY CUBE SIMULATION LIBRARY
+ *
  * MEMORY ALLOCATION/FREE FUNCTIONS
- * 
+ *
  */
 
 
@@ -15,9 +15,9 @@
 
 
 /* ----------------------------------------------------- HMCSIM_FREE_MEMORY */
-/* 
+/*
  * HMCSIM_FREE_MEMORY
- * 
+ *
  */
 extern int	hmcsim_free_memory( struct hmcsim_t *hmc )
 {
