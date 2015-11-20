@@ -13,10 +13,31 @@
 #include <string.h>
 #include "hmc_sim.h"
 
+/* ----------------------------------------------------- HMCSIM_CONFIG_CMC */
+/*
+ * HMCSIM_CONFIG_CMC
+ *
+ */
+static int    hmcsim_config_cmc( struct hmcsim_t *hmc ){
+
+      /* vars */
+      int i = 0;
+      /* ---- */
+
+      for( i=0; i<HMC_MAX_CMC; i++ ){
+        hmc->cmcs[i].op     = UNK_CMC;
+        hmc->cmcs[i].type   = FLOW_NULL;  /* default to a null op */
+        hmc->cmcs[i].cmd    = 0x00ll;
+        hmc->cmcs[i].active = 0;          /* disable this op */
+      }
+
+      return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_CONFIG_FEAT_REG */
-/* 
+/*
  * HMCSIM_CONFIG_FEAT_REG
- * 
+ *
  */
 static int	hmcsim_config_feat_reg( struct hmcsim_t *hmc, uint32_t dev )
 {
@@ -178,129 +199,129 @@ static int	hmcsim_config_dev_reg( struct hmcsim_t *hmc, uint32_t dev )
 	hmc->devs[dev].regs[HMC_REG_EDR0_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_EDR0_IDX].phy_idx	= HMC_REG_EDR0; 
 	hmc->devs[dev].regs[HMC_REG_EDR0_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_EDR1_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_EDR1_IDX].phy_idx	= HMC_REG_EDR1; 
 	hmc->devs[dev].regs[HMC_REG_EDR1_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_EDR2_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_EDR2_IDX].phy_idx	= HMC_REG_EDR2; 
 	hmc->devs[dev].regs[HMC_REG_EDR2_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_EDR3_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_EDR3_IDX].phy_idx	= HMC_REG_EDR3; 
 	hmc->devs[dev].regs[HMC_REG_EDR3_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_ERR_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_ERR_IDX].phy_idx	= HMC_REG_ERR; 
 	hmc->devs[dev].regs[HMC_REG_ERR_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_GC_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_GC_IDX].phy_idx	= HMC_REG_GC; 
 	hmc->devs[dev].regs[HMC_REG_GC_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_LC0_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_LC0_IDX].phy_idx	= HMC_REG_LC0; 
 	hmc->devs[dev].regs[HMC_REG_LC0_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_LC1_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_LC1_IDX].phy_idx	= HMC_REG_LC1; 
 	hmc->devs[dev].regs[HMC_REG_LC1_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_LC2_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_LC2_IDX].phy_idx	= HMC_REG_LC2; 
 	hmc->devs[dev].regs[HMC_REG_LC2_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_LC3_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_LC3_IDX].phy_idx	= HMC_REG_LC3; 
 	hmc->devs[dev].regs[HMC_REG_LC3_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_LRLL0_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_LRLL0_IDX].phy_idx	= HMC_REG_LRLL0; 
 	hmc->devs[dev].regs[HMC_REG_LRLL0_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_LRLL1_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_LRLL1_IDX].phy_idx	= HMC_REG_LRLL1; 
 	hmc->devs[dev].regs[HMC_REG_LRLL1_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_LRLL2_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_LRLL2_IDX].phy_idx	= HMC_REG_LRLL2; 
 	hmc->devs[dev].regs[HMC_REG_LRLL2_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_LRLL3_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_LRLL3_IDX].phy_idx	= HMC_REG_LRLL3; 
 	hmc->devs[dev].regs[HMC_REG_LRLL3_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_LR0_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_LR0_IDX].phy_idx	= HMC_REG_LR0; 
 	hmc->devs[dev].regs[HMC_REG_LR0_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_LR1_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_LR1_IDX].phy_idx	= HMC_REG_LR1; 
 	hmc->devs[dev].regs[HMC_REG_LR1_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_LR2_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_LR2_IDX].phy_idx	= HMC_REG_LR2; 
 	hmc->devs[dev].regs[HMC_REG_LR2_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_LR3_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_LR3_IDX].phy_idx	= HMC_REG_LR3; 
 	hmc->devs[dev].regs[HMC_REG_LR3_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_IBTC0_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_IBTC0_IDX].phy_idx	= HMC_REG_IBTC0; 
 	hmc->devs[dev].regs[HMC_REG_IBTC0_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_IBTC1_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_IBTC1_IDX].phy_idx	= HMC_REG_IBTC1; 
 	hmc->devs[dev].regs[HMC_REG_IBTC1_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_IBTC2_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_IBTC2_IDX].phy_idx	= HMC_REG_IBTC2; 
 	hmc->devs[dev].regs[HMC_REG_IBTC2_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_IBTC3_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_IBTC3_IDX].phy_idx	= HMC_REG_IBTC3; 
 	hmc->devs[dev].regs[HMC_REG_IBTC3_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_AC_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_AC_IDX].phy_idx	= HMC_REG_AC; 
 	hmc->devs[dev].regs[HMC_REG_AC_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_VCR_IDX].type	= HMC_RW; 
 	hmc->devs[dev].regs[HMC_REG_VCR_IDX].phy_idx	= HMC_REG_VCR; 
 	hmc->devs[dev].regs[HMC_REG_VCR_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_FEAT_IDX].type	= HMC_RO;
 	hmc->devs[dev].regs[HMC_REG_FEAT_IDX].phy_idx	= HMC_REG_FEAT; 
 	hmc->devs[dev].regs[HMC_REG_FEAT_IDX].reg	= 0x00ll;
-	
+
 	hmc->devs[dev].regs[HMC_REG_RVID_IDX].type	= HMC_RO;
 	hmc->devs[dev].regs[HMC_REG_RVID_IDX].phy_idx	= HMC_REG_RVID; 
 	hmc->devs[dev].regs[HMC_REG_RVID_IDX].reg	= 0x00ll;
 
 
-	/* 
+	/*
 	 * write the feature revision register
-	 * 
- 	 */	
+	 *
+ 	 */
 	hmcsim_config_feat_reg( hmc, dev );
 
 
-	/* 
+	/*
 	 * write the device revision register
-	 * 
- 	 */	
+	 *
+ 	 */
 	hmcsim_config_rvid_reg( hmc, dev );
 
-	return 0;	
+	return 0;
 }
 
 
 /* ----------------------------------------------------- HMCSIM_CONFIG_DEVICES */
-/* 
+/*
  * HMCSIM_CONFIG_DEVICES
- * 
+ *
  */
 extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 {
@@ -328,6 +349,13 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 		return -1;
 	}
 
+        /*
+         * init the cmc structure
+         *
+         */
+        hmcsim_config_cmc( hmc );
+
+
 	/* 
 	 * set the device pointers
 	 * 
@@ -352,7 +380,7 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 		 *
 		 */
 		hmc->devs[i].id	= i;
-		
+
 		/* 
 	 	 * zero the sequence number
 		 * 
@@ -505,15 +533,15 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 
 				cur_queue += hmc->queue_depth;	
 			}
-	
+
 			//cur_queue += hmc->queue_depth;	
 			//cur_vault += hmc->num_vaults;
 			cur_vault += 4;
 
 		}
-	
+
 		cur_quad+=hmc->num_quads;
-	}	
+	}
 
 	return 0;
 }

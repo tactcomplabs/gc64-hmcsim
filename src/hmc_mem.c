@@ -25,6 +25,11 @@ extern int	hmcsim_free_memory( struct hmcsim_t *hmc )
 		return -1;
 	}
 
+        if( hmc->cmcs != NULL ){ 
+                free( hmc->cmcs );
+                hmc->cmcs = NULL;
+        }
+
 	if( hmc->__ptr_devs != NULL ){ 
 		free( hmc->__ptr_devs );
 		hmc->__ptr_devs = NULL;
@@ -101,6 +106,15 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 #endif
 		return -1;
 	}
+
+        hmc->cmcs = malloc( sizeof( struct hmc_cmc_t ) * HMC_MAX_CMC );
+        if( hmc->cmcs == NULL ){ 
+#ifdef HMC_DEBUG
+                HMCSIM_PRINT_TRACE( "FAILED TO ALLOCATE cmcs" );
+#endif
+          return -1;
+        }
+
 
 	hmc->__ptr_devs	= malloc( sizeof( struct hmc_dev_t ) * hmc->num_devs );
 	if( hmc->__ptr_devs == NULL ){ 

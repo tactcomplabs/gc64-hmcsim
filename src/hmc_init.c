@@ -126,6 +126,7 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
 	hmc->num_banks	= num_banks;
 	hmc->num_drams	= num_drams;
 	hmc->capacity	= capacity;
+        hmc->num_cmc    = 0x00;
 	hmc->queue_depth= queue_depth;
 	hmc->xbar_depth	= xbar_depth;
 

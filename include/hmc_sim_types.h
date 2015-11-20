@@ -1,13 +1,13 @@
-/* 
+/*
  * _HMC_SIM_TYPES_H_
- * 
+ *
  * HYBRID MEMORY CUBE SIMULATION LIBRARY
- * 
- * HMC TYPES HEADER FILE 
- * 
+ *
+ * HMC TYPES HEADER FILE
+ *
  * WARNING: DO NOT INCLUDE THIS FILE DIRECTLY
- *	    ALWAYS INCLUDE THE TOP-LEVEL HEADER 
- * 
+ *	    ALWAYS INCLUDE THE TOP-LEVEL HEADER
+ *
  */
 
 #ifndef _HMC_SIM_TYPES_H_
@@ -45,6 +45,8 @@ typedef enum{
 }hmc_response_t;
 
 typedef enum{
+        INARG,                          /*! HMC-SIM: HMC_CMCOP_T: INPUT DATA ARGUMENT PRESENT */
+        OUTARG,                         /*! HMC-SIM: HMC_CMCOP_T: OUTPUT DATA ARGUMENT PRESENT */
         PREDATA_OP,                     /*! HMC-SIM: HMC_CMCOP_T: CMC PRE DATA LOGIC OP */
         POSTDATA_OP,                    /*! HMC-SIM: HMC_CMCOP_T: CMC POST DATA LOGIC OP */
         LOGIC_OP,                       /*! HMC-SIM: HMC_CMCOP_T: CMC LOGIC OPERATION : REGISTER READ/WRITE */
@@ -117,6 +119,7 @@ typedef enum{
 }hmc_rqst_t;
 
 /* -------------------------------------------------- DATA STRUCTURES */
+
 
 struct hmc_link_t{
 
@@ -192,9 +195,18 @@ struct hmc_dev_t{
 	uint8_t seq;				/*! HMC-SIM: HMC_DEV_T: SEQUENCE NUMBER */
 };
 
+struct hmc_cmc_t{
+        hmc_cmcop_t op;                 /*! HMC-SIM: HMC_CMC_T: OPERATION SPECIFICATION */
+        hmc_rqst_t type;                /*! HMC-SIM: HMC_CMC_T: REGISTERED REQUEST TYPE */
+        uint32_t cmd;                   /*! HMC-SIM: HMC_CMC_T: COMMAND CODE OF THE REQUEST */
+        uint32_t active;                /*! HMC-SIM: HMC_CMC_T: SIGNALS THAT THE COMMAND IS ACTIVE */
+};
+
 struct hmcsim_t{
 
 	struct hmc_dev_t *devs;		/*! HMC-SIM: HMCSIM_T: DEVICE STRUCTURES */
+
+        struct hmc_cmc_t *cmcs;         /*! HMC-SIM: HMCSIM_T: REGISTERED CMC OPERATIONS */
 
 	uint32_t num_devs;		/*! HMC-SIM: HMCSIM_T: NUMBER OF DEVICES */ 
 	uint32_t num_links;		/*! HMC-SIM: HMCSIM_T: LINKS PER DEVICE */	
@@ -203,6 +215,8 @@ struct hmcsim_t{
 	uint32_t num_banks;		/*! HMC-SIM: HMCSIM_T: BANKS PER VAULT */
 	uint32_t num_drams;		/*! HMC-SIM: HMCSIM_T: DRAMS PER BANK */
 	uint32_t capacity;		/*! HMC-SIM: HMCSIM_T: CAPACITY PER DEVICE */
+
+        uint32_t num_cmc;               /*! HMC-SIM: HMCSIM_T: NUMBER OF REGISTERED CMC OPERATIONS */
 
 	uint32_t queue_depth;		/*! HMC-SIM: HMCSIM_T: VAULT QUEUE DEPTH */
 	uint32_t xbar_depth;		/*! HMC-SIM: HMCSIM_T: VAULT QUEUE DEPTH */
