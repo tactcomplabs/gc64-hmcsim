@@ -45,6 +45,13 @@ typedef enum{
 }hmc_response_t;
 
 typedef enum{
+        PREDATA_OP,                     /*! HMC-SIM: HMC_CMCOP_T: CMC PRE DATA LOGIC OP */
+        POSTDATA_OP,                    /*! HMC-SIM: HMC_CMCOP_T: CMC POST DATA LOGIC OP */
+        LOGIC_OP,                       /*! HMC-SIM: HMC_CMCOP_T: CMC LOGIC OPERATION : REGISTER READ/WRITE */
+        UNK_CMC                         /*! HMC-SIM: HMC_CMCOP_T: UNKNOWN TYPE OF CMC OPERATION */
+}hmc_cmcop_t;
+
+typedef enum{
 	WR16, 				/*! HMC-SIM: HMC_RQST_T: 16-BYTE WRITE REQUEST */
 	WR32, 				/*! HMC-SIM: HMC_RQST_T: 32-BYTE WRITE REQUEST */
 	WR48, 				/*! HMC-SIM: HMC_RQST_T: 48-BYTE WRITE REQUEST */
