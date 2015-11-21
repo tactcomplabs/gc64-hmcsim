@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_PROCESS_PACKET_C_
- * 
- * HYBRID MEMORY CUBE SIMULATION LIBRARY 
- * 
+ *
+ * HYBRID MEMORY CUBE SIMULATION LIBRARY
+ *
  * HMC PACKET PROCESSORS FOR MEM OPS
- * 
+ *
  */
 
 
@@ -15,42 +15,43 @@
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
 extern int	hmcsim_trace( struct hmcsim_t *hmc, char *str );
-extern int	hmcsim_trace_rqst( 	struct hmcsim_t *hmc, 
-					char *rqst, 
-					uint32_t dev, 
-					uint32_t quad, 
-					uint32_t vault, 
-					uint32_t bank, 
-					uint64_t addr1, 
+extern int	hmcsim_trace_rqst( 	struct hmcsim_t *hmc,
+					char *rqst,
+					uint32_t dev,
+					uint32_t quad,
+					uint32_t vault,
+					uint32_t bank,
+					uint64_t addr1,
 					uint32_t size );
-extern int	hmcsim_trace_stall(	struct hmcsim_t *hmc, 
-					uint32_t dev, 
-					uint32_t quad, 
-					uint32_t vault, 
-					uint32_t src, 
-					uint32_t dest, 
-					uint32_t link, 
-					uint32_t slot, 
+extern int	hmcsim_trace_stall(	struct hmcsim_t *hmc,
+					uint32_t dev,
+					uint32_t quad,
+					uint32_t vault,
+					uint32_t src,
+					uint32_t dest,
+					uint32_t link,
+					uint32_t slot,
 					uint32_t type );
 extern int	hmcsim_util_zero_packet( struct hmc_queue_t *queue );
-extern int	hmcsim_util_decode_bank( struct hmcsim_t *hmc, 
-					uint32_t dev, 
-					uint32_t bsize, 
+extern int	hmcsim_util_decode_bank( struct hmcsim_t *hmc,
+					uint32_t dev,
+					uint32_t bsize,
 					uint64_t addr,
 					uint32_t *bank );
-extern int	hmcsim_decode_rsp_cmd( 	hmc_response_t rsp_cmd, 
+extern int	hmcsim_decode_rsp_cmd( 	hmc_response_t rsp_cmd,
 					uint8_t *cmd );
+extern uint32_t hmcsim_cmc_cmdtoidx( hmc_rqst_t rqst );
 
 
 /* ----------------------------------------------------- HMCSIM_PROCESS_RQST */
-/* 
+/*
  * HMCSIM_PROCESS_RQST
- * 
+ *
  */
-extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc, 
-					uint32_t dev, 
-					uint32_t quad, 
-					uint32_t vault, 
+extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
+					uint32_t dev,
+					uint32_t quad,
+					uint32_t vault,
 					uint32_t slot )
 {
 	/* vars */
@@ -69,7 +70,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	uint64_t rsp_rrp		= 0x00ll;
 	uint32_t rsp_len		= 0x00;
 	uint64_t packet[HMC_MAX_UQ_PACKET];
-	
+
 	uint32_t cur			= 0x00;
 	uint32_t error			= 0x00;
 	uint32_t t_slot			= hmc->queue_depth+1;
@@ -79,41 +80,41 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	uint32_t tag			= 0x00;
 	uint32_t bsize			= 0x00;
 	uint32_t bank			= 0x00;
-	uint64_t addr			= 0x00ll; 
+	uint64_t addr			= 0x00ll;
 	int no_response			= 0x00;
 	hmc_response_t rsp_cmd		= RSP_ERROR;
 	uint8_t tmp8			= 0x0;
 	/* ---- */
 
 
-	/* 	
+	/*
 	 * -- Description of error types --
-	 * Given that the various requests can return 
-	 * varying results and errors, we define a 
+	 * Given that the various requests can return
+	 * varying results and errors, we define a
  	 * generic error type above that is handled
-	 * when building the response packets. 
+	 * when building the response packets.
 	 * In this manner, we can signal a varying
 	 * number of errors in the packet handlers
-	 * without disrupting everything too much. 
-	 * The error codes are described as follows: 
-	 * 
+	 * without disrupting everything too much.
+	 * The error codes are described as follows:
+	 *
 	 * error = 0 : no error has occurred [default]
-	 * error = 1 : packet request exceeds maximum 
-	 *             block size [bsize] 
-	 * 
+	 * error = 1 : packet request exceeds maximum
+	 *             block size [bsize]
+	 *
  	 */
 
 
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 		return -1;
 	}
 
-	/* 
+	/*
 	 * Step 1: get the request
-	 * 
+	 *
 	 */
 	queue	= &(hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[slot]);
-	head	= queue->packet[0];	
+	head	= queue->packet[0];
 
 	/* -- get the packet length [10:7] */
 	length 	= (uint32_t)( (head >> 7) & 0x0F );
@@ -121,18 +122,18 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	/* -- cmd = [5:0] */
 	cmd	= (uint32_t)(head & 0x3F);
 
-	if( cmd == 0x00 ){ 
-		/* command is flow control, dump out */	
+	if( cmd == 0x00 ){
+		/* command is flow control, dump out */
 		no_response = 1;
-		goto step4_vr;	
+		goto step4_vr;
 	}
 
-	/* -- decide where the tail is */	
+	/* -- decide where the tail is */
 	tail	= queue->packet[ ((length*2)-1) ];
 
-	/* 
-	 * Step 2: decode it 
-	 * 
+	/*
+	 * Step 2: decode it
+	 *
  	 */
 	/* -- cmd = [5:0] */
 	cmd	= (uint32_t)(head & 0x3F);
@@ -149,10 +150,10 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	/* -- get the bank */
 	hmcsim_util_decode_bank( hmc, dev, bsize, addr, &bank );
 
-	/* 
+	/*
  	 * Step 3: find a response slot
 	 *         if no slots available, then this operation must stall
-	 * 
+	 *
  	 */
 
 	/* -- find a response slot */
@@ -173,818 +174,906 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 		queue->valid = HMC_RQST_STALLED;
 
-		/* 
+		/*
 		 * print a stall trace
-		 * 
+		 *
 		 */
-		if( (hmc->tracelevel & HMC_TRACE_STALL) > 0 ){ 
-			hmcsim_trace_stall(	hmc, 
-						dev, 
-						quad, 
-						vault, 
-						0, 
+		if( (hmc->tracelevel & HMC_TRACE_STALL) > 0 ){
+			hmcsim_trace_stall(	hmc,
+						dev,
+						quad,
+						vault,
 						0,
 						0,
-						slot, 
+						0,
+						slot,
 						1 );
 		}
 
 		return HMC_STALL;
-	}	
+	}
 
-	/* 
-	 * Step 3: perform the op 
-	 * 
+	/*
+	 * Step 3: perform the op
+	 *
  	 */
 	switch( cmd )
 	{
-		case 0x08:
+		case 8:
 			/* WR16 */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"WR16", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"WR16",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = WR_RS; 		
+			rsp_cmd = WR_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
 
 			break;
-		case 0x09:
+		case 9:
 			/* WR32 */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"WR32", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"WR32",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = WR_RS; 		
+			rsp_cmd = WR_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
 
 			break;
-		case 0x0A:
+		case 10:
 			/* WR48 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 48 ){ 
+			if( bsize < 48 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"WR48", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"WR48",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = WR_RS; 		
+			rsp_cmd = WR_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
 
 			break;
-		case 0x0B:
+		case 11:
 			/* WR64 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 64 ){ 
+			if( bsize < 64 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"WR64", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"WR64",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = WR_RS; 		
+			rsp_cmd = WR_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
 
 			break;
-		case 0x0C:
+		case 12:
 			/* WR80 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 80 ){ 
+			if( bsize < 80 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"WR80", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"WR80",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = WR_RS; 		
+			rsp_cmd = WR_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
 
 			break;
-		case 0x0D:
+		case 13:
 			/* WR96 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 96 ){ 
+			if( bsize < 96 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"WR96", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"WR96",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = WR_RS; 		
+			rsp_cmd = WR_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
 
 			break;
-		case 0x0E:
+		case 14:
 			/* WR112 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 112 ){ 
+			if( bsize < 112 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"WR112", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"WR112",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = WR_RS; 		
+			rsp_cmd = WR_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
 
 			break;
-		case 0x0F:
+		case 15:
 			/* WR128 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 128 ){ 
+			if( bsize < 128 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"WR128", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"WR128",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = WR_RS; 		
+			rsp_cmd = WR_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
 
 			break;
-		case 0x10:
+                case 79:
+			/* WR256 */
+
+			/*
+			 * check to see if we exceed maximum block size
+			 *
+			 */
+			if( bsize < 256 ){
+				error = 1;
+				break;
+			}
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"WR256",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = WR_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 1;
+
+			break;
+
+		case 16:
 			/* MD_WR */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"MD_WR", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"MD_WR",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = MD_WR_RS; 		
+			rsp_cmd = MD_WR_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
 
 			break;
-		case 0x11:
+		case 17:
 			/* BWR */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"BWR", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"BWR",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = WR_RS; 		
+			rsp_cmd = WR_RS;
 
 			break;
-		case 0x12:
+		case 18:
 			/* TWOADD8 */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"TWOADD8", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"TWOADD8",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = WR_RS; 		
+			rsp_cmd = WR_RS;
 
 			break;
-		case 0x13:
+		case 19:
 			/* ADD16 */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"ADD16", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"ADD16",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = WR_RS; 		
+			rsp_cmd = WR_RS;
 
 			break;
-		case 0x18:
+		case 24:
 			/* P_WR16 */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"P_WR16", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P_WR16",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE; 		
+			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x19:
+		case 25:
 			/* P_WR32 */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"P_WR32", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P_WR32",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE; 		
+			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x1A:
+		case 26:
 			/* P_WR48 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 48 ){ 
+			if( bsize < 48 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"P_WR48", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P_WR48",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE; 		
+			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x1B:
+		case 27:
 			/* P_WR64 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 64 ){ 
+			if( bsize < 64 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"P_WR64", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P_WR64",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE; 		
+			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x1C:
+		case 28:
 			/* P_WR80 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 80 ){ 
+			if( bsize < 80 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"P_WR80", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P_WR80",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE; 		
+			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x1D:
+		case 29:
 			/* P_WR96 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 96 ){ 
+			if( bsize < 96 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"P_WR96", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P_WR96",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE; 		
+			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x1E:
+		case 30:
 			/* P_WR112 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 112 ){ 
+			if( bsize < 112 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"P_WR112", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P_WR112",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE; 		
+			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x1F:
+		case 31:
 			/* P_WR128 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 128 ){ 
+			if( bsize < 128 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"P_WR128", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P_WR128",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE; 		
+			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x21:
+                case 95:
+			/* P_WR256 */
+
+			/*
+			 * check to see if we exceed maximum block size
+			 *
+			 */
+			if( bsize < 256 ){
+				error = 1;
+				break;
+			}
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P_WR256",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RSP_NONE;
+
+			break;
+		case 33:
 			/* P_BWR */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"P_BWR", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P_BWR",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE; 		
+			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x22:
+		case 34:
 			/* P2ADD8 */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"P2ADD8", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P2ADD8",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE; 		
+			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x23:
-			/* P_ADD16 */
+		case 35:
+			/* P2ADD16 */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"P_ADD16", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P2ADD16",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE; 		
+			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x30:
+		case 48:
 			/* RD16 */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"RD16", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"RD16",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RD_RS; 		
+			rsp_cmd = RD_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
 
 			break;
-		case 0x31:
+		case 49:
 			/* RD32 */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"RD32", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"RD32",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RD_RS; 		
+			rsp_cmd = RD_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 3;
 
 			break;
-		case 0x32:
+		case 50:
 			/* RD48 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 48 ){ 
+			if( bsize < 48 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"RD48", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"RD48",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RD_RS; 		
+			rsp_cmd = RD_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 4;
 
 			break;
-		case 0x33:
+		case 51:
 			/* RD64 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 64 ){ 
+			if( bsize < 64 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"RD64", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"RD64",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RD_RS; 		
+			rsp_cmd = RD_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 5;
 
 			break;
-		case 0x34:
+		case 52:
 			/* RD80 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 80 ){ 
+			if( bsize < 80 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"RD80", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"RD80",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RD_RS; 		
+			rsp_cmd = RD_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 6;
 
 			break;
-		case 0x35:
+		case 53:
 			/* RD96 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 96 ){ 
+			if( bsize < 96 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"RD96", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"RD96",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RD_RS; 		
+			rsp_cmd = RD_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 7;
 
 			break;
-		case 0x36:
+		case 54:
 			/* RD112 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 112 ){ 
+			if( bsize < 112 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"RD112", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"RD112",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RD_RS; 		
+			rsp_cmd = RD_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 8;
 
 			break;
-		case 0x37:
+		case  55:
 			/* RD128 */
 
-			/* 
-			 * check to see if we exceed maximum block size 
-			 * 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
 			 */
-			if( bsize < 128 ){ 
+			if( bsize < 128 ){
 				error = 1;
 				break;
 			}
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"RD128", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"RD128",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = RD_RS; 		
+			rsp_cmd = RD_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 9;
 
 			break;
-		case 0x28:
-			/* MD_RD */
+                case 119:
+			/* RD256 */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"MD_RD", 
-							dev, 
+			/*
+			 * check to see if we exceed maximum block size
+			 *
+			 */
+			if( bsize < 256 ){
+				error = 1;
+				break;
+			}
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"RD256",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
 			/* set the response command */
-			rsp_cmd = MD_RD_RS; 		
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 17;
+
+			break;
+		case 40:
+			/* MD_RD */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"MD_RD",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = MD_RD_RS;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -993,14 +1082,14 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 		case 0x00:
 			/* FLOW_NULL */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"FLOW_NULL", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"FLOW_NULL",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
@@ -1011,14 +1100,14 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 		case 0x01:
 			/* PRET */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"PRET", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"PRET",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
@@ -1029,14 +1118,14 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 		case 0x02:
 			/* TRET */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"TRET", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"TRET",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
@@ -1047,14 +1136,14 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 		case 0x03:
 			/* IRTRY */
 
-			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){ 
-				hmcsim_trace_rqst(	hmc, 
-							"IRTRY", 
-							dev, 
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"IRTRY",
+							dev,
 							quad,
-							vault, 
-							bank, 
-							addr, 
+							vault,
+							bank,
+							addr,
 							length );
 			}
 
@@ -1062,13 +1151,147 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			no_response = 1;
 
 			break;
+                /* begin extended atomics*/
+                case 82:
+                        /* 2ADDS8R */
+                        break;
+                case 83:
+                        /* ADDS16R */
+                        break;
+                case 80:
+                        /* INC8 */
+                        break;
+                case 84:
+                        /* PINC8 */
+                        break;
+                case 64:
+                        /* XOR16 */
+                        break;
+                case 65:
+                        /* OR16 */
+                        break;
+                case 66:
+                        /* NOR16 */
+                        break;
+                case 67:
+                        /* AND16 */
+                        break;
+                case 68:
+                        /* NAND16 */
+                        break;
+                case 96:
+                        /* CASGT8 */
+                        break;
+                case 98:
+                        /* CASGT16 */
+                        break;
+                case 97:
+                        /* CASLT8 */
+                        break;
+                case 99:
+                        /* CASLT16 */
+                        break;
+                case 100:
+                        /* CASEQ8 */
+                        break;
+                case 101:
+                        /* CASZERO16 */
+                        break;
+                case 105:
+                        /* EQ8 */
+                        break;
+                case 104:
+                        /* EQ16 */
+                        break;
+                case 81:
+                        /* BWR8R */
+                        break;
+                case 106:
+                        /* SWAP16 */
+                        break;
+                /* begin CMC commands */
+                //case 1:
+                //case 2:
+                //case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 20:
+                case 21:
+                case 22:
+                case 23:
+                case 32:
+                case 36:
+                case 37:
+                case 38:
+                case 39:
+                case 41:
+                case 42:
+                case 43:
+                case 44:
+                case 45:
+                case 46:
+                case 47:
+                case 56:
+                case 57:
+                case 58:
+                case 59:
+                case 60:
+                case 61:
+                case 62:
+                case 63:
+                case 69:
+                case 70:
+                case 71:
+                case 72:
+                case 73:
+                case 74:
+                case 75:
+                case 76:
+                case 77:
+                case 78:
+                case 85:
+                case 86:
+                case 87:
+                case 88:
+                case 89:
+                case 90:
+                case 91:
+                case 92:
+                case 93:
+                case 94:
+                case 102:
+                case 103:
+                case 107:
+                case 108:
+                case 109:
+                case 110:
+                case 111:
+                case 112:
+                case 113:
+                case 114:
+                case 115:
+                case 116:
+                case 117:
+                case 118:
+                case 120:
+                case 121:
+                case 122:
+                case 123:
+                case 124:
+                case 125:
+                case 126:
+                case 127:
+                        /* CMC operations */
+                        break;
 		default:
 			break;
 	}
 
-	/* 
+	/*
  	 * Step 4: build and register the response with vault response queue
-	 * 
+	 *
  	 */
 step4_vr:
 	if( no_response == 0 ){
@@ -1110,10 +1333,10 @@ step4_vr:
 
 	}/* else, no response required, probably flow control */
 
-	/* 
+	/*
 	 * Step 5: invalidate the request queue slot
-	 * 
- 	 */	
+	 *
+ 	 */
 	hmcsim_util_zero_packet( queue );
 
 	return 0;
