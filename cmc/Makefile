@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# HMCSIM CMC MAKEFILE
+#
+# Drives building all the cmc libraries
+
+
+SUBDIRS :=	$(shell find ./ -maxdepth 1 -mindepth 1 -type d)
+
+CLEANDIRS :=	$(addsuffix .clean, $(SUBDIRS))
+
+all:$(SUBDIRS)
+$(SUBDIRS):
+	@echo " Building CMC Library in $(@)"; $(MAKE) -C $@
+.PHONY: all $(SUBDIRS)
+
+clean: $(CLEANDIRS)
+$(CLEANDIRS):
+	@echo " Cleaning CMC Library in $(@)"; $(MAKE) -C $(basename $@) clean
+.PHONY: clean $(CLEANDIRS)
+

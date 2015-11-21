@@ -1,0 +1,21 @@
+HMC-Sim 2.0 Custom Memory Cube (CMC) Libraries
+-------------------------------------------------------
+This directory contains individual impementations
+of CMC extensions to the base HMC 2.0 specification. Each
+directory contains a single CMC library.  Each library
+implements a single CMC operation.  The user may
+load any number of CMC libraries into a given simulation
+providing that their command codes do not conflict.
+For examples on how to create new CMC libraries and/or
+integrate CMC operations into a simulation, see the
+test directory in ../test and/or read the HMC-Sim
+2.0 documentation at www.gc64.org.
+-------------------------------------------------------
+Note on licenses.  All the CMC source code in the
+core HMC-Sim 2.0 source tree are subject to the
+BSD-style license found at ../LICENSE.  Users of
+HMC-Sim may develop, package and release their
+own libraries using the CMC interfaces under their
+own license restrictions.
+-------------------------------------------------------
+EOF
