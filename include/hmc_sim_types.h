@@ -112,9 +112,82 @@ typedef enum{
 	EQ8,				/*! HMC-SIM: HMC_RQST_T: 8-BYTE ATOMIC EQUAL */
 	EQ16,				/*! HMC-SIM: HMC_RQST_T: 16-BYTE ATOMIC EQUAL */
 	BWR8R,				/*! HMC-SIM: HMC_RQST_T: 8-BYTE ATOMIC BIT WRITE WITH RETURN */
-	SWAP16				/*! HMC-SIM: HMC_RQST_T: 16-BYTE ATOMIC SWAP */
+	SWAP16,				/*! HMC-SIM: HMC_RQST_T: 16-BYTE ATOMIC SWAP */
 
-	/* -- CMC Types */	
+	/* -- CMC Types */
+        CMC01,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=1 */
+        CMC02,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=2 */
+        CMC03,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=3 */
+        CMC04,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=4 */
+        CMC05,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=5 */
+        CMC06,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=6 */
+        CMC07,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=7 */
+        CMC20,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=20 */
+        CMC21,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=21 */
+        CMC22,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=22 */
+        CMC23,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=23 */
+        CMC32,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=32 */
+        CMC36,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=36 */
+        CMC37,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=37 */
+        CMC38,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=38 */
+        CMC39,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=39 */
+        CMC41,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=41 */
+        CMC42,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=42 */
+        CMC43,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=43 */
+        CMC44,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=44 */
+        CMC45,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=45 */
+        CMC46,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=46 */
+        CMC47,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=47 */
+        CMC56,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=56 */
+        CMC57,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=57 */
+        CMC58,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=58 */
+        CMC59,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=59 */
+        CMC60,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=60 */
+        CMC61,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=61 */
+        CMC62,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=62 */
+        CMC63,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=63 */
+        CMC69,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=69 */
+        CMC70,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=70 */
+        CMC71,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=71 */
+        CMC72,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=72 */
+        CMC73,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=73 */
+        CMC74,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=74 */
+        CMC75,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=75 */
+        CMC76,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=76 */
+        CMC77,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=77 */
+        CMC78,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=78 */
+        CMC85,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=85 */
+        CMC86,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=86 */
+        CMC87,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=87 */
+        CMC88,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=88 */
+        CMC89,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=89 */
+        CMC90,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=90 */
+        CMC91,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=91 */
+        CMC92,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=92 */
+        CMC93,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=93 */
+        CMC94,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=94 */
+        CMC102,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=102 */
+        CMC103,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=103 */
+        CMC107,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=107 */
+        CMC108,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=108 */
+        CMC109,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=109 */
+        CMC110,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=110 */
+        CMC111,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=111 */
+        CMC112,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=112 */
+        CMC113,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=113 */
+        CMC114,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=114 */
+        CMC115,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=115 */
+        CMC116,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=116 */
+        CMC117,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=117 */
+        CMC118,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=118 */
+        CMC120,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=120 */
+        CMC121,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=121 */
+        CMC122,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=122 */
+        CMC123,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=123 */
+        CMC124,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=124 */
+        CMC125,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=125 */
+        CMC126,                         /*! HMC-SIM: HMC_RQST_T: CMC CMD=126 */
+        CMC127                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=127 */
 
 }hmc_rqst_t;
 
