@@ -127,7 +127,13 @@ extern uint32_t hmcsim_cmc_cmdtoidx( hmc_rqst_t rqst ){
 static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
 
   /* vars */
+  hmc_cmcop_t op;
+  hmc_rqst_t rqst;
+  uint32_t cmd;
+  uint32_t idx;
+
   void *handle = NULL;
+  int (*cmc_register)(hmc_cmcop_t *,hmc_rqst_t *,uint32_t *) = NULL;
   /* ---- */
 
   /* attempt to load the library */
@@ -141,12 +147,61 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   }
 
   /* library is loaded, resolve the functions */
+  /* -- hmcsim_register_cmc */
+  cmc_register = (int (*)(hmc_cmcop_t *,hmc_rqst_t *,uint32_t *))dlsym(handle,"hmcsim_register_cmc");
+  if( cmc_register == NULL ){
+    dlclose( handle );
+    return -1;
+  }
 
+  if( (*cmc_register)(&op, &rqst, &cmd) != 0 ){
+    dlclose( handle );
+    return -1;
+  }
+
+  idx = hmcsim_cmc_cmdtoidx( cmd );
+
+  if( hmc->cmcs[idx].active == 1 ){
+    /* previously actived, this is an error */
+    dlclose( handle );
+    return -1;
+  }
 
   /* write the necessary references into the structure */
+  hmc->cmcs[idx].op     = op;
+  hmc->cmcs[idx].type   = rqst;
+  hmc->cmcs[idx].cmd    = cmd;
+  hmc->cmcs[idx].active = 1;
+  hmc->cmcs[idx].handle = handle;
+  hmc->cmcs[idx].cmc_register = cmc_register;
 
   return 0;
 }
+
+/* ----------------------------------------------------- HMCSIM_FREE_CMC */
+/*
+ * HMCSIM_FREE_CMC
+ *
+ */
+extern int    hmcsim_free_cmc( struct hmcsim_t *hmc ){
+  uint32_t i = 0;
+
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  if( hmc->cmcs == NULL ){
+    return -1;
+  }
+
+  for( i=0; i<HMC_MAX_CMC; i++ ){
+    if( hmc->cmcs[i].active == 1 ){
+      dlclose( hmc->cmcs[i].handle );
+    }
+  }
+
+  return 0;
+};
 
 /* ----------------------------------------------------- HMCSIM_LOAD_CMC */
 /*

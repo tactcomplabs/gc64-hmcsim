@@ -269,11 +269,16 @@ struct hmc_dev_t{
 };
 
 struct hmc_cmc_t{
+
+        /* -- data */
         hmc_cmcop_t op;                 /*! HMC-SIM: HMC_CMC_T: OPERATION SPECIFICATION */
         hmc_rqst_t type;                /*! HMC-SIM: HMC_CMC_T: REGISTERED REQUEST TYPE */
         uint32_t cmd;                   /*! HMC-SIM: HMC_CMC_T: COMMAND CODE OF THE REQUEST */
         uint32_t active;                /*! HMC-SIM: HMC_CMC_T: SIGNALS THAT THE COMMAND IS ACTIVE */
         void *handle;                   /*! HMC-SIM: HMC_CMC_T: DLSYM HANDLE */
+
+        /* -- fptrs */
+        int (*cmc_register)(hmc_cmcop_t *,hmc_rqst_t *,uint32_t *);
 };
 
 struct hmcsim_t{

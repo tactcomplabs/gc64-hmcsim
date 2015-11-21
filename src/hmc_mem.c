@@ -13,6 +13,7 @@
 #include <string.h>
 #include "hmc_sim.h"
 
+extern int hmcsim_free_cmc( struct hmcsim_t *hmc );
 
 /* ----------------------------------------------------- HMCSIM_FREE_MEMORY */
 /*
@@ -26,6 +27,7 @@ extern int	hmcsim_free_memory( struct hmcsim_t *hmc )
 	}
 
         if( hmc->cmcs != NULL ){ 
+                hmcsim_free_cmc( hmc );
                 free( hmc->cmcs );
                 hmc->cmcs = NULL;
         }
