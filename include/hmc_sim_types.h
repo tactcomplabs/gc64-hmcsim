@@ -256,13 +256,13 @@ struct hmc_reg_t{
 struct hmc_dev_t{
 
 	struct hmc_link_t *links;		/* HMC-SIM: HMC_DEV_T: LINK STRUCTURE */
-	
+
 	struct hmc_quad_t *quads;		/*! HMC-SIM: HMC_DEV_T: QUADRANT STRUCTURE */
-	
+
 	struct hmc_xbar_t *xbar;		/*! HMC-SIM: HMC_DEV_T: CROSSBAR STRUCTURE */
 
 	struct hmc_reg_t regs[HMC_NUM_REGS];	/*! HMC-SIM: HMC_DEV_T: DEVICE CONFIGURATION REGISTERS */
-	
+
 	uint32_t id;				/*! HMC-SIM: HMC_DEV_T: CUBE ID */
 
 	uint8_t seq;				/*! HMC-SIM: HMC_DEV_T: SEQUENCE NUMBER */
@@ -273,6 +273,7 @@ struct hmc_cmc_t{
         hmc_rqst_t type;                /*! HMC-SIM: HMC_CMC_T: REGISTERED REQUEST TYPE */
         uint32_t cmd;                   /*! HMC-SIM: HMC_CMC_T: COMMAND CODE OF THE REQUEST */
         uint32_t active;                /*! HMC-SIM: HMC_CMC_T: SIGNALS THAT THE COMMAND IS ACTIVE */
+        void *handle;                   /*! HMC-SIM: HMC_CMC_T: DLSYM HANDLE */
 };
 
 struct hmcsim_t{
