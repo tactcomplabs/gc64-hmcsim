@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_INIT_C_
- * 
- * HYBRID MEMORY CUBE SIMULATION LIBRARY 
- * 
- * INITIALIZATION ROUTINES 
- * 
+ *
+ * HYBRID MEMORY CUBE SIMULATION LIBRARY
+ *
+ * INITIALIZATION ROUTINES
+ *
  */
 
 
@@ -23,18 +23,18 @@ extern int	hmc_reset_device( struct hmcsim_t *hmc, uint32_t dev );
 
 
 /* ----------------------------------------------------- HMCSIM_INIT */
-/* 
+/*
  * HMCSIM_INIT
- * 
+ *
  */
-extern int hmcsim_init(	struct hmcsim_t *hmc, 
-			uint32_t num_devs, 
-			uint32_t num_links, 
-			uint32_t num_vaults, 
+extern int hmcsim_init(	struct hmcsim_t *hmc,
+			uint32_t num_devs,
+			uint32_t num_links,
+			uint32_t num_vaults,
 			uint32_t queue_depth,
-			uint32_t num_banks, 
-			uint32_t num_drams, 
-			uint32_t capacity, 
+			uint32_t num_banks,
+			uint32_t num_drams,
+			uint32_t capacity,
 			uint32_t xbar_depth )
 {
 	/* vars */
@@ -43,16 +43,16 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
 
 	/*
 	 * ensure we have a good structure
-	 * 
+	 *
 	 */
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 		return -1;
 	}
 
-	/* 
-	 * sanity check the args 
+	/*
+	 * sanity check the args
 	 *
-	 */	
+	 */
 	if( (num_devs > HMC_MAX_DEVS) || (num_devs < 1) ){
 		return HMC_ERROR_PARAMS;
 	}else if( (num_links < HMC_MIN_LINKS) || (num_links > HMC_MAX_LINKS) ){
@@ -107,19 +107,19 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
 		return HMC_ERROR_PARAMS;
 	}else if( (capacity == 8) && ( (num_banks == 8 ) || (num_links==4) ) ){
 		return HMC_ERROR_PARAMS;
-	}	
+	}
 
 #ifdef HMC_DEBUG
 	HMCSIM_PRINT_TRACE( "PASSED LEVEL3 INIT SANITY CHECK" );
 #endif
 
-	/* 
-	 * init all the internals 
-	 * 
+	/*
+	 * init all the internals
+	 *
  	 */
 	hmc->tfile	= NULL;
 	hmc->tracelevel	= 0x00;
-	
+
 	hmc->num_devs	= num_devs;
 	hmc->num_links	= num_links;
 	hmc->num_vaults	= num_vaults;
@@ -132,13 +132,13 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
 
 	hmc->clk	= 0x00ll;
 
-	if( num_links == 4 ){ 
+	if( num_links == 4 ){
 		hmc->num_quads = 4;
-	}else{ 
+	}else{
 		hmc->num_quads = 8;
 	}
 
-	/* 
+	/*
 	 * pointers
 	 */
 	hmc->__ptr_devs			= NULL;
@@ -154,14 +154,14 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
 	hmc->__ptr_vault_rqst		= NULL;
 	hmc->__ptr_vault_rsp		= NULL;
 
-	/* 
-	 * 
-	 * allocate memory 
-	 * 
-	 */	
-	if( hmcsim_allocate_memory( hmc ) != 0 ){ 
-		/* 
-		 * probably ran out of memory 
+	/*
+	 *
+	 * allocate memory
+	 *
+	 */
+	if( hmcsim_allocate_memory( hmc ) != 0 ){
+		/*
+		 * probably ran out of memory
 		 *
 		 */
 #ifdef HMC_DEBUG
@@ -172,9 +172,9 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
 	}
 
 
-	/* 
-	 * configure all the devices 
-	 * 
+	/*
+	 * configure all the devices
+	 *
 	 */
 	if( hmcsim_config_devices( hmc ) != 0 ){
 #ifdef HMC_DEBUG
@@ -185,15 +185,14 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
 		return -1;
 	}
 
-	/* 
+	/*
 	 * warm reset all the devices
-	 * 
+	 *
 	 */
-	for( i=0; i<hmc->num_devs; i++ ) { 
+	for( i=0; i<hmc->num_devs; i++ ) {
 
 		//hmc_reset_device( hmc, i );
-		
-	}	
+	}
 
 	return 0;
 }

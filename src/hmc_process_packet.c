@@ -82,6 +82,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	uint32_t bank			= 0x00;
 	uint64_t addr			= 0x00ll;
 	int no_response			= 0x00;
+        int use_cmc                     = 0x00;
 	hmc_response_t rsp_cmd		= RSP_ERROR;
 	uint8_t tmp8			= 0x0;
 	/* ---- */
@@ -1211,9 +1212,6 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                         break;
 
                 /* begin CMC commands */
-                /* case 1: still in 2.0? */
-                /* case 2: still in 2.0? */
-                /* case 3: still in 2.0? */
                 case 4:
                 case 5:
                 case 6:
@@ -1285,6 +1283,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                 case 126:
                 case 127:
                         /* CMC OPERATIONS */
+                        use_cmc = 1;
                         break;
 		default:
 			break;
@@ -1306,29 +1305,32 @@ step4_vr:
 		rsp_frp		= ((tail>>8) & 0xFF);
 		rsp_rrp		= (tail & 0xFF);
 
-		/* -- decode the repsonse command : see hmc_response.c */
-		hmcsim_decode_rsp_cmd( rsp_cmd, &(tmp8) );
+		/* -- decode the response command : see hmc_response.c */
+                if( use_cmc != 1 ){
+                  /* only decode the response if not using cmc */
+		  hmcsim_decode_rsp_cmd( rsp_cmd, &(tmp8) );
+                }
 
 		/* -- packet head */
 		rsp_head	|= (tmp8 & 0x3F);
 		rsp_head	|= (rsp_len<<8);
 		rsp_head	|= (rsp_len<<11);
 		rsp_head	|= (rsp_tag<<15);
-		rsp_head	|= (rsp_slid<<39); 
+		rsp_head	|= (rsp_slid<<39);
 
 		/* -- packet tail */
 		rsp_tail	|= (rsp_rrp);
 		rsp_tail	|= (rsp_frp<<8);
 		rsp_tail	|= (rsp_seq<<16);
 		rsp_tail	|= (rsp_rtc<<27);
-		rsp_tail	|= (rsp_crc<<32); 
+		rsp_tail	|= (rsp_crc<<32);
 
 		packet[0] 		= rsp_head;
 		packet[((rsp_len*2)-1)]	= rsp_tail;
 
 		/* -- register the response */
 		hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].valid = HMC_RQST_VALID;
-		for( j=0; j<rsp_len; j++ ){ 
+		for( j=0; j<rsp_len; j++ ){
 			hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].packet[j] = packet[j];
 		}
 

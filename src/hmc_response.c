@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_RESPONSE_C_
- * 
- * HYBRID MEMORY CUBE SIMULATION LIBRARY 
- * 
+ *
+ * HYBRID MEMORY CUBE SIMULATION LIBRARY
+ *
  * MEMORY RESPONSE HANDLERS
- * 
+ *
  */
 
 
@@ -15,9 +15,9 @@
 
 
 /* ----------------------------------------------------- HMCSIM_DECODE_RSP_CMD */
-/* 
+/*
  * HMCSIM_DECODE_RSP_CMD
- * 
+ *
  */
 extern int	hmcsim_decode_rsp_cmd(	hmc_response_t rsp_cmd, uint8_t *cmd )
 {
@@ -44,31 +44,31 @@ extern int	hmcsim_decode_rsp_cmd(	hmc_response_t rsp_cmd, uint8_t *cmd )
 		default:
 			*cmd = 0x00;
 			break;
-	} 
+	}
 
 	return HMC_OK;
 }
 
 /* ----------------------------------------------------- HMCSIM_DECODE_MEMRESPONSE */
-/* 
+/*
  * HMCSIM_DECODE_MEMRESPONSE
- * 
+ *
  */
-extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc, 
-						uint64_t *packet, 
-						uint64_t *response_head, 
-						uint64_t *response_tail, 
-						hmc_response_t *type, 
-						uint8_t *length, 
-						uint16_t *tag, 
-						uint8_t *rtn_tag, 
-						uint8_t *src_link, 
-						uint8_t *rrp, 
-						uint8_t *frp, 
-						uint8_t *seq, 
-						uint8_t *dinv, 
-						uint8_t *errstat, 
-						uint8_t *rtc, 
+extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
+						uint64_t *packet,
+						uint64_t *response_head,
+						uint64_t *response_tail,
+						hmc_response_t *type,
+						uint8_t *length,
+						uint16_t *tag,
+						uint8_t *rtn_tag,
+						uint8_t *src_link,
+						uint8_t *rrp,
+						uint8_t *frp,
+						uint8_t *seq,
+						uint8_t *dinv,
+						uint8_t *errstat,
+						uint8_t *rtc,
 						uint32_t *crc )
 {
 	/* vars */
@@ -78,27 +78,27 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 	uint8_t  tmp8	= 0x00;
 	/* ---- */
 
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 		return -1;
 	}
 
-	if( packet == NULL ){ 
+	if( packet == NULL ){
 		return -1;
-	}	
+	}
 
-	/* 
-	 * pull out and decode the packet header 
-	 * 
+	/*
+	 * pull out and decode the packet header
+	 *
 	 */
 
 	tmp64 = packet[0];
 	*response_head	= tmp64;
 
-	/* 
+	/*
 	 * shift out cmd field
-	 * 
+	 *
 	 */
-	tmp8	= (uint8_t)( tmp64 & 0x3F );	
+	tmp8	= (uint8_t)( tmp64 & 0x3F );
 
 	switch( tmp8 )
 	{
@@ -129,14 +129,14 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 			printf( "response type failure\n" );
 			return -1;
 			break;
-	}	
+	}
 
 	tmp8 = 0x00;
 
-	/* 
-	 * packet length field 
-	 * 
-	 */	
+	/*
+	 * packet length field
+	 *
+	 */
 	tmp8	= (uint8_t)( (tmp64 & 0x780) >> 7);
 	*length	= tmp8;
 	tmp8	= 0x00;

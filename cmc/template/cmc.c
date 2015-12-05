@@ -29,13 +29,33 @@ static hmc_cmcop_t __op     = (INARG|OUTARG);
           : See hmc_rqst_t enums from hmc_sim_types.h
           : MUST BE UNIQUE ACROSS CMC LIBS
 */
-static hmc_rqst_t __rqst    = CMC01;
+static hmc_rqst_t __rqst    = CMC04;
 
 /* __cmd : Contains the respective command code for this CMC operation.
          : This MUST match the __rqst field.  For example, if we have
          : CMC32 as the __rqst, then the __cmd is (uint32_t)(32).
 */
 static uint32_t __cmd       = 1;
+
+/* __rsp_len : Contains the respective command response packet len in flits
+             : Permissible values are 0->17.  This must include the header
+             : and tail flits.  If __rsp_len is 0, then the operation
+             : is assumed to be posted.
+*/
+static uint32_t __rsp_len   = 2;
+
+/* __rsp_cmd : Contains the respective response command.  See hmc_response_t
+             : enum in hmc_sim_types.h.  All normal commands are permissible.
+             : If RSP_CMC is selected, you must also set __rsp_cmd_code
+*/
+static hmc_response_t __rsp_cmd = RD_RS;
+
+
+/* __rsp_cmd_code : Contains the command code for RSP_CMC command
+                  : responses.  The code must be <= 127 decimal.
+                  : Unused response commands are 64->127
+*/
+static uint8_t __rsp_cmd_code = 0x00;
 
 
 /* ----------------------------------------------------- HMCSIM_REGISTER_CMC */
@@ -58,10 +78,16 @@ static uint32_t __cmd       = 1;
  */
 extern int hmcsim_register_cmc( hmc_cmcop_t *op,
                                 hmc_rqst_t *rqst,
-                                uint32_t *cmd ){
-  *op   = __op;
-  *rqst = __rqst;
-  *cmd  = __cmd;
+                                uint32_t *cmd,
+                                uint32_t *rsp_len,
+                                hmc_response_t *rsp_cmd,
+                                uint8_t *rsp_cmd_code){
+  *op           = __op;
+  *rqst         = __rqst;
+  *cmd          = __cmd;
+  *rsp_len      = __rsp_len;
+  *rsp_cmd      = __rsp_cmd;
+  *rsp_cmd_code = __rsp_cmd_code;
 
   return 0;
 }

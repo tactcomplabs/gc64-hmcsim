@@ -96,13 +96,13 @@ extern int	hmcsim_free_memory( struct hmcsim_t *hmc )
 }
 
 /* ----------------------------------------------------- HMCSIM_ALLOCATE_MEMORY */
-/* 
+/*
  * HMCSIM_ALLOCATE_MEMORY
- * 
+ *
  */
 extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 {
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 #ifdef HMC_DEBUG
                 HMCSIM_PRINT_TRACE( "HMC STRUCTURE IS NULL" );
 #endif
@@ -110,7 +110,7 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 	}
 
         hmc->cmcs = malloc( sizeof( struct hmc_cmc_t ) * HMC_MAX_CMC );
-        if( hmc->cmcs == NULL ){ 
+        if( hmc->cmcs == NULL ){
 #ifdef HMC_DEBUG
                 HMCSIM_PRINT_TRACE( "FAILED TO ALLOCATE cmcs" );
 #endif
@@ -119,7 +119,7 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 
 
 	hmc->__ptr_devs	= malloc( sizeof( struct hmc_dev_t ) * hmc->num_devs );
-	if( hmc->__ptr_devs == NULL ){ 
+	if( hmc->__ptr_devs == NULL ){
 #ifdef HMC_DEBUG
                 HMCSIM_PRINT_TRACE( "FAILED TO ALLOCATE __ptr_devs" );
 #endif
@@ -228,13 +228,13 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 }
 
 /* ----------------------------------------------------- HMCSIM_FREE */
-/* 
+/*
  * HMCSIM_FREE
- * 
+ *
  */
 extern int	hmcsim_free( struct hmcsim_t *hmc )
 {
-	if( hmc->tfile != NULL ){ 
+	if( hmc->tfile != NULL ){
 		fflush( hmc->tfile );
 	}
 

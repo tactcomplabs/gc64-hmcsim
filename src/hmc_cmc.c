@@ -23,9 +23,6 @@ struct cmc_table{
 
 struct cmc_table ctable[HMC_MAX_CMC] = {
 
-  {CMC01,1,0},
-  {CMC02,2,1},
-  {CMC03,3,2},
   {CMC04,4,3},
   {CMC05,5,4},
   {CMC06,6,5},
@@ -131,9 +128,17 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   hmc_rqst_t rqst;
   uint32_t cmd;
   uint32_t idx;
+  uint32_t rsp_len;
+  hmc_response_t rsp_cmd;
+  uint8_t rsp_cmd_code;
 
   void *handle = NULL;
-  int (*cmc_register)(hmc_cmcop_t *,hmc_rqst_t *,uint32_t *) = NULL;
+  int (*cmc_register)(hmc_cmcop_t *,
+                      hmc_rqst_t *,
+                      uint32_t *,
+                      uint32_t *,
+                      hmc_response_t *,
+                      uint8_t *) = NULL;
   /* ---- */
 
   /* attempt to load the library */
@@ -150,13 +155,21 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   /* -- hmcsim_register_cmc */
   cmc_register = (int (*)(hmc_cmcop_t *,
                           hmc_rqst_t *,
-                          uint32_t *))dlsym(handle,"hmcsim_register_cmc");
+                          uint32_t *,
+                          uint32_t *,
+                          hmc_response_t *,
+                          uint8_t *))dlsym(handle,"hmcsim_register_cmc");
   if( cmc_register == NULL ){
     dlclose( handle );
     return -1;
   }
 
-  if( (*cmc_register)(&op, &rqst, &cmd) != 0 ){
+  if( (*cmc_register)(&op,
+                      &rqst,
+                      &cmd,
+                      &rsp_len,
+                      &rsp_cmd,
+                      &rsp_cmd_code) != 0 ){
     dlclose( handle );
     return -1;
   }
@@ -173,6 +186,9 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   hmc->cmcs[idx].op           = op;
   hmc->cmcs[idx].type         = rqst;
   hmc->cmcs[idx].cmd          = cmd;
+  hmc->cmcs[idx].rsp_len      = rsp_len;
+  hmc->cmcs[idx].rsp_cmd      = rsp_cmd;
+
   hmc->cmcs[idx].active       = 1;
   hmc->cmcs[idx].handle       = handle;
   hmc->cmcs[idx].cmc_register = cmc_register;

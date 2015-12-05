@@ -41,7 +41,8 @@ typedef enum{
 	MD_RD_RS, 			/*! HMC-SIM: HMC_RESPONSE_T: MODE READ RESPONSE */
 	MD_WR_RS,			/*! HMC-SIM: HMC_RESPONSE_T: MODE WRITE RESPONSE */
 	RSP_ERROR,			/*! HMC-SIM: HMC_RESPONSE_T: ERROR RESPONSE */
-	RSP_NONE			/*! HMC-SIM: HMC_RESPONSE_T: NO RESPONSE COMMAND */
+	RSP_NONE,			/*! HMC-SIM: HMC_RESPONSE_T: NO RESPONSE COMMAND */
+        RSP_CMC                         /*! HMC-SIM: HMC_RESPONSE_T: CUSTOM CMC RESPONSE */
 }hmc_response_t;
 
 typedef enum{
@@ -115,9 +116,6 @@ typedef enum{
 	SWAP16,				/*! HMC-SIM: HMC_RQST_T: 16-BYTE ATOMIC SWAP */
 
 	/* -- CMC Types */
-        CMC01,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=1 */
-        CMC02,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=2 */
-        CMC03,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=3 */
         CMC04,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=4 */
         CMC05,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=5 */
         CMC06,                          /*! HMC-SIM: HMC_RQST_T: CMC CMD=6 */
@@ -212,7 +210,7 @@ struct hmc_dram_t{
 };
 
 struct hmc_bank_t{
-	
+
 	struct hmc_dram_t *drams;	/*! HMC-SIM: HMC_BANK_T: DRAMS */
 
 	uint32_t id;			/*! HMC-SIM: HMC_BANK_T: BANK ID */
@@ -224,7 +222,7 @@ struct hmc_queue_t{
 	uint64_t packet[HMC_MAX_UQ_PACKET];	/*! HMC-SIM: HMC_QUEUE_T: PACKET */
 };
 
-struct hmc_vault_t{ 
+struct hmc_vault_t{
 
 	struct hmc_bank_t *banks;	/*! HMC-SIM: HMC_VAULT_T: BANK STRUCTURE */
 
@@ -235,7 +233,7 @@ struct hmc_vault_t{
 	uint32_t id;			/*! HMC-SIM: HMC_VAULT_T: VAULT ID */
 };
 
-struct hmc_quad_t{ 
+struct hmc_quad_t{
 
 	struct hmc_vault_t *vaults;	/*! HMC-SIM: HMC_QUAD_T: VAULT STRUCTURE */
 
@@ -274,11 +272,20 @@ struct hmc_cmc_t{
         hmc_cmcop_t op;                 /*! HMC-SIM: HMC_CMC_T: OPERATION SPECIFICATION */
         hmc_rqst_t type;                /*! HMC-SIM: HMC_CMC_T: REGISTERED REQUEST TYPE */
         uint32_t cmd;                   /*! HMC-SIM: HMC_CMC_T: COMMAND CODE OF THE REQUEST */
+        uint32_t rsp_len;               /*! HMC-SIM: HMC_CMC_T: RESPONSE LENGTH */
+        hmc_response_t rsp_cmd;         /*! HMC-SIM: HMC_CMC_T: RESPONSE COMMAND */
+        uint8_t rsp_cmd_code;           /*! HMC-SIM: HMC_CMC_T: RESPONSE COMMAND CODE */
+
         uint32_t active;                /*! HMC-SIM: HMC_CMC_T: SIGNALS THAT THE COMMAND IS ACTIVE */
         void *handle;                   /*! HMC-SIM: HMC_CMC_T: DLSYM HANDLE */
 
         /* -- fptrs */
-        int (*cmc_register)(hmc_cmcop_t *,hmc_rqst_t *,uint32_t *);
+        int (*cmc_register)(hmc_cmcop_t *,
+                            hmc_rqst_t *,
+                            uint32_t *,
+                            uint32_t *,
+                            hmc_response_t *,
+                            uint8_t *);
 };
 
 struct hmcsim_t{
