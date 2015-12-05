@@ -148,7 +148,9 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
 
   /* library is loaded, resolve the functions */
   /* -- hmcsim_register_cmc */
-  cmc_register = (int (*)(hmc_cmcop_t *,hmc_rqst_t *,uint32_t *))dlsym(handle,"hmcsim_register_cmc");
+  cmc_register = (int (*)(hmc_cmcop_t *,
+                          hmc_rqst_t *,
+                          uint32_t *))dlsym(handle,"hmcsim_register_cmc");
   if( cmc_register == NULL ){
     dlclose( handle );
     return -1;
@@ -168,11 +170,11 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   }
 
   /* write the necessary references into the structure */
-  hmc->cmcs[idx].op     = op;
-  hmc->cmcs[idx].type   = rqst;
-  hmc->cmcs[idx].cmd    = cmd;
-  hmc->cmcs[idx].active = 1;
-  hmc->cmcs[idx].handle = handle;
+  hmc->cmcs[idx].op           = op;
+  hmc->cmcs[idx].type         = rqst;
+  hmc->cmcs[idx].cmd          = cmd;
+  hmc->cmcs[idx].active       = 1;
+  hmc->cmcs[idx].handle       = handle;
   hmc->cmcs[idx].cmc_register = cmc_register;
 
   return 0;

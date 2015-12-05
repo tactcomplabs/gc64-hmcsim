@@ -22,42 +22,42 @@ extern int hmcsim_free_cmc( struct hmcsim_t *hmc );
  */
 extern int	hmcsim_free_memory( struct hmcsim_t *hmc )
 {
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 		return -1;
 	}
 
-        if( hmc->cmcs != NULL ){ 
+        if( hmc->cmcs != NULL ){
                 hmcsim_free_cmc( hmc );
                 free( hmc->cmcs );
                 hmc->cmcs = NULL;
         }
 
-	if( hmc->__ptr_devs != NULL ){ 
+	if( hmc->__ptr_devs != NULL ){
 		free( hmc->__ptr_devs );
 		hmc->__ptr_devs = NULL;
 	}
 
-	if( hmc->__ptr_quads != NULL ){ 
+	if( hmc->__ptr_quads != NULL ){
 		free( hmc->__ptr_quads );
 		hmc->__ptr_quads = NULL;
 	}
 
-	if( hmc->__ptr_vaults != NULL ){ 
+	if( hmc->__ptr_vaults != NULL ){
 		free( hmc->__ptr_vaults );
 		hmc->__ptr_vaults = NULL;
 	}
 
-	if( hmc->__ptr_banks != NULL ){ 
+	if( hmc->__ptr_banks != NULL ){
 		free( hmc->__ptr_banks );
 		hmc->__ptr_banks = NULL;
 	}
 
-	if( hmc->__ptr_drams != NULL ){ 
+	if( hmc->__ptr_drams != NULL ){
 		free( hmc->__ptr_drams );
 		hmc->__ptr_drams = NULL;
 	}
 
-	if( hmc->__ptr_links != NULL ){ 
+	if( hmc->__ptr_links != NULL ){
 		free( hmc->__ptr_links );
 		hmc->__ptr_links = NULL;
 	}
@@ -67,7 +67,7 @@ extern int	hmcsim_free_memory( struct hmcsim_t *hmc )
 		hmc->__ptr_xbars = NULL;
 	}
 
-	if( hmc->__ptr_stor != NULL ){ 
+	if( hmc->__ptr_stor != NULL ){
 		free( hmc->__ptr_stor );
 		hmc->__ptr_stor = NULL;
 	}

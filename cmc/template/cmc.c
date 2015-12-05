@@ -42,7 +42,8 @@ static uint32_t __cmd       = 1;
 /*
  * Registers the target CMC library instance with the core simulation. This
  * function is loaded via dlopen and called from the HMC-Sim library when
- * the sim makes a call to hmcsim_load_cmc().
+ * the sim makes a call to hmcsim_load_cmc().  Most users will not need
+ * to change this function.
  *
  * *op is a pointer to a valid hmc_cmcop_t for which the function returns
  *     its CMC operation type.
