@@ -23,81 +23,93 @@ struct cmc_table{
 
 struct cmc_table ctable[HMC_MAX_CMC] = {
 
-  {CMC04,4,3},
-  {CMC05,5,4},
-  {CMC06,6,5},
-  {CMC07,7,6},
-  {CMC20,20,7},
-  {CMC21,21,8},
-  {CMC22,22,9},
-  {CMC23,23,10},
-  {CMC32,32,11},
-  {CMC36,36,12},
-  {CMC37,37,13},
-  {CMC38,38,14},
-  {CMC39,39,15},
-  {CMC41,41,16},
-  {CMC42,42,17},
-  {CMC43,43,18},
-  {CMC44,44,19},
-  {CMC45,45,20},
-  {CMC46,46,21},
-  {CMC47,47,22},
-  {CMC56,56,23},
-  {CMC57,57,24},
-  {CMC58,58,25},
-  {CMC59,59,26},
-  {CMC60,60,27},
-  {CMC61,61,28},
-  {CMC62,62,29},
-  {CMC63,63,30},
-  {CMC69,69,31},
-  {CMC70,70,32},
-  {CMC71,71,33},
-  {CMC72,72,34},
-  {CMC73,73,35},
-  {CMC74,74,36},
-  {CMC75,75,37},
-  {CMC76,76,38},
-  {CMC77,77,39},
-  {CMC78,78,40},
-  {CMC85,85,41},
-  {CMC86,86,42},
-  {CMC87,87,43},
-  {CMC88,88,44},
-  {CMC89,89,45},
-  {CMC90,90,46},
-  {CMC91,91,47},
-  {CMC92,92,48},
-  {CMC93,93,49},
-  {CMC94,94,50},
-  {CMC102,102,51},
-  {CMC103,103,52},
-  {CMC107,107,53},
-  {CMC108,108,54},
-  {CMC109,109,55},
-  {CMC110,110,56},
-  {CMC111,111,57},
-  {CMC112,112,58},
-  {CMC113,113,59},
-  {CMC114,114,60},
-  {CMC115,115,61},
-  {CMC116,116,62},
-  {CMC117,117,63},
-  {CMC118,118,64},
-  {CMC120,120,65},
-  {CMC121,121,66},
-  {CMC122,122,67},
-  {CMC123,123,68},
-  {CMC124,124,69},
-  {CMC125,125,70},
-  {CMC126,126,71},
-  {CMC127,127,72}
+  {CMC04,4,0},
+  {CMC05,5,1},
+  {CMC06,6,2},
+  {CMC07,7,3},
+  {CMC20,20,4},
+  {CMC21,21,5},
+  {CMC22,22,6},
+  {CMC23,23,7},
+  {CMC32,32,8},
+  {CMC36,36,9},
+  {CMC37,37,10},
+  {CMC38,38,11},
+  {CMC39,39,12},
+  {CMC41,41,13},
+  {CMC42,42,14},
+  {CMC43,43,15},
+  {CMC44,44,16},
+  {CMC45,45,17},
+  {CMC46,46,18},
+  {CMC47,47,19},
+  {CMC56,56,20},
+  {CMC57,57,21},
+  {CMC58,58,22},
+  {CMC59,59,23},
+  {CMC60,60,24},
+  {CMC61,61,25},
+  {CMC62,62,26},
+  {CMC63,63,27},
+  {CMC69,69,28},
+  {CMC70,70,29},
+  {CMC71,71,30},
+  {CMC72,72,31},
+  {CMC73,73,32},
+  {CMC74,74,33},
+  {CMC75,75,34},
+  {CMC76,76,35},
+  {CMC77,77,36},
+  {CMC78,78,37},
+  {CMC85,85,38},
+  {CMC86,86,39},
+  {CMC87,87,40},
+  {CMC88,88,41},
+  {CMC89,89,42},
+  {CMC90,90,43},
+  {CMC91,91,44},
+  {CMC92,92,45},
+  {CMC93,93,46},
+  {CMC94,94,47},
+  {CMC102,102,48},
+  {CMC103,103,49},
+  {CMC107,107,50},
+  {CMC108,108,51},
+  {CMC109,109,52},
+  {CMC110,110,53},
+  {CMC111,111,54},
+  {CMC112,112,55},
+  {CMC113,113,56},
+  {CMC114,114,57},
+  {CMC115,115,58},
+  {CMC116,116,59},
+  {CMC117,117,60},
+  {CMC118,118,61},
+  {CMC120,120,62},
+  {CMC121,121,63},
+  {CMC122,122,64},
+  {CMC123,123,65},
+  {CMC124,124,66},
+  {CMC125,125,67},
+  {CMC126,126,68},
+  {CMC127,127,69}
 
 };
 
 /* Prototypes of the library functions */
 /* int hmcsim_register_cmc( hmc_cmcop_t, hmc_rqst_t, uint32_t cmd ) */
+
+/* ----------------------------------------------------- HMCSIM_CMC_RAWTOIDX */
+extern uint32_t hmcsim_cmc_rawtoidx( uint32_t raw ){
+  uint32_t i = 0;
+
+  for( i=0; i<HMC_MAX_CMC; i++ ){
+    if( ctable[i].cmd == raw ){
+      return i;
+    }
+  }
+  return HMC_MAX_CMC; /* redundant, but squashes gcc warning */
+}
 
 /* ----------------------------------------------------- HMCSIM_CMC_IDXTOCMD */
 extern hmc_rqst_t hmcsim_cmc_idxtocmd( uint32_t idx ){
@@ -192,6 +204,39 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   hmc->cmcs[idx].active       = 1;
   hmc->cmcs[idx].handle       = handle;
   hmc->cmcs[idx].cmc_register = cmc_register;
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_PROCESS_CMC */
+extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
+                                uint32_t rawcmd,
+                                uint32_t dev,
+                                uint32_t quad,
+                                uint32_t vault,
+                                uint32_t bank,
+                                uint64_t addr,
+                                uint32_t length,
+                                uint64_t head,
+                                uint64_t tail,
+                                uint64_t rqst_payload[16],
+                                uint64_t rsp_payload[16] ){
+
+  /* vars */
+  uint32_t idx = 0;
+  /* ---- */
+
+  idx = hmcsim_cmc_rawtoidx( rawcmd );
+
+  if( idx == HMC_MAX_CMC ){
+    /* erroneous request */
+    return -1;
+  }else if( hmc->cmcs[idx].active == 0 ){
+    /* command not active */
+    return -1;
+  }
+
+  /* command is active, process it */
 
   return 0;
 }
