@@ -40,6 +40,7 @@ extern int	hmcsim_util_decode_bank( struct hmcsim_t *hmc,
 					uint32_t *bank );
 extern int	hmcsim_decode_rsp_cmd( 	hmc_response_t rsp_cmd,
 					uint8_t *cmd );
+extern uint32_t hmcsim_cmc_cmdtoidx( hmc_rqst_t rqst );
 
 
 /* ----------------------------------------------------- HMCSIM_PROCESS_RQST */
@@ -198,7 +199,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
  	 */
 	switch( cmd )
 	{
-		case 0x08:
+		case 8:
 			/* WR16 */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -219,7 +220,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 1;
 
 			break;
-		case 0x09:
+		case 9:
 			/* WR32 */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -240,7 +241,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 1;
 
 			break;
-		case 0x0A:
+		case 10:
 			/* WR48 */
 
 			/*
@@ -270,7 +271,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 1;
 
 			break;
-		case 0x0B:
+		case 11:
 			/* WR64 */
 
 			/*
@@ -300,7 +301,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 1;
 
 			break;
-		case 0x0C:
+		case 12:
 			/* WR80 */
 
 			/*
@@ -330,7 +331,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 1;
 
 			break;
-		case 0x0D:
+		case 13:
 			/* WR96 */
 
 			/*
@@ -360,7 +361,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 1;
 
 			break;
-		case 0x0E:
+		case 14:
 			/* WR112 */
 
 			/*
@@ -390,7 +391,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 1;
 
 			break;
-		case 0x0F:
+		case 15:
 			/* WR128 */
 
 			/*
@@ -451,7 +452,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			break;
 
-		case 0x10:
+		case 16:
 			/* MD_WR */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -472,7 +473,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 1;
 
 			break;
-		case 0x11:
+		case 17:
 			/* BWR */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -490,7 +491,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = WR_RS;
 
 			break;
-		case 0x12:
+		case 18:
 			/* TWOADD8 */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -508,7 +509,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = WR_RS;
 
 			break;
-		case 0x13:
+		case 19:
 			/* ADD16 */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -526,7 +527,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = WR_RS;
 
 			break;
-		case 0x18:
+		case 24:
 			/* P_WR16 */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -544,7 +545,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x19:
+		case 25:
 			/* P_WR32 */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -562,7 +563,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x1A:
+		case 26:
 			/* P_WR48 */
 
 			/*
@@ -589,7 +590,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x1B:
+		case 27:
 			/* P_WR64 */
 
 			/*
@@ -616,7 +617,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x1C:
+		case 28:
 			/* P_WR80 */
 
 			/*
@@ -643,7 +644,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x1D:
+		case 29:
 			/* P_WR96 */
 
 			/*
@@ -670,7 +671,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x1E:
+		case 30:
 			/* P_WR112 */
 
 			/*
@@ -697,12 +698,13 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x1F:
+		case 31:
 			/* P_WR128 */
 
 			/*
 			 * check to see if we exceed maximum block size
 			 *
+<<<<<<< HEAD
 			 */
 			if( bsize < 128 ){
 				error = 1;
@@ -751,7 +753,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x21:
+		case 33:
 			/* P_BWR */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -766,10 +768,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-		rsp_cmd = RSP_NONE;
-
+			rsp_cmd = RSP_NONE;
 			break;
-		case 0x22:
+		case 34:
 			/* P2ADD8 */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -787,12 +788,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x23:
-			/* P_ADD16 */
+		case 35:
+			/* P2ADD16 */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
 				hmcsim_trace_rqst(	hmc,
-							"P_ADD16",
+							"P2ADD16",
 							dev,
 							quad,
 							vault,
@@ -805,7 +806,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_cmd = RSP_NONE;
 
 			break;
-		case 0x30:
+		case 48:
 			/* RD16 */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -826,7 +827,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 2;
 
 			break;
-		case 0x31:
+		case 49:
 			/* RD32 */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -847,7 +848,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 3;
 
 			break;
-		case 0x32:
+		case 50:
 			/* RD48 */
 
 			/*
@@ -877,7 +878,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 4;
 
 			break;
-		case 0x33:
+		case 51:
 			/* RD64 */
 
 			/*
@@ -907,7 +908,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 5;
 
 			break;
-		case 0x34:
+		case 52:
 			/* RD80 */
 
 			/*
@@ -937,7 +938,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 6;
 
 			break;
-		case 0x35:
+		case 53:
 			/* RD96 */
 
 			/*
@@ -967,7 +968,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 7;
 
 			break;
-		case 0x36:
+		case 54:
 			/* RD112 */
 
 			/*
@@ -997,7 +998,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 8;
 
 			break;
-		case 0x37:
+		case  55:
 			/* RD128 */
 
 			/*
@@ -1027,7 +1028,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 9;
 
 			break;
-                case 199:
+                case 119:
 			/* RD256 */
 
 			/*
@@ -1057,8 +1058,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			rsp_len = 17;
 
 			break;
-
-		case 0x28:
+		case 40:
 			/* MD_RD */
 
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
@@ -1151,6 +1151,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			no_response = 1;
 
 			break;
+                /* begin extended atomics*/
                 case 82:
                         /* 2ADDS8R */
                         break;
@@ -1208,6 +1209,8 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                 case 106:
                         /* SWAP16 */
                         break;
+
+                /* begin CMC commands */
                 /* case 1: still in 2.0? */
                 /* case 2: still in 2.0? */
                 /* case 3: still in 2.0? */
