@@ -58,6 +58,30 @@ static uint8_t __rsp_cmd_code = 0x00;
 
 
 /* ----------------------------------------------------- HMCSIM_EXECUTE_CMC */
+/*
+ * Performs the actual CMC operation.  All your custom logic belongs in this
+ * function.
+ *
+ * *hmc is a void pointer to the core hmc structure.  Note that this must
+ *    be cast to (struct hmcsim_t *)
+ * dev is the respective device where the op is occurring
+ * quad is the respective quad where the op is occurring
+ * vault is the respective vault where the op is occurring
+ * bank is the respective bank where the op is occurring
+ * addr is the base address of the incoming request
+ * length is the length of the incoming request
+ * head is the packet head
+ * tail is the packet tail
+ * *rqst_payload is the incoming request payload formatted as the maximum
+ *    possible packet (256 bytes of data).  Its up to this function to
+ *    pull the required bits from this payload.
+ * *rsp_payload is the outgoing response data payload formatted as the
+ *    maximum possible packet (256 bytes of data).  Its up to this function
+ *    to write the required number of output bits in the response payload.
+ *    Note that the calling infrastructure will only utilize the number of
+ *    bytes as defined by the rsp_len of this CMC operation
+ *
+ */
 extern int hmcsim_execute_cmc(  void *hmc,
                                 uint32_t dev,
                                 uint32_t quad,
@@ -88,6 +112,14 @@ extern int hmcsim_execute_cmc(  void *hmc,
  * *cmd is the respective command code that matches the *rqst command enum.
  *     For example, if *rqst returns CMC32, then the *cmd is "32".
  *
+ * *rsp_len is the respective command's response packet length.
+ *    This must fit within the standard HMC response packet sizes
+ *
+ * *rsp_cmd is the respective command's response command type.  See
+ *    the values defined in the hmc_response_t enum in ~/include/hmc_sim_types.h
+ *
+ * *rsp_cmd_code is the respective command's response command code in raw form.
+ *
  */
 extern int hmcsim_register_cmc( hmc_rqst_t *rqst,
                                 uint32_t *cmd,
@@ -107,6 +139,8 @@ extern int hmcsim_register_cmc( hmc_rqst_t *rqst,
 /*
  * Returns the name of the CMC operation for use in tracing
  * Most users will not need to change this function
+ *
+ * *out is the output string that is written to
  *
  */
 extern void hmcsim_cmc_str( char *out ){
