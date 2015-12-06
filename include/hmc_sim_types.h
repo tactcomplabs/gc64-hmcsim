@@ -286,6 +286,20 @@ struct hmc_cmc_t{
                             uint32_t *,
                             hmc_response_t *,
                             uint8_t *);
+
+        int (*cmc_execute)(void *,  /* hmc */
+                           uint32_t,    /* dev */
+                           uint32_t,    /* quad */
+                           uint32_t,    /* vault */
+                           uint32_t,    /* bank */
+                           uint64_t,    /* addr */
+                           uint32_t,    /* length */
+                           uint64_t,    /* head */
+                           uint64_t,    /* tail */
+                           uint64_t *,  /* rqst_payload */
+                           uint64_t *); /* rsp_payload */
+        void (*cmc_str)(char *);
+
 };
 
 struct hmcsim_t{

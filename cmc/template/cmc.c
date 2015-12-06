@@ -19,6 +19,10 @@
    libraries.
 */
 
+
+/* __op_name : Contains a string representative for the trace logs */
+static char *__op_name      = "TEMPLATE_OP";
+
 /* __op : Contains a bitwise OR'd list of operation parameters.
         : See hmc_cmc_opt enums from hmc_sim_types.h
 */
@@ -58,6 +62,23 @@ static hmc_response_t __rsp_cmd = RD_RS;
 static uint8_t __rsp_cmd_code = 0x00;
 
 
+/* ----------------------------------------------------- HMCSIM_EXECUTE_CMC */
+extern int hmcsim_execute_cmc(  void *hmc,
+                                uint32_t dev,
+                                uint32_t quad,
+                                uint32_t vault,
+                                uint32_t bank,
+                                uint64_t addr,
+                                uint32_t length,
+                                uint64_t head,
+                                uint64_t tail,
+                                uint64_t *rqst_payload,
+                                uint64_t *rsp_payload ){
+  /* perform your operation */
+
+  return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_REGISTER_CMC */
 /*
  * Registers the target CMC library instance with the core simulation. This
@@ -90,6 +111,16 @@ extern int hmcsim_register_cmc( hmc_cmcop_t *op,
   *rsp_cmd_code = __rsp_cmd_code;
 
   return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_CMC_STR */
+/*
+ * Returns the name of the CMC operation for use in tracing
+ * Most users will not need to change this function
+ *
+ */
+extern void hmcsim_cmc_str( char *out ){
+  sprintf( out, "%s", __op_name );
 }
 
 /* EOF */

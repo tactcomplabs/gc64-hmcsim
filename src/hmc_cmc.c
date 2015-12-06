@@ -14,6 +14,17 @@
 #include "hmc_sim.h"
 
 
+/* Function Prototypes */
+extern int hmcsim_trace_rqst( struct hmcsim_t *hmc,
+                              char *rqst,
+                              uint32_t dev,
+                              uint32_t quad,
+                              uint32_t vault,
+                              uint32_t bank,
+                              uint64_t addr,
+                              uint32_t size );
+
+
 /* conversion table for cmc request enums, opcodes and struct indices */
 struct cmc_table{
   hmc_rqst_t type;
@@ -151,6 +162,18 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
                       uint32_t *,
                       hmc_response_t *,
                       uint8_t *) = NULL;
+  int (*cmc_execute)(void *,
+                     uint32_t,
+                     uint32_t,
+                     uint32_t,
+                     uint32_t,
+                     uint64_t,
+                     uint32_t,
+                     uint64_t,
+                     uint64_t,
+                     uint64_t *,
+                     uint64_t *) = NULL;
+  void (*cmc_str)(char *) = NULL;
   /* ---- */
 
   /* attempt to load the library */
@@ -186,6 +209,32 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
     return -1;
   }
 
+  /* -- hmcsim_execute_cmc */
+  cmc_execute = (int (*)(void *,
+                     uint32_t,
+                     uint32_t,
+                     uint32_t,
+                     uint32_t,
+                     uint64_t,
+                     uint32_t,
+                     uint64_t,
+                     uint64_t,
+                     uint64_t *,
+                     uint64_t *))dlsym(handle,"hmcsim_execute_cmc");
+  if( cmc_execute == NULL ){
+    dlclose( handle );
+    return -1;
+  }
+
+  /* -- hmcsim_cmc_str */
+  cmc_str = (void (*)(char *))dlsym(handle,"hmcsim_cmc_str");
+  if( cmc_str == NULL ){
+    dlclose( handle );
+    return -1;
+  }
+
+  /* done loading functions */
+
   idx = hmcsim_cmc_cmdtoidx( cmd );
 
   if( hmc->cmcs[idx].active == 1 ){
@@ -204,6 +253,8 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   hmc->cmcs[idx].active       = 1;
   hmc->cmcs[idx].handle       = handle;
   hmc->cmcs[idx].cmc_register = cmc_register;
+  hmc->cmcs[idx].cmc_execute  = cmc_execute;
+  hmc->cmcs[idx].cmc_str      = cmc_str;
 
   return 0;
 }
@@ -226,7 +277,21 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                                 uint8_t *raw_rsp_cmd ){
 
   /* vars */
-  uint32_t idx = 0;
+  uint32_t idx  = 0;
+  int rtn       = 0;
+  char op_name[256];
+  int (*cmc_execute)(void *,
+                     uint32_t,
+                     uint32_t,
+                     uint32_t,
+                     uint32_t,
+                     uint64_t,
+                     uint32_t,
+                     uint64_t,
+                     uint64_t,
+                     uint64_t *,
+                     uint64_t *) = NULL;
+  void (*cmc_str)(char *);
   /* ---- */
 
   /* resolve the index of the cmc in the lookup table */
@@ -241,6 +306,42 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
   }
 
   /* command is active, process it */
+  cmc_execute = hmc->cmcs[idx].cmc_execute;
+  rtn = (*cmc_execute)( (void *)(hmc),
+                        dev,
+                        quad,
+                        vault,
+                        bank,
+                        addr,
+                        length,
+                        head,
+                        tail,
+                        rqst_payload,
+                        rsp_payload);
+
+  if( rtn == -1 ){
+    return HMC_ERROR;
+  }
+
+  /* register all the response data */
+  *rsp_len      = hmc->cmcs[idx].rsp_len;
+  *rsp_cmd      = hmc->cmcs[idx].rsp_cmd;
+  *raw_rsp_cmd  = hmc->cmcs[idx].rsp_cmd_code;
+
+  /* trace it */
+  /* -- get the name of the op */
+  cmc_str = hmc->cmcs[idx].cmc_str;
+  (*cmc_str)(&(op_name[0]));
+
+  /* -- insert the trace */
+  hmcsim_trace_rqst( hmc,
+                     &(op_name[0]),
+                     dev,
+                     quad,
+                     vault,
+                     bank,
+                     addr,
+                     length );
 
   return 0;
 }
