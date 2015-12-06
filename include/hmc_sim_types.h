@@ -314,12 +314,12 @@ struct hmcsim_t{
 
 	uint64_t clk;			/*! HMC-SIM: HMCSIM_T: CLOCK TICK */
 
-	struct hmc_dev_t	*__ptr_devs;	
-	struct hmc_quad_t	*__ptr_quads;	
-	struct hmc_vault_t	*__ptr_vaults;	
-	struct hmc_bank_t 	*__ptr_banks;	
-	struct hmc_dram_t 	*__ptr_drams;	
-	struct hmc_link_t 	*__ptr_links;	
+	struct hmc_dev_t	*__ptr_devs;
+	struct hmc_quad_t	*__ptr_quads;
+	struct hmc_vault_t	*__ptr_vaults;
+	struct hmc_bank_t 	*__ptr_banks;
+	struct hmc_dram_t 	*__ptr_drams;
+	struct hmc_link_t 	*__ptr_links;
 	struct hmc_xbar_t	*__ptr_xbars;
 	struct hmc_queue_t	*__ptr_xbar_rqst;
 	struct hmc_queue_t	*__ptr_xbar_rsp;

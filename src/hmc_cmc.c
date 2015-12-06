@@ -219,13 +219,17 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                                 uint32_t length,
                                 uint64_t head,
                                 uint64_t tail,
-                                uint64_t rqst_payload[16],
-                                uint64_t rsp_payload[16] ){
+                                uint64_t *rqst_payload,
+                                uint64_t *rsp_payload,
+                                uint32_t *rsp_len,
+                                hmc_response_t *rsp_cmd,
+                                uint8_t *raw_rsp_cmd ){
 
   /* vars */
   uint32_t idx = 0;
   /* ---- */
 
+  /* resolve the index of the cmc in the lookup table */
   idx = hmcsim_cmc_rawtoidx( rawcmd );
 
   if( idx == HMC_MAX_CMC ){

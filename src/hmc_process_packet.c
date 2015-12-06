@@ -41,6 +41,23 @@ extern int	hmcsim_util_decode_bank( struct hmcsim_t *hmc,
 extern int	hmcsim_decode_rsp_cmd( 	hmc_response_t rsp_cmd,
 					uint8_t *cmd );
 extern uint32_t hmcsim_cmc_cmdtoidx( hmc_rqst_t rqst );
+extern int hmcsim_process_cmc(  struct hmcsim_t *hmc,
+                                uint32_t rawcmd,
+                                uint32_t dev,
+                                uint32_t quad,
+                                uint32_t vault,
+                                uint32_t bank,
+                                uint32_t addr,
+                                uint32_t length,
+                                uint32_t head,
+                                uint32_t tail,
+                                uint64_t *rqst_payload,
+                                uint64_t *rsp_payload,
+                                uint32_t *rsp_len,
+                                hmc_response_t *rsp_cmd,
+                                uint8_t *raw_rsp_cmd );
+
+
 
 
 /* ----------------------------------------------------- HMCSIM_PROCESS_RQST */
@@ -70,6 +87,10 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	uint64_t rsp_rrp		= 0x00ll;
 	uint32_t rsp_len		= 0x00;
 	uint64_t packet[HMC_MAX_UQ_PACKET];
+
+        uint64_t i;
+        uint64_t rqst_payload[16];
+        uint64_t rsp_payload[16];
 
 	uint32_t cur			= 0x00;
 	uint32_t error			= 0x00;
@@ -193,6 +214,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 		return HMC_STALL;
 	}
+
+       /* zero the temp payloads */
+       for( i=0; i<16; i++ ){
+         rqst_payload[i] = 0x00ll;
+         rsp_payload[i] = 0x00ll;
+       }
 
 	/*
 	 * Step 3: perform the op
@@ -1284,6 +1311,50 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                 case 127:
                         /* CMC OPERATIONS */
                         use_cmc = 1;
+
+                        /* -- copy the request payload */
+                        for( i=1; i<(length*2)-1; i++ ){
+                          rqst_payload[i-1] = queue->packet[i];
+                        }
+
+
+                        /* -- attempt to make a call to the cmc lib */
+                        if( hmcsim_process_cmc( hmc,
+                                                cmd,
+                                                dev,
+                                                quad,
+                                                vault,
+                                                bank,
+                                                addr,
+                                                length,
+                                                head,
+                                                tail,
+                                                &(rqst_payload[0]),
+                                                &(rsp_payload[0]),
+                                                &rsp_len,
+                                                &rsp_cmd,
+                                                &tmp8)!=0){
+                          /* error occurred */
+                          return HMC_ERROR;
+                        }
+
+                        /* -- operation was successful */
+                        /* -- decode the response and see if we need
+                           -- to send a response
+                        */
+                        switch( rsp_cmd ){
+                          case MD_RD_RS:
+                          case MD_WR_RS:
+                          case RSP_NONE:
+                            /* no response packet */
+                            no_response = 1;
+                            break;
+                          default:
+                            /* response packet */
+                            no_response = 0;
+                            break;
+                        }
+
                         break;
 		default:
 			break;
