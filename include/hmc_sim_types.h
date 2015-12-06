@@ -46,15 +46,6 @@ typedef enum{
 }hmc_response_t;
 
 typedef enum{
-        INARG,                          /*! HMC-SIM: HMC_CMCOP_T: INPUT DATA ARGUMENT PRESENT */
-        OUTARG,                         /*! HMC-SIM: HMC_CMCOP_T: OUTPUT DATA ARGUMENT PRESENT */
-        PREDATA_OP,                     /*! HMC-SIM: HMC_CMCOP_T: CMC PRE DATA LOGIC OP */
-        POSTDATA_OP,                    /*! HMC-SIM: HMC_CMCOP_T: CMC POST DATA LOGIC OP */
-        LOGIC_OP,                       /*! HMC-SIM: HMC_CMCOP_T: CMC LOGIC OPERATION : REGISTER READ/WRITE */
-        UNK_CMC                         /*! HMC-SIM: HMC_CMCOP_T: UNKNOWN TYPE OF CMC OPERATION */
-}hmc_cmcop_t;
-
-typedef enum{
 	WR16, 				/*! HMC-SIM: HMC_RQST_T: 16-BYTE WRITE REQUEST */
 	WR32, 				/*! HMC-SIM: HMC_RQST_T: 32-BYTE WRITE REQUEST */
 	WR48, 				/*! HMC-SIM: HMC_RQST_T: 48-BYTE WRITE REQUEST */
@@ -269,7 +260,6 @@ struct hmc_dev_t{
 struct hmc_cmc_t{
 
         /* -- data */
-        hmc_cmcop_t op;                 /*! HMC-SIM: HMC_CMC_T: OPERATION SPECIFICATION */
         hmc_rqst_t type;                /*! HMC-SIM: HMC_CMC_T: REGISTERED REQUEST TYPE */
         uint32_t cmd;                   /*! HMC-SIM: HMC_CMC_T: COMMAND CODE OF THE REQUEST */
         uint32_t rsp_len;               /*! HMC-SIM: HMC_CMC_T: RESPONSE LENGTH */
@@ -280,8 +270,7 @@ struct hmc_cmc_t{
         void *handle;                   /*! HMC-SIM: HMC_CMC_T: DLSYM HANDLE */
 
         /* -- fptrs */
-        int (*cmc_register)(hmc_cmcop_t *,
-                            hmc_rqst_t *,
+        int (*cmc_register)(hmc_rqst_t *,
                             uint32_t *,
                             uint32_t *,
                             hmc_response_t *,

@@ -23,11 +23,6 @@
 /* __op_name : Contains a string representative for the trace logs */
 static char *__op_name      = "TEMPLATE_OP";
 
-/* __op : Contains a bitwise OR'd list of operation parameters.
-        : See hmc_cmc_opt enums from hmc_sim_types.h
-*/
-static hmc_cmcop_t __op     = (INARG|OUTARG);
-
 /* __rqst : Contains the respective command enum that the simulated
           : application uses to initiate a request for this command.
           : See hmc_rqst_t enums from hmc_sim_types.h
@@ -86,9 +81,6 @@ extern int hmcsim_execute_cmc(  void *hmc,
  * the sim makes a call to hmcsim_load_cmc().  Most users will not need
  * to change this function.
  *
- * *op is a pointer to a valid hmc_cmcop_t for which the function returns
- *     its CMC operation type.
- *
  * *rqst is a pointer to a valid hmc_rqst_t that defines which CMC operation
  *     command enum that this library will utilize.  See the hmc_rqst_t
  *     enums labeled CMCnn in ~/include/hmc_sim_types.h.
@@ -97,13 +89,11 @@ extern int hmcsim_execute_cmc(  void *hmc,
  *     For example, if *rqst returns CMC32, then the *cmd is "32".
  *
  */
-extern int hmcsim_register_cmc( hmc_cmcop_t *op,
-                                hmc_rqst_t *rqst,
+extern int hmcsim_register_cmc( hmc_rqst_t *rqst,
                                 uint32_t *cmd,
                                 uint32_t *rsp_len,
                                 hmc_response_t *rsp_cmd,
                                 uint8_t *rsp_cmd_code){
-  *op           = __op;
   *rqst         = __rqst;
   *cmd          = __cmd;
   *rsp_len      = __rsp_len;

@@ -25,10 +25,15 @@ static int    hmcsim_config_cmc( struct hmcsim_t *hmc ){
       /* ---- */
 
       for( i=0; i<HMC_MAX_CMC; i++ ){
-        hmc->cmcs[i].op     = UNK_CMC;
-        hmc->cmcs[i].type   = FLOW_NULL;  /* default to a null op */
-        hmc->cmcs[i].cmd    = 0x00ll;
-        hmc->cmcs[i].active = 0;          /* disable this op */
+        hmc->cmcs[i].type         = FLOW_NULL;  /* default to a null op */
+        hmc->cmcs[i].cmd          = 0x00ll;
+        hmc->cmcs[i].rsp_len      = 0x0;
+        hmc->cmcs[i].rsp_cmd_code = 0x0;
+        hmc->cmcs[i].active       = 0;          /* disable this op */
+        hmc->cmcs[i].handle       = NULL;
+        hmc->cmcs[i].cmc_register = NULL;
+        hmc->cmcs[i].cmc_execute  = NULL;
+        hmc->cmcs[i].cmc_str      = NULL;
       }
 
       return 0;

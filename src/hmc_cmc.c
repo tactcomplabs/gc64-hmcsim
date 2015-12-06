@@ -147,7 +147,6 @@ extern uint32_t hmcsim_cmc_cmdtoidx( hmc_rqst_t rqst ){
 static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
 
   /* vars */
-  hmc_cmcop_t op;
   hmc_rqst_t rqst;
   uint32_t cmd;
   uint32_t idx;
@@ -156,8 +155,7 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   uint8_t rsp_cmd_code;
 
   void *handle = NULL;
-  int (*cmc_register)(hmc_cmcop_t *,
-                      hmc_rqst_t *,
+  int (*cmc_register)(hmc_rqst_t *,
                       uint32_t *,
                       uint32_t *,
                       hmc_response_t *,
@@ -188,8 +186,7 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
 
   /* library is loaded, resolve the functions */
   /* -- hmcsim_register_cmc */
-  cmc_register = (int (*)(hmc_cmcop_t *,
-                          hmc_rqst_t *,
+  cmc_register = (int (*)(hmc_rqst_t *,
                           uint32_t *,
                           uint32_t *,
                           hmc_response_t *,
@@ -199,8 +196,7 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
     return -1;
   }
 
-  if( (*cmc_register)(&op,
-                      &rqst,
+  if( (*cmc_register)(&rqst,
                       &cmd,
                       &rsp_len,
                       &rsp_cmd,
@@ -244,7 +240,6 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   }
 
   /* write the necessary references into the structure */
-  hmc->cmcs[idx].op           = op;
   hmc->cmcs[idx].type         = rqst;
   hmc->cmcs[idx].cmd          = cmd;
   hmc->cmcs[idx].rsp_len      = rsp_len;
