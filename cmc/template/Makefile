@@ -6,7 +6,10 @@
 
 include ../Makefile.inc
 
+#-- CHANGE THE NAME OF YOUR LIBRARY HERE
 LIBNAME := cmctemplate
+#---------------------------------------
+
 SRCDIR := .
 BUILDDIR := build
 TARGET := lib$(LIBNAME).so
