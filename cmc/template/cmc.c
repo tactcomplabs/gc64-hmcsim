@@ -1,5 +1,5 @@
 /*
- * _CMC_H_
+ * _CMC_C_
  *
  * Implements a single CMC operation
  *
