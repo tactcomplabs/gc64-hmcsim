@@ -35,4 +35,4 @@ AR_OPTS=rcs
 #-- DOXYGEN BINARY
 DOXYGEN=`which doxygen`
 
-#-- EOF 
+#-- EOF

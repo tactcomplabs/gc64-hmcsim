@@ -31,6 +31,7 @@ III.	Tested Platforms
 - Mac OSX/Darwin 10.9.5 + gcc 4.2.1
 - Mac OSX/Darwin 10.9.5 + clang 2.9 (OSX)
 - Ubuntu 14.04LTS + gcc 4.8.4
+- Ubuntu 14.04LTS + clang 3.3
 
 
 IV.	Build Time Options
