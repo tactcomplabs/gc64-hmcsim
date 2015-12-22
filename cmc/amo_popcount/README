@@ -1,0 +1,7 @@
+-------------------------------------------------
+HMC-Sim 2.0 CMC Sample AMO PopCount
+
+Adds an atomic popcount operation to the HMC
+as command code CMC05
+-------------------------------------------------
+EOF

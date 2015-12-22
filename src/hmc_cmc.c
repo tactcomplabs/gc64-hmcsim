@@ -234,7 +234,7 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   idx = hmcsim_cmc_cmdtoidx( cmd );
 
   if( hmc->cmcs[idx].active == 1 ){
-    /* previously actived, this is an error */
+    /* previously activated, this is an error */
     dlclose( handle );
     return -1;
   }

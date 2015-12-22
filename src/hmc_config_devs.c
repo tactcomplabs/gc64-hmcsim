@@ -29,7 +29,7 @@ static int    hmcsim_config_cmc( struct hmcsim_t *hmc ){
         hmc->cmcs[i].cmd          = 0x00ll;
         hmc->cmcs[i].rsp_len      = 0x0;
         hmc->cmcs[i].rsp_cmd_code = 0x0;
-        hmc->cmcs[i].active       = 0;          /* disable this op */
+        hmc->cmcs[i].active       = 0;          /* disable this op by default */
         hmc->cmcs[i].handle       = NULL;
         hmc->cmcs[i].cmc_register = NULL;
         hmc->cmcs[i].cmc_execute  = NULL;
@@ -46,9 +46,9 @@ static int    hmcsim_config_cmc( struct hmcsim_t *hmc ){
  */
 static int	hmcsim_config_feat_reg( struct hmcsim_t *hmc, uint32_t dev )
 {
-	/* 
-	 * write the necessary data for the feature register 
-	 * 
+	/*
+	 * write the necessary data for the feature register
+	 *
 	 */
 	uint64_t feat	= 0x00ll;
 	uint64_t size	= 0x00ll;
@@ -56,7 +56,7 @@ static int	hmcsim_config_feat_reg( struct hmcsim_t *hmc, uint32_t dev )
 	uint64_t banks  = 0x00ll;
 	uint64_t phy	= HMC_PHY_SPEED;
 
-	/* 
+	/*
 	 * determine capacity
 	 *
 	 */
@@ -144,59 +144,59 @@ static int	hmcsim_config_feat_reg( struct hmcsim_t *hmc, uint32_t dev )
 }
 
 /* ----------------------------------------------------- HMCSIM_CONFIG_RVID_REG */
-/* 
+/*
  * HMCSIM_CONFIG_RVID_REG
- * 
+ *
  */
 static int	hmcsim_config_rvid_reg( struct hmcsim_t *hmc, uint32_t dev )
 {
 	/*
 	 * write the necessary data for the revision, vendor, product
-	 * protocol and phy 
- 	 * 
-	 */	
+	 * protocol and phy
+ 	 *
+	 */
 
 	uint64_t rev = 0x00ll;
-	
-	/* 
-	 * vendor 
+
+	/*
+	 * vendor
 	 *
 	 */
 	rev |= HMC_VENDOR_ID;
 
-	/* 
+	/*
 	 * product revision
-	 * 
+	 *
  	 */
 	rev |= (uint64_t)(HMC_PRODUCT_REVISION << 8 );
 
 
-	/* 
+	/*
 	 * protocol revision
-	 * 
+	 *
 	 */
 	rev |= (uint64_t)(HMC_PROTOCOL_REVISION << 16 );
-	
-	/* 
-	 * phy revision 
-	 * 
+
+	/*
+	 * phy revision
+	 *
  	 */
 	rev |= (uint64_t)(HMC_PHY_REVISION << 24 );
 
-	/* 
-	 * write the register 
-	 * 
+	/*
+	 * write the register
+	 *
  	 */
 	hmc->devs[dev].regs[HMC_REG_RVID_IDX].reg	= rev;
-	
+
 	return 0;
 }
 
 
 /* ----------------------------------------------------- HMCSIM_CONFIG_DEV_REG */
-/* 
+/*
  * HMCSIM_CONFIG_DEV_REG
- * 
+ *
  */
 static int	hmcsim_config_dev_reg( struct hmcsim_t *hmc, uint32_t dev )
 {
