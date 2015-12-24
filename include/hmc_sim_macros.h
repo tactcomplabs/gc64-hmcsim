@@ -21,7 +21,7 @@ extern "C" {
 #define		HMC_MAJOR_VERSION	0
 #endif
 
-#ifndef		HMC_MINOR_VERSION	
+#ifndef		HMC_MINOR_VERSION
 #define		HMC_MINOR_VERSION	1
 #endif
 
@@ -31,11 +31,11 @@ extern "C" {
 #endif
 
 #ifndef		HMC_PRODUCT_REVISION
-#define		HMC_PRODUCT_REVISION	0x1
+#define		HMC_PRODUCT_REVISION	0x2
 #endif
 
-#ifndef		HMC_PROTOCOL_REVISION	
-#define		HMC_PROTOCOL_REVISION	0x1
+#ifndef		HMC_PROTOCOL_REVISION
+#define		HMC_PROTOCOL_REVISION	0x2
 #endif
 
 #ifndef		HMC_PHY_REVISION
@@ -66,7 +66,7 @@ extern "C" {
 #define		HMC_MAX_LINKS		8
 #define		HMC_MIN_LINKS		4
 #define		HMC_MAX_CAPACITY	8
-#define		HMC_MIN_CAPACITY	2
+#define		HMC_MIN_CAPACITY	4
 #define		HMC_MAX_VAULTS		32
 #define		HMC_MIN_VAULTS		16
 #define		HMC_MAX_BANKS		32
@@ -75,7 +75,7 @@ extern "C" {
 #define		HMC_MAX_DRAMS		20
 #define		HMC_MIN_QUEUE_DEPTH	2
 #define		HMC_MAX_QUEUE_DEPTH	65536
-#define 	HMC_MAX_UQ_PACKET	18
+#define 	HMC_MAX_UQ_PACKET	34
 
 #define         HMC_MAX_CMC             70
 

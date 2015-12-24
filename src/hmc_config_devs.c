@@ -62,32 +62,32 @@ static int	hmcsim_config_feat_reg( struct hmcsim_t *hmc, uint32_t dev )
 	 */
 	switch( hmc->capacity )
 	{
-		case 2 : 
+		case 2 :
 			size = 0x00;
-			break; 
-		case 4 : 
+			break;
+		case 4 :
 			size = 0x01;
-			break; 
-		case 8 : 
+			break;
+		case 8 :
 			size = 0x02;
-			break; 
-		case 16: 
+			break;
+		case 16:
 			size = 0x03;
-			break; 
+			break;
 		default:
-			/* 
-	 		 * we currently don't support vendor specific 
+			/*
+	 		 * we currently don't support vendor specific
 		     	 * capacities
 			 *
 			 */
 			size = 0x00;
-			break; 
+			break;
 	}
 
-	/* 
+	/*
 	 * determine vaults
-	 * 
-	 */	
+	 *
+	 */
 	switch( hmc->num_vaults )
 	{
 		case 16:
@@ -97,8 +97,8 @@ static int	hmcsim_config_feat_reg( struct hmcsim_t *hmc, uint32_t dev )
 			vaults = 0x01;
 			break;
 		default:
-			/* 
-	 		 * we currently don't support vendor specific 
+			/*
+	 		 * we currently don't support vendor specific
 		     	 * vaults
 			 *
 			 */
@@ -106,40 +106,40 @@ static int	hmcsim_config_feat_reg( struct hmcsim_t *hmc, uint32_t dev )
 			break;
 	}
 
-	/* 
+	/*
 	 * banks per vault
-	 * 
-	 */	
+	 *
+	 */
 	switch( hmc->num_banks )
 	{
-		case 8: 
-			banks = 0x00;	
+		case 8:
+			banks = 0x00;
 			break;
 		case 16:
-			banks = 0x01;	
+			banks = 0x01;
 			break;
 		default:
-			/* 
-	 		 * we currently don't support vendor specific 
+			/*
+	 		 * we currently don't support vendor specific
 		     	 * banks
 			 *
 			 */
-			banks = 0x00;	
+			banks = 0x00;
 			break;
-	}	
+	}
 
 	feat |= size;
 	feat |= (vaults << 4 );
 	feat |= (banks  << 8 );
 	feat |= (phy    << 12);
 
-	/* 
+	/*
 	 * write the register
- 	 * 
+ 	 *
 	 */
 	hmc->devs[dev].regs[HMC_REG_FEAT_IDX].reg	= feat;
 
-	
+
 	return 0;
 }
 

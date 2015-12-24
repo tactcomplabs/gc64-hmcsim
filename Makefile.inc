@@ -27,9 +27,12 @@
 # -DHMC_PHY_REVISION=n
 #
 # HMCSIM PHYSICAL LINK SPEED
-# 0 = 15Gpbs
-# 1 = 10Gpbs
-# -DHMC_PHY_SPEED={0,1}
+# 0 = 30Gbps
+# 1 = 28Gbps
+# 2 = 25Gbps
+# 3 = 15Gbps
+# 4 = 12.5Gbps
+# -DHMC_PHY_SPEED={0,1,2,3,4}
 #
 #---------------------------------------------------------
 

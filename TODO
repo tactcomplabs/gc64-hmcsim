@@ -1,6 +1,10 @@
 HMC-SIM TODO LIST
 --------------------------------------------------------------------------------------------
 
+- revisit hmc register decoding
+
+- add "hmc_init_skew()" to init the sim using a defined config 
+
 - decode bank to dram association
 
 - add function to simulate "clock"
