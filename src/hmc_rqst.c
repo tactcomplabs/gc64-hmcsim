@@ -489,24 +489,30 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
 	 *
 	 */
 
-	/* -- return retry pointer : bits 7:0 */
+	/* -- return retry pointer : bits 8:0 */
 	rrp = hmcsim_rqst_getrrp( hmc );
 	tmp |= rrp;
 
-	/* -- forward retry pointer : bits 15:8 */
+	/* -- forward retry pointer : bits 17:9 */
 	frp = hmcsim_rqst_getfrp( hmc );
-	tmp |= ( (uint64_t)(frp & 0xFF) << 8 );
+	tmp |= ( (uint64_t)(frp & 0x1FF) << 9 );
 
-	/* -- sequence number : bits 18:16 */
+	/* -- sequence number : bits 20:18 */
 	seq = hmcsim_rqst_getseq( hmc, type );
-	tmp |= ( (uint64_t)(seq & 0x7) << 16 );
+	tmp |= ( (uint64_t)(seq & 0x7) << 18 );
+
+        /* -- data valid bit : bit 21 */
+        tmp |= ( (uint64_t)(0x1<<21) );
 
 	/* -- source link id : bits 26:24 */
-	tmp |= ( (uint64_t)(link & 0x7) << 24 );
+	//tmp |= ( (uint64_t)(link & 0x7) << 24 );
 
-	/* -- return token count : bits 31:27 */
+        /* -- error status bits : bits 28:22 */
+        /* -- no errors are present */
+
+	/* -- return token count : bits 31:29 */
 	rtc = hmcsim_rqst_getrtc( hmc );
-	tmp |= ( (uint64_t)(rtc & 0x1F) << 27 );
+	tmp |= ( (uint64_t)(rtc & 0x7) << 29 );
 
 	/* -- retrieve the crc : bits 63:32 */
 	crc = hmcsim_crc32( addr, payload, (2*flits) );
