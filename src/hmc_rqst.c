@@ -156,6 +156,9 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
 			flits	= 9;
 			cmd	= 0x0F;		/* 001111 */
 			break;
+                case WR256:
+                        flits   = 17;
+                        cmd     = 79;
 		case MD_WR:
 			flits	= 2;
 			cmd	= 0x10;		/* 010000 */
@@ -204,6 +207,10 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
 			flits	= 9;
 			cmd	= 0x1F;		/* 011111 */
 			break;
+                case P_WR256:
+                        flits   = 17;
+                        cmd     = 95;
+                        break;
 		case P_BWR:
 			flits	= 2;
 			cmd	= 0x21;		/* 100001 */
@@ -248,6 +255,10 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
 			flits	= 1;
 			cmd	= 0x37;		/* 110111 */
 			break;
+                case RD256:
+                        flits   = 1;
+                        cmd     = 119;
+                        break;
 		case MD_RD:
 			flits	= 1;
 			cmd	= 0x28;		/* 101000 */
@@ -268,6 +279,83 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
 			flits	= 1;
 			cmd	= 0x03;		/* 000011 */
 			break;
+                case TWOADDS8R:
+                        flits   = 2;
+                        cmd     = 82;
+                        break;
+                case ADDS16R:
+                        flits   = 2;
+                        cmd     = 83;
+                        break;
+                case INC8:
+                        flits   = 1;
+                        cmd     = 80;
+                        break;
+                case P_INC8:
+                        flits   = 1;
+                        cmd     = 84;
+                        break;
+                case XOR16:
+                        flits   = 2;
+                        cmd     = 64;
+                        break;
+                case OR16:
+                        flits   = 2;
+                        cmd     = 65;
+                        break;
+                case NOR16:
+                        flits   = 2;
+                        cmd     = 66;
+                        break;
+                case AND16:
+                        flits   = 2;
+                        cmd     = 67;
+                        break;
+                case NAND16:
+                        flits   = 2;
+                        cmd     = 68;
+                        break;
+                case CASGT8:
+                        flits   = 2;
+                        cmd     = 96;
+                        break;
+                case CASGT16:
+                        flits   = 2;
+                        cmd     = 98;
+                        break;
+                case CASLT8:
+                        flits   = 2;
+                        cmd     = 97;
+                        break;
+                case CASLT16:
+                        flits   = 2;
+                        cmd     = 99;
+                        break;
+                case CASEQ8:
+                        flits   = 2;
+                        cmd     = 100;
+                        break;
+                case CASZERO16:
+                        flits   = 2;
+                        cmd     = 101;
+                        break;
+                case EQ8:
+                        flits   = 2;
+                        cmd     = 105;
+                        break;
+                case EQ16:
+                        flits   = 2;
+                        cmd     = 104;
+                        break;
+                case BWR8R:
+                        flits   = 2;
+                        cmd     = 81;
+                        break;
+                case SWAP16:
+                        flits   = 2;
+                        cmd     = 106;
+                        break;
+                /* CMC OPS */
 		default:
 			return -1;
 			break;

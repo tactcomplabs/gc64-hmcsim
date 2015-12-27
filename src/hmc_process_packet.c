@@ -729,7 +729,6 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/*
 			 * check to see if we exceed maximum block size
 			 *
-<<<<<<< HEAD
 			 */
 			if( bsize < 128 ){
 				error = 1;
