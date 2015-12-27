@@ -263,6 +263,7 @@ struct hmc_cmc_t{
         /* -- data */
         hmc_rqst_t type;                /*! HMC-SIM: HMC_CMC_T: REGISTERED REQUEST TYPE */
         uint32_t cmd;                   /*! HMC-SIM: HMC_CMC_T: COMMAND CODE OF THE REQUEST */
+        uint32_t rqst_len;              /*! HMC-SIM: HMC_CMC_T: REQUEST LENGTH */
         uint32_t rsp_len;               /*! HMC-SIM: HMC_CMC_T: RESPONSE LENGTH */
         hmc_response_t rsp_cmd;         /*! HMC-SIM: HMC_CMC_T: RESPONSE COMMAND */
         uint8_t rsp_cmd_code;           /*! HMC-SIM: HMC_CMC_T: RESPONSE COMMAND CODE */

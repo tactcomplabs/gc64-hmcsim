@@ -14,6 +14,14 @@
 #include "hmc_sim.h"
 
 
+/* ----------------------------------------------------- FUNCTION PROTOTYPES */
+extern int hmcsim_query_cmc( struct hmcsim_t *hmc,
+                             hmc_rqst_t type,
+                             uint32_t *flits,
+                             uint8_t *cmd );
+
+
+
 /* ----------------------------------------------------- HMCSIM_RQST_GETSEQ */
 /*
  * HMCSIM_RQST_GETSEQ
@@ -356,6 +364,92 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
                         cmd     = 106;
                         break;
                 /* CMC OPS */
+                case CMC04:
+                case CMC05:
+                case CMC06:
+                case CMC07:
+                case CMC20:
+                case CMC21:
+                case CMC22:
+                case CMC23:
+                case CMC32:
+                case CMC36:
+                case CMC37:
+                case CMC38:
+                case CMC39:
+                case CMC41:
+                case CMC42:
+                case CMC43:
+                case CMC44:
+                case CMC45:
+                case CMC46:
+                case CMC47:
+                case CMC56:
+                case CMC57:
+                case CMC58:
+                case CMC59:
+                case CMC60:
+                case CMC61:
+                case CMC62:
+                case CMC63:
+                case CMC69:
+                case CMC70:
+                case CMC71:
+                case CMC72:
+                case CMC73:
+                case CMC74:
+                case CMC75:
+                case CMC76:
+                case CMC77:
+                case CMC78:
+                case CMC85:
+                case CMC86:
+                case CMC87:
+                case CMC88:
+                case CMC89:
+                case CMC90:
+                case CMC91:
+                case CMC92:
+                case CMC93:
+                case CMC94:
+                case CMC102:
+                case CMC103:
+                case CMC107:
+                case CMC108:
+                case CMC109:
+                case CMC110:
+                case CMC111:
+                case CMC112:
+                case CMC113:
+                case CMC114:
+                case CMC115:
+                case CMC116:
+                case CMC117:
+                case CMC118:
+                case CMC120:
+                case CMC121:
+                case CMC122:
+                case CMC123:
+                case CMC124:
+                case CMC125:
+                case CMC126:
+                case CMC127:
+
+                        /* check for an active cmc op */
+                        if( hmcsim_query_cmc( hmc,
+                                              type,
+                                              &flits,
+                                              &cmd ) != 0 ){
+                          /* no active cmc op */
+                          return -1;
+                        }
+
+                        /*
+                         * cmc op is active
+                         * flits and cmd are initialized
+                         */
+
+                        break;
 		default:
 			return -1;
 			break;

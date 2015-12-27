@@ -254,6 +254,29 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   return 0;
 }
 
+/* ----------------------------------------------------- HMCSIM_QUERY_CMC */
+extern int  hmcsim_query_cmc( struct hmcsim_t *hmc,
+                              hmc_rqst_t type,
+                              uint32_t *flits,
+                              uint8_t *cmd ){
+  /* vars */
+  uint32_t idx      = HMC_MAX_CMC;
+  /* ---- */
+
+  idx = hmcsim_cmc_cmdtoidx( type );
+
+  if( idx == HMC_MAX_CMC ){
+    return -1;
+  }else if( hmc->cmcs[idx].active == 0 ){
+    return -1;
+  }
+
+  *flits  = hmc->cmcs[idx].rqst_len;
+  *cmd    = hmc->cmcs[idx].cmd;
+
+  return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_PROCESS_CMC */
 extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                                 uint32_t rawcmd,
