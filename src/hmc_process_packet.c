@@ -138,11 +138,11 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	queue	= &(hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[slot]);
 	head	= queue->packet[0];
 
-	/* -- get the packet length [10:7] */
-	length 	= (uint32_t)( (head >> 7) & 0x0F );
+	/* -- get the packet length [11:7] */
+	length 	= (uint32_t)( (head >> 7) & 0x1F );
 
-	/* -- cmd = [5:0] */
-	cmd	= (uint32_t)(head & 0x3F);
+	/* -- cmd = [6:0] */
+	cmd	= (uint32_t)(head & 0x7F);
 
 	if( cmd == 0x00 ){
 		/* command is flow control, dump out */
@@ -157,11 +157,8 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	 * Step 2: decode it
 	 *
  	 */
-	/* -- cmd = [5:0] */
-	cmd	= (uint32_t)(head & 0x3F);
-
-	/* -- tag = [23:15] */
-	tag	= (uint32_t)((head >> 15) & 0x1FF);
+	/* -- tag = [22:12] */
+	tag	= (uint32_t)((head >> 12) & 0x7FF);
 
 	/* -- addr = [57:24] */
 	addr	= ((head >> 24) & 0x3FFFFFFFF );

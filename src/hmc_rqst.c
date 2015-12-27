@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_RQST_C_
- * 
- * HYBRID MEMORY CUBE SIMULATION LIBRARY 
- * 
+ *
+ * HYBRID MEMORY CUBE SIMULATION LIBRARY
+ *
  * MEMORY REQUEST HANDLERS
- * 
+ *
  */
 
 
@@ -15,19 +15,19 @@
 
 
 /* ----------------------------------------------------- HMCSIM_RQST_GETSEQ */
-/* 
+/*
  * HMCSIM_RQST_GETSEQ
- * 
+ *
  */
 static uint8_t hmcsim_rqst_getseq( struct hmcsim_t *hmc, hmc_rqst_t type )
 {
-	if( (type == PRET) || (type == IRTRY) ){ 
+	if( (type == PRET) || (type == IRTRY) ){
 		return hmc->seq;
 	}
 
 	hmc->seq++;
 
-	if( hmc->seq > 0x07 ){ 
+	if( hmc->seq > 0x07 ){
 		hmc->seq = 0x00;
 	}
 
@@ -35,9 +35,9 @@ static uint8_t hmcsim_rqst_getseq( struct hmcsim_t *hmc, hmc_rqst_t type )
 }
 
 /* ----------------------------------------------------- HMCSIM_RQST_GETRRP */
-/* 
+/*
  * HMCSIM_RQST_GETRRP
- * 
+ *
  */
 static uint8_t hmcsim_rqst_getrrp( struct hmcsim_t *hmc )
 {
@@ -45,9 +45,9 @@ static uint8_t hmcsim_rqst_getrrp( struct hmcsim_t *hmc )
 }
 
 /* ----------------------------------------------------- HMCSIM_RQST_GETFRP */
-/* 
+/*
  * HMCSIM_RQST_GETFRP
- * 
+ *
  */
 static uint8_t hmcsim_rqst_getfrp( struct hmcsim_t *hmc )
 {
@@ -55,9 +55,9 @@ static uint8_t hmcsim_rqst_getfrp( struct hmcsim_t *hmc )
 }
 
 /* ----------------------------------------------------- HMCSIM_RQST_GETRTC */
-/* 
+/*
  * HMCSIM_RQST_GETRTC
- * 
+ *
  */
 static uint8_t hmcsim_rqst_getrtc( struct hmcsim_t *hmc )
 {
@@ -66,9 +66,9 @@ static uint8_t hmcsim_rqst_getrtc( struct hmcsim_t *hmc )
 
 
 /* ----------------------------------------------------- HMCSIM_CRC32 */
-/* 
+/*
  * HMCSIM_CRC32
- * 
+ *
  */
 static uint32_t hmcsim_crc32( uint64_t addr, uint64_t *payload, uint32_t len )
 {
@@ -76,21 +76,22 @@ static uint32_t hmcsim_crc32( uint64_t addr, uint64_t *payload, uint32_t len )
 	uint32_t crc	= 0x11111111;
 	/* ---- */
 
+        /* FIXME : REPORT THE TRUE CRC */
 	return crc;
 }
 
 /* ----------------------------------------------------- HMCSIM_BUILD_MEMREQUEST */
-/* 
+/*
  * HMCSIM_BUILD_MEMREQUEST
- * 
+ *
  */
-extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc, 
-					uint8_t  cub, 
-					uint64_t addr, 
-					uint16_t  tag, 
+extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
+					uint8_t  cub,
+					uint64_t addr,
+					uint16_t  tag,
 					hmc_rqst_t type,
-					uint8_t link, 
-					uint64_t *payload, 
+					uint8_t link,
+					uint64_t *payload,
 					uint64_t *rqst_head,
 					uint64_t *rqst_tail )
 {
@@ -105,19 +106,19 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
 	uint64_t tmp	= 0x00ll;
 	/* ---- */
 
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 		return -1;
 	}
 
 
-	/* 
+	/*
 	 * we do no validation of inputs here
 	 * users may want to deliberately create bogus
 	 * requests
-	 * 
+	 *
 	 */
 
-	/* 
+	/*
 	 * get the correct command bit sequence
 	 *
 	 */
@@ -274,20 +275,21 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
 
 	/*
 	 * build the request packet header
-	 * 
+	 *
 	 */
-	
-	/* -- cmd field : bits 5:0 */
-	tmp |= (cmd & 0x3F);
-	
-	/* -- lng field in flits : bits 10:7 */
-	tmp |= ( (uint64_t)(flits & 0xF) << 7 );
+
+	/* -- cmd field : bits 6:0 */
+	tmp |= (cmd & 0x7F);
+
+	/* -- lng field in flits : bits 11:7 */
+	tmp |= ( (uint64_t)(flits & 0x1F) << 7 );
 
 	/* -- dln field; duplicate of lng : bits 14:11 */
-	tmp |= ( (uint64_t)(flits & 0xF) << 11 );
+        /* this is disabled in the 2.0 spec */
+	//tmp |= ( (uint64_t)(flits & 0xF) << 11 );
 
-	/* -- tag field: bits 23:15 */
-	tmp |= ( (uint64_t)(tag & 0x1FF) << 15 );
+	/* -- tag field: bits 22:12 */
+	tmp |= ( (uint64_t)(tag & 0x7FF) << 12 );
 
 	/* -- address field : bits 57:24 */
 	tmp |= ( (addr& 0x3FFFFFFFF) << 24 );
@@ -296,13 +298,13 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
 	tmp |= ( (uint64_t)(cub&0x7) << 61 );
 
 	/* write the request header out */
-	*rqst_head	= tmp;	
+	*rqst_head	= tmp;
 
 	tmp = 0x00ll;
 
 	/*
 	 * build the request packet tail
-	 * 
+	 *
 	 */
 
 	/* -- return retry pointer : bits 7:0 */
@@ -330,7 +332,7 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
 
 	/* write the request tail out */
 	*rqst_tail	= tmp;
-	
+
 	return 0;
 }
 
