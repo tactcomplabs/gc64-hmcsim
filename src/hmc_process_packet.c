@@ -515,6 +515,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the response length in flits */
+                        rsp_len = 1;
+
 			break;
 		case 18:
 			/* TWOADD8 */
@@ -570,7 +573,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE;
+                        no_response = 1;
 
 			break;
 		case 25:
@@ -588,7 +591,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE;
+                        no_response = 1;
 
 			break;
 		case 26:
@@ -615,7 +618,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE;
+                        no_response = 1;
 
 			break;
 		case 27:
@@ -642,7 +645,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE;
+                        no_response = 1;
 
 			break;
 		case 28:
@@ -669,7 +672,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE;
+                        no_response = 1;
 
 			break;
 		case 29:
@@ -696,7 +699,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE;
+                        no_response = 1;
 
 			break;
 		case 30:
@@ -723,7 +726,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE;
+                        no_response = 1;
 
 			break;
 		case 31:
@@ -750,7 +753,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE;
+                        no_response = 1;
 
 			break;
                 case 95:
@@ -777,7 +780,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE;
+                        no_response = 1;
 
 			break;
 		case 33:
@@ -795,7 +798,8 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE;
+                        no_response = 1;
+
 			break;
 		case 34:
 			/* P2ADD8 */
@@ -812,7 +816,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE;
+                        no_response = 1;
 
 			break;
 		case 35:
@@ -830,7 +834,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = RSP_NONE;
+                        no_response = 1;
 
 			break;
 		case 48:
@@ -1178,63 +1182,402 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			no_response = 1;
 
 			break;
-                /* begin extended atomics*/
+                /* -- begin extended atomics -- */
                 case 82:
                         /* 2ADDS8R */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"2ADDS8R",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 83:
                         /* ADDS16R */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"ADDS16R",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 80:
                         /* INC8 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"INC8",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = WR_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 1;
+
                         break;
                 case 84:
                         /* P_INC8 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"P_INC8",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+                        no_response = 1;
+
                         break;
                 case 64:
                         /* XOR16 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"XOR16",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 65:
                         /* OR16 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"OR16",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 66:
                         /* NOR16 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"NOR16",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 67:
                         /* AND16 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"AND16",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 68:
                         /* NAND16 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"NAND16",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 96:
                         /* CASGT8 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"CASGT8",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 98:
                         /* CASGT16 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"CASGT16",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 97:
                         /* CASLT8 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"CASLT8",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 99:
                         /* CASLT16 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"CASLT16",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 100:
                         /* CASEQ8 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"CASEQ8",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 101:
                         /* CASZERO16 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"CASZERO16",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 105:
                         /* EQ8 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"EQ8",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = WR_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 1;
+
                         break;
                 case 104:
                         /* EQ16 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"EQ16",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = WR_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 1;
+
                         break;
                 case 81:
                         /* BWR8R */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"BWR8R",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
                 case 106:
                         /* SWAP16 */
+
+			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
+				hmcsim_trace_rqst(	hmc,
+							"SWAP16",
+							dev,
+							quad,
+							vault,
+							bank,
+							addr,
+							length );
+			}
+
+			/* set the response command */
+			rsp_cmd = RD_RS;
+
+			/* set the response length in FLITS */
+			rsp_len = 2;
+
                         break;
 
                 /* begin CMC commands */
