@@ -150,12 +150,14 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   hmc_rqst_t rqst;
   uint32_t cmd;
   uint32_t idx;
+  uint32_t rqst_len;
   uint32_t rsp_len;
   hmc_response_t rsp_cmd;
   uint8_t rsp_cmd_code;
 
   void *handle = NULL;
   int (*cmc_register)(hmc_rqst_t *,
+                      uint32_t *,
                       uint32_t *,
                       uint32_t *,
                       hmc_response_t *,
@@ -189,6 +191,7 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   cmc_register = (int (*)(hmc_rqst_t *,
                           uint32_t *,
                           uint32_t *,
+                          uint32_t *,
                           hmc_response_t *,
                           uint8_t *))dlsym(handle,"hmcsim_register_cmc");
   if( cmc_register == NULL ){
@@ -198,6 +201,7 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
 
   if( (*cmc_register)(&rqst,
                       &cmd,
+                      &rqst_len,
                       &rsp_len,
                       &rsp_cmd,
                       &rsp_cmd_code) != 0 ){
@@ -242,6 +246,7 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   /* write the necessary references into the structure */
   hmc->cmcs[idx].type         = rqst;
   hmc->cmcs[idx].cmd          = cmd;
+  hmc->cmcs[idx].rqst_len      = rqst_len;
   hmc->cmcs[idx].rsp_len      = rsp_len;
   hmc->cmcs[idx].rsp_cmd      = rsp_cmd;
 

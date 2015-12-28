@@ -275,6 +275,7 @@ struct hmc_cmc_t{
         int (*cmc_register)(hmc_rqst_t *,
                             uint32_t *,
                             uint32_t *,
+                            uint32_t *,
                             hmc_response_t *,
                             uint8_t *);
 

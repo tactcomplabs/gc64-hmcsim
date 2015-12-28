@@ -36,6 +36,14 @@ static hmc_rqst_t __rqst    = CMC05;
 */
 static uint32_t __cmd       = 5;
 
+/* __rqst_len : Contains the respective command request packet len in flits
+              : Permissible values are 1->17.  This must include the header
+              : and tail flits.  Commands with just an address have 1 flit.
+              : Commands with data will include at least two flits.
+              : It is up to the implementor to decode the data flits
+*/
+static uint32_t __rqst_len  = 1;
+
 /* __rsp_len : Contains the respective command response packet len in flits
              : Permissible values are 0->17.  This must include the header
              : and tail flits.  If __rsp_len is 0, then the operation
@@ -125,11 +133,13 @@ extern int hmcsim_execute_cmc(  void *hmc,
  */
 extern int hmcsim_register_cmc( hmc_rqst_t *rqst,
                                 uint32_t *cmd,
+                                uint32_t *rqst_len,
                                 uint32_t *rsp_len,
                                 hmc_response_t *rsp_cmd,
                                 uint8_t *rsp_cmd_code){
   *rqst         = __rqst;
   *cmd          = __cmd;
+  *rqst_len     = __rqst_len;
   *rsp_len      = __rsp_len;
   *rsp_cmd      = __rsp_cmd;
   *rsp_cmd_code = __rsp_cmd_code;
