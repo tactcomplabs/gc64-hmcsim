@@ -812,10 +812,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			}
 
 			/* set the response command */
-			rsp_cmd = WR_RS;
-
-			/* set the response length in FLITS */
-			rsp_len = 1;
+			rsp_cmd = RSP_NONE;
 
 			break;
 		case 35:
