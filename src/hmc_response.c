@@ -141,96 +141,96 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 	*length	= tmp8;
 	tmp8	= 0x00;
 
-	/* 
+	/*
 	 * tag field
-	 * 
+	 *
 	 */
 	tmp16	= (uint16_t)( (tmp64 & 0xFF8000) >> 15);
 	*tag	= tmp16;
 	tmp16	= 0x0000;
 
-	/* 
-	 * return tag field 
-	 * 
+	/*
+	 * return tag field
+	 *
  	 */
 	tmp16	= (uint16_t)( (tmp64 & 0x1FF000000) >> 24);
 	*rtn_tag = tmp16;
 
-	/* 
+	/*
 	 * source link field
-	 * 
+	 *
 	 */
 	tmp8	= (uint8_t)( (tmp64 & 0x38000000000) >> 39);
 	*src_link = tmp8;
 
-	/* 
- 	 * done decoding the header 
+	/*
+ 	 * done decoding the header
 	 *
 	 */
 
-	/* 
-	 * decode the tail 
-	 * 
+	/*
+	 * decode the tail
+	 *
 	 */
 	tmp64	= packet[ (*length*2)-1 ];
 	*response_tail	= tmp64;
 
-	/* 
-	 * rrp 
-	 * 
+	/*
+	 * rrp
+	 *
 	 */
 	tmp8	= (uint8_t)( tmp64 & 0xFF );
-	*rrp 	= tmp8;	
+	*rrp 	= tmp8;
 	tmp8	= 0x00;
 
-	/* 
-	 * frp 
-	 * 
+	/*
+	 * frp
+	 *
  	 */
 	tmp8	= (uint8_t)( ( tmp64 & 0xFF00 ) >> 8 );
 	*frp	= tmp8;
 	tmp8 	= 0x00;
 
-	/* 
+	/*
 	 * sequence number
-	 * 
+	 *
 	 */
 	tmp8	= (uint8_t)( ( tmp64 & 0x70000 ) >> 16 );
 	*seq	= tmp8;
 	tmp8 	= 0x00;
 
-	/* 
+	/*
 	 * dinv
-	 * 
+	 *
 	 */
 	tmp8	= (uint8_t)( (tmp64 & 0x80000 ) >> 19 );
 	*dinv	= tmp8;
 	tmp8	= 0x00;
 
-	/* 
+	/*
 	 * errstat
-	 * 
+	 *
 	 */
 	tmp8	= (uint8_t)( (tmp64 & 0x7F00000 ) >> 20 );
 	*dinv	= tmp8;
 	tmp8	= 0x00;
 
-	/* 
+	/*
 	 * rtc
-	 * 
+	 *
 	 */
 	tmp8	= (uint8_t)( (tmp64 & 0xF8000000 ) >> 27 );
 	*rtc	= tmp8;
 	tmp8	= 0x00;
 
-	/* 
+	/*
 	 * crc
-	 * 
+	 *
 	 */
 	tmp32	= (uint32_t)( (tmp64 & 0xFFFFFFFF00000000) >> 32 );
 	*crc	= tmp32;
 	tmp32	= 0x00000000;
-	
+
 
 	return HMC_OK;
 }

@@ -107,8 +107,6 @@ struct cmc_table ctable[HMC_MAX_CMC] = {
 
 };
 
-/* Prototypes of the library functions */
-/* int hmcsim_register_cmc( hmc_cmcop_t, hmc_rqst_t, uint32_t cmd ) */
 
 /* ----------------------------------------------------- HMCSIM_CMC_RAWTOIDX */
 extern uint32_t hmcsim_cmc_rawtoidx( uint32_t raw ){
@@ -137,6 +135,48 @@ extern uint32_t hmcsim_cmc_cmdtoidx( hmc_rqst_t rqst ){
     }
   }
   return HMC_MAX_CMC; /* redundant, but squashes gcc warning */
+}
+
+/* ----------------------------------------------------- HMCSIM_CMC_TRACE_HEADER */
+extern void hmcsim_cmc_trace_header( struct hmcsim_t *hmc ){
+
+  /* vars */
+  uint32_t i      = 0;
+  uint32_t active = 0;
+  char str[256];
+  void (*cmc_str)(char *)  = NULL;
+  /* ---- */
+
+  for( i=0; i<HMC_MAX_CMC; i++ ){
+    active += hmc->cmcs[i].active;
+  }
+
+  if( active == 0 ){
+    /* nothing active, dump out */
+    return ;
+  }
+
+  /* print everything active */
+  fprintf( hmc->tfile, "%s\n",    "#---------------------------------------------------------" );
+  fprintf( hmc->tfile, "%s\n",    "# CMC_OP:CMC_STR:RQST_LEN:RSP_LEN:RSP_CMD_CODE" );
+  for( i=0; i<HMC_MAX_CMC; i++ ){
+    if( hmc->cmcs[i].active == 1 ){
+      cmc_str = hmc->cmcs[i].cmc_str;
+      (*cmc_str)(&(str[0]));
+      fprintf( hmc->tfile, "%s%d%s%s%s%d%s%d%s%d\n",
+               "#",
+               hmc->cmcs[i].cmd,
+               ":",
+               str,
+               ":",
+               hmc->cmcs[i].rqst_len,
+               ":",
+               hmc->cmcs[i].rsp_len,
+               ":",
+               hmc->cmcs[i].rsp_cmd_code );
+    }
+  }
+  fprintf( hmc->tfile, "%s\n",    "#---------------------------------------------------------" );
 }
 
 /* ----------------------------------------------------- HMCSIM_REGISTER_FUNCTIONS */
