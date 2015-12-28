@@ -36,7 +36,7 @@ LDFLAGS=-L../../
 
 #-- LDLIBS
 #-- LIBRARIES FOR LINKING
-LDLIBS=-lhmcsim
+LDLIBS=-lhmcsim -ldl
 
 #-- AR
 #-- ARCHIVE BINARY
