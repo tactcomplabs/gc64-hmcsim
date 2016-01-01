@@ -320,7 +320,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
           inc_link(hmc, &link);
           /* try to set the lock */
           if( lock.mlock == 0 ){
-            printf( "...thread %d acquired the lock\n", i );
+            //printf( "...thread %d acquired the lock\n", i );
             lock.mlock = 1;
             lock.tid  = i;
           }
@@ -355,14 +355,14 @@ extern int execute_test(        struct hmcsim_t *hmc,
           status[i]       = TAG_ULOCK_SEND;
           wlocks[i].mlock = 0;
           wtags[i]        = 0;
-          printf( "THREAD %d RECEIVED A RESPONSE: I HAVE THE LOCK\n", i );
+          //printf( "THREAD %d RECEIVED A RESPONSE: I HAVE THE LOCK\n", i );
           break;
         case 2:
           /* the lock is set, but it is not me */
           status[i]       = TAG_TLOCK_SEND;
           wlocks[i].mlock = 0;
           wtags[i]        = 0;
-          printf( "THREAD %d RECEIVED A RESPONSE: I DO NOT HAVE THE LOCK\n", i );
+          //printf( "THREAD %d RECEIVED A RESPONSE: I DO NOT HAVE THE LOCK\n", i );
           break;
         default:
           printf( "FAILED : LOCK PACKET RECV FAILURE\n" );
@@ -406,11 +406,10 @@ extern int execute_test(        struct hmcsim_t *hmc,
           inc_link(hmc, &link);
           /* try to set the lock */
           if( lock.mlock == 0 ){
-            printf( "...thread %d acquired the lock\n", i );
             lock.mlock = 1;
             lock.tid  = i;
           }
-          printf( "THREAD %d SENT HMC_TRYLOCK PACKET; TAG=%d\n", i, wtags[i] );
+          //printf( "THREAD %d SENT HMC_TRYLOCK PACKET; TAG=%d\n", i, wtags[i] );
           break;
         case HMC_STALL:
           /* stalled */
@@ -439,14 +438,14 @@ extern int execute_test(        struct hmcsim_t *hmc,
           status[i]       = TAG_ULOCK_SEND;
           wlocks[i].mlock = 0;
           wtags[i]        = 0;
-          printf( "THREAD %d RECEIVED A RESPONSE: I HAVE THE LOCK\n", i );
+          //printf( "THREAD %d RECEIVED A RESPONSE: I HAVE THE LOCK\n", i );
           break;
         case 2:
           /* the lock is set, but it is not me */
           status[i]       = TAG_TLOCK_SEND;
           wlocks[i].mlock = 0;
           wtags[i]        = 0;
-          printf( "THREAD %d RECEIVED A RESPONSE: I DO NOT HAVE THE LOCK\n", i );
+          //printf( "THREAD %d RECEIVED A RESPONSE: I DO NOT HAVE THE LOCK\n", i );
           break;
         default:
           printf( "FAILED : TLOCK PACKET RECV FAILURE\n" );
@@ -492,7 +491,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
           if( (lock.mlock == 1) /*&& (lock.tid == i)*/ ){
             lock.mlock = 0;
             lock.tid  = i;
-            printf( "THREAD %d SENT HMC_ULOCK PACKET; TAG=%d\n", i, wtags[i] );
+            //printf( "THREAD %d SENT HMC_ULOCK PACKET; TAG=%d\n", i, wtags[i] );
           }
           break;
         case HMC_STALL:
@@ -522,7 +521,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
           /* i have the lock */
           status[i]       = TAG_DONE;
           done++;
-          printf( "THREAD %d RECEIVED A RESPONSE: UNLOCK SUCCESS\n", i );
+          //printf( "THREAD %d RECEIVED A RESPONSE: UNLOCK SUCCESS\n", i );
           break;
         }
 
@@ -562,7 +561,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
                                      &d_errstat,
                                      &d_rtc,
                                      &d_crc );
-          printf( "triggering tag = %d\n", d_tag );
+
           trigger_mutex_response( d_type,
                                   d_tag,
                                   wtags,
