@@ -34,6 +34,10 @@
 # 4 = 12.5Gbps
 # -DHMC_PHY_SPEED={0,1,2,3,4}
 #
+# HMCSIM MEMORY ALLOCATION
+# !WARNING! WILL REQUIRE LARGE PHYSICAL MEMORY FOOTPRINT
+# -DHMC_ALLOC_MEM
+#
 #---------------------------------------------------------
 
 #-- HMCSIM_MACROS

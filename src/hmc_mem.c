@@ -177,12 +177,13 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 		return -1;
 	}
 
-#if 0
+#ifdef HMC_ALLOC_MEM
 	hmc->__ptr_stor = malloc( sizeof( uint64_t ) * hmc->num_devs * hmc->capacity * HMC_1GB );
 	if( hmc->__ptr_stor == NULL ){ 
 #ifdef HMC_DEBUG
                 HMCSIM_PRINT_TRACE( "FAILED TO ALLOCATE __ptr_stor" );
 #endif
+                printf( "DUMPING OUT; CAN'T ALLOC MEMORY\n" );
 		return -1;
 	}
 #endif
