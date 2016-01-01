@@ -42,7 +42,7 @@ static uint32_t __cmd       = 125;
               : Commands with data will include at least two flits.
               : It is up to the implementor to decode the data flits
 */
-static uint32_t __rqst_len  = 1;
+static uint32_t __rqst_len  = 2;
 
 /* __rsp_len : Contains the respective command response packet len in flits
              : Permissible values are 0->17.  This must include the header
