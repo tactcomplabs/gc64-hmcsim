@@ -21,20 +21,20 @@
 
 
 /* __op_name : Contains a string representative for the trace logs */
-static char *__op_name      = "TEMPLATE_OP";
+static char *__op_name      = "HMC_LOCK";
 
 /* __rqst : Contains the respective command enum that the simulated
           : application uses to initiate a request for this command.
           : See hmc_rqst_t enums from hmc_sim_types.h
           : MUST BE UNIQUE ACROSS CMC LIBS
 */
-static hmc_rqst_t __rqst    = CMC04;
+static hmc_rqst_t __rqst    = CMC125;
 
 /* __cmd : Contains the respective command code for this CMC operation.
          : This MUST match the __rqst field.  For example, if we have
          : CMC32 as the __rqst, then the __cmd is (uint32_t)(32).
 */
-static uint32_t __cmd       = 1;
+static uint32_t __cmd       = 125;
 
 /* __rqst_len : Contains the respective command request packet len in flits
               : Permissible values are 1->17.  This must include the header
@@ -55,7 +55,7 @@ static uint32_t __rsp_len   = 2;
              : enum in hmc_sim_types.h.  All normal commands are permissible.
              : If RSP_CMC is selected, you must also set __rsp_cmd_code
 */
-static hmc_response_t __rsp_cmd = RD_RS;
+static hmc_response_t __rsp_cmd = WR_RS;
 
 
 /* __rsp_cmd_code : Contains the command code for RSP_CMC command
