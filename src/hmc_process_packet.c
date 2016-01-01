@@ -1651,6 +1651,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                 case 125:
                 case 126:
                 case 127:
+#ifdef HMC_DEBUG
+                        printf( "HMCSIM_PROCESS_PACKET: PROCESSING CMC PACKET REQUEST\n" );
+#endif
                         /* CMC OPERATIONS */
                         use_cmc = 1;
 
@@ -1710,12 +1713,12 @@ step4_vr:
 	if( no_response == 0 ){
 
 		/* -- build the response */
-		rsp_slid 	= ((tail>>24) & 0x07);
-		rsp_tag		= ((head>>15) & 0x1FF );
+		rsp_slid 	= ((tail>>26) & 0x07);
+		rsp_tag		= tag;
 		rsp_crc		= ((tail>>32) & 0xFFFFFFFF);
-		rsp_rtc		= ((tail>>27) & 0x3F);
-		rsp_seq		= ((tail>>16) & 0x07);
-		rsp_frp		= ((tail>>8) & 0xFF);
+		rsp_rtc		= ((tail>>29) & 0x7);
+		rsp_seq		= ((tail>>18) & 0x7);
+		rsp_frp		= ((tail>>9) & 0x1FF);
 		rsp_rrp		= (tail & 0xFF);
 
 		/* -- decode the response command : see hmc_response.c */
@@ -1724,18 +1727,17 @@ step4_vr:
 		  hmcsim_decode_rsp_cmd( rsp_cmd, &(tmp8) );
                 }
 
-		/* -- packet head */
-		rsp_head	|= (tmp8 & 0x3F);
-		rsp_head	|= (rsp_len<<8);
-		rsp_head	|= (rsp_len<<11);
-		rsp_head	|= (rsp_tag<<15);
+                /* -- packet head */
+		rsp_head	|= (tmp8 & 0x7F);
+		rsp_head	|= (rsp_len<<7);
+		rsp_head	|= (rsp_tag<<12);
 		rsp_head	|= (rsp_slid<<39);
 
 		/* -- packet tail */
 		rsp_tail	|= (rsp_rrp);
-		rsp_tail	|= (rsp_frp<<8);
-		rsp_tail	|= (rsp_seq<<16);
-		rsp_tail	|= (rsp_rtc<<27);
+		rsp_tail	|= (rsp_frp<<9);
+		rsp_tail	|= (rsp_seq<<18);
+		rsp_tail	|= (rsp_rtc<<29);
 		rsp_tail	|= (rsp_crc<<32);
 
 		packet[0] 		= rsp_head;

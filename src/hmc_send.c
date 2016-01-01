@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_SEND_C_
- * 
- * HYBRID MEMORY CUBE SIMULATION LIBRARY 
- * 
+ *
+ * HYBRID MEMORY CUBE SIMULATION LIBRARY
+ *
  * MEMORY SEND FUNCTIONS
- * 
+ *
  */
 
 
@@ -19,9 +19,9 @@ extern int hmcsim_util_zero_packet( struct hmc_queue_t *queue );
 
 
 /* ----------------------------------------------------- HMCSIM_SEND */
-/* 
+/*
  * HMCSIM_SEND
- * 
+ *
  */
 extern int	hmcsim_send( struct hmcsim_t *hmc, uint64_t *packet )
 {
@@ -38,11 +38,11 @@ extern int	hmcsim_send( struct hmcsim_t *hmc, uint64_t *packet )
 	struct hmc_queue_t *queue = NULL;
 	/* ---- */
 
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 		return -1;
 	}
 
-	if( packet == NULL ){ 
+	if( packet == NULL ){
 		return -1;
 	}
 
@@ -57,23 +57,23 @@ extern int	hmcsim_send( struct hmcsim_t *hmc, uint64_t *packet )
 	HMCSIM_PRINT_ADDR_TRACE( "PACKET HEADER", header );
 #endif
 
-	/* 
+	/*
 	 * pull the packet length and grab the tail
-	 * 
+	 *
 	 */
-	len = (uint32_t)( (header & 0x780) >> 7 );
+        len = (uint32_t)( (header >> 7) & 0x1F);
 	t_len = len * 2;
-	
-	tail = packet[t_len-1];	
+
+	tail = packet[t_len-1];
 
 #ifdef HMC_DEBUG
 	HMCSIM_PRINT_ADDR_TRACE( "PACKET TAIL", tail );
 	HMCSIM_PRINT_INT_TRACE( "PACKET T_LEN", (int)(t_len) );
 #endif
 
-	/* 
-	 * grab the cub 
-	 * 
+	/*
+	 * grab the cub
+	 *
 	 */
 	cub = (uint8_t)( (header >> 61) & 0x7 );
 
@@ -81,24 +81,24 @@ extern int	hmcsim_send( struct hmcsim_t *hmc, uint64_t *packet )
 	HMCSIM_PRINT_INT_TRACE( "PACKET CUB", (int)(cub) );
 #endif
 
-	/* 
-	 * grab the link id 
+	/*
+	 * grab the link id
 	 *
 	 */
-	link = (uint8_t)( (tail & 0x7000000 ) >> 24 );
+        link = (uint8_t)( (tail >> 26) & 0x7 );
 
 #ifdef HMC_DEBUG
 	HMCSIM_PRINT_INT_TRACE( "PACKET LINK", (int)(link) );
 #endif
 
 
-	/* 
-	 * validate the cub:link 
-	 * 
+	/*
+	 * validate the cub:link
+	 *
 	 */
 	if( cub > (hmc->num_devs+1) ){
 		return -1;
-	}else if( cub == hmc->num_devs ){ 
+	}else if( cub == hmc->num_devs ){
 		return -1;
 	}
 

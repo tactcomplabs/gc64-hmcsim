@@ -96,32 +96,33 @@ static int hmcsim_clock_print_xbar_stats( struct hmcsim_t *hmc,
 }
 
 /* ----------------------------------------------------- HMCSIM_CLOCK_PRINT_VAULT_STATS */
-static int hmcsim_clock_print_vault_stats( struct hmcsim_t *hmc, 
+static int hmcsim_clock_print_vault_stats( struct hmcsim_t *hmc,
 					struct hmc_queue_t *queue )
 {
-	/* vars */
-	int nvalid	= 0;
-	int ninvalid	= 0;
-	int nstalled	= 0;
-	int nconflict	= 0;
-	int i		= 0;
-	/* ---- */
+  /* vars */
+  int nvalid	= 0;
+  int ninvalid	= 0;
+  int nstalled	= 0;
+  int nconflict	= 0;
+  int i		= 0;
+  /* ---- */
 
-	for( i=0; i<hmc->xbar_depth; i++ ){
-		if( queue[i].valid == HMC_RQST_VALID ){ 
-			nvalid++;
-		}else if( queue[i].valid == HMC_RQST_INVALID ){ 
-			ninvalid++;
-		}else if( queue[i].valid == HMC_RQST_CONFLICT ){
-			nconflict++;
-		}else if( queue[i].valid == HMC_RQST_STALLED ){ 
-			nstalled++;
-		}
-	}
-	
-	printf( "VAULT:nvalid:ninvalid:nconflict:nstalled = %d:%d:%d:%d\n", nvalid, ninvalid, nconflict, nstalled );	
-	
-	return 0;
+  for( i=0; i<hmc->xbar_depth; i++ ){
+    if( queue[i].valid == HMC_RQST_VALID ){
+      nvalid++;
+    }else if( queue[i].valid == HMC_RQST_INVALID ){
+      ninvalid++;
+    }else if( queue[i].valid == HMC_RQST_CONFLICT ){
+      nconflict++;
+    }else if( queue[i].valid == HMC_RQST_STALLED ){
+      nstalled++;
+    }
+  }
+
+  printf( "VAULT:nvalid:ninvalid:nconflict:nstalled = %d:%d:%d:%d\n",
+          nvalid, ninvalid, nconflict, nstalled );
+
+  return 0;
 }
 #endif
 
@@ -854,7 +855,7 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 				 * process the bank conflicts
 				 * 
 			 	 */
-				hmcsim_process_bank_conflicts( hmc, i, j, k, &(addr[0]), na ); 
+				//hmcsim_process_bank_conflicts( hmc, i, j, k, &(addr[0]), na ); 
 			}
 		}
 	}
@@ -991,9 +992,9 @@ static int hmcsim_clock_rw_ops( struct hmcsim_t *hmc )
 }
 
 /* ----------------------------------------------------- HMCSIM_CLOCK_REG_RESPONSES */
-/* 
+/*
  * HMCSIM_CLOCK_REG_RESPONSES
- * 
+ *
  */
 static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 {
@@ -1122,7 +1123,7 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 			}
 		}
 	}
-					
+
 	return 0;
 }
 

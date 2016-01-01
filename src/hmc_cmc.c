@@ -389,7 +389,34 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
   /* register all the response data */
   *rsp_len      = hmc->cmcs[idx].rsp_len;
   *rsp_cmd      = hmc->cmcs[idx].rsp_cmd;
-  *raw_rsp_cmd  = hmc->cmcs[idx].rsp_cmd_code;
+
+  if( *rsp_len > 0 ){
+    if( *rsp_cmd == RSP_CMC ){
+      *raw_rsp_cmd  = hmc->cmcs[idx].rsp_cmd_code;
+    }else{
+      /* encode the normal reponse */
+      switch( *rsp_cmd ){
+      case RD_RS:
+        *raw_rsp_cmd = 0x38;
+        break;
+      case WR_RS:
+        *raw_rsp_cmd = 0x39;
+        break;
+      case MD_RD_RS:
+        *raw_rsp_cmd = 0x3A;
+        break;
+      case MD_WR_RS:
+        *raw_rsp_cmd = 0x3B;
+        break;
+      case RSP_ERROR:
+      default:
+        *raw_rsp_cmd = 0x00;
+        break;
+      }
+    }
+  }else{
+    *raw_rsp_cmd = 0x00;
+  }
 
   /* trace it */
   /* -- get the name of the op */
