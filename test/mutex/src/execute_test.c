@@ -324,7 +324,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
             lock.mlock = 1;
             lock.tid  = i;
           }
-          printf( "THREAD %d SENT HMC_LOCK PACKET; TAG=%d\n", i, wtags[i] );
+          //printf( "THREAD %d SENT HMC_LOCK PACKET; TAG=%d\n", i, wtags[i] );
           break;
         case HMC_STALL:
           /* stalled */
