@@ -10,6 +10,20 @@
 #include <stdint.h>
 #include "hmc_sim.h"
 
+/* ----------------------------------------------------- WEAK FUNCTIONS */
+/*
+ * Required to access the internal device memory
+ *
+ */
+extern int  hmcsim_readmem( struct hmcsim_t *hmc,
+                            uint64_t addr,
+                            uint64_t *data,
+                            uint32_t len ) __attribute__((weak_import));
+extern int  hmcsim_readmem( struct hmcsim_t *hmc,
+                            uint64_t addr,
+                            uint64_t *data,
+                            uint32_t len )__attribute__((weak_import));
+
 
 /* ----------------------------------------------------- GLOBALS */
 /* These globals define the CMC operation parameters, the request
