@@ -43,7 +43,7 @@ extern int main( int argc, char **argv )
 		{
                         case 'C':
                                cmc_lib = malloc( sizeof( char) *
-                                                 strlen( optarg ) );
+                                                 (strlen( optarg )+1) );
                                 if( cmc_lib == NULL ){
                                   printf( "ERROR : COULD NOT ALLOCATE MEMORY FOR LIBRARY\n" );
                                   return -1;
