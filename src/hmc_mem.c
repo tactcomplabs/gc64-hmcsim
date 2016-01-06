@@ -186,6 +186,11 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
                 printf( "DUMPING OUT; CAN'T ALLOC MEMORY\n" );
 		return -1;
 	}
+
+        hmc->__ptr_end  = (uint64_t *)( hmc->__ptr_stor
+                                        + (sizeof( uint64_t ) *
+                                           hmc->num_devs *
+                                           hmc->capacity * HMC_1GB) );
 #endif
 
 	hmc->__ptr_xbar_rqst = malloc( sizeof( struct hmc_queue_t ) * hmc->num_devs 

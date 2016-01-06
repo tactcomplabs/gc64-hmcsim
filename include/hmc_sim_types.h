@@ -332,6 +332,7 @@ struct hmcsim_t{
 	struct hmc_queue_t	*__ptr_vault_rqst;
 	struct hmc_queue_t	*__ptr_vault_rsp;
 	uint64_t 		*__ptr_stor;
+	uint64_t 		*__ptr_end;
 };
 
 
