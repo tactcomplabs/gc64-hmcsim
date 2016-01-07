@@ -320,6 +320,16 @@ struct hmcsim_t{
 
 	uint64_t clk;			/*! HMC-SIM: HMCSIM_T: CLOCK TICK */
 
+        int (*readmem)(struct hmcsim_t *,
+                       uint64_t,
+                       uint64_t *,
+                       uint32_t );
+
+        int (*writemem)(struct hmcsim_t *,
+                       uint64_t,
+                       uint64_t *,
+                       uint32_t );
+
 	struct hmc_dev_t	*__ptr_devs;
 	struct hmc_quad_t	*__ptr_quads;
 	struct hmc_vault_t	*__ptr_vaults;

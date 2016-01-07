@@ -12,19 +12,6 @@
 #include <stdint.h>
 #include "hmc_sim.h"
 
-/*
- * Force weak linking
- *
- */
-extern int  hmcsim_readmem( struct hmcsim_t *hmc,
-                            uint64_t addr,
-                            uint64_t *data,
-                            uint32_t len ) __attribute__((weak_import));
-extern int  hmcsim_readmem( struct hmcsim_t *hmc,
-                            uint64_t addr,
-                            uint64_t *data,
-                            uint32_t len )__attribute__((weak_import));
-
 /* ----------------------------------------------------- HMCSIM_READMEM */
 extern int  hmcsim_readmem( struct hmcsim_t *hmc,
                             uint64_t addr,
