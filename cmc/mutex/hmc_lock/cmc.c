@@ -101,7 +101,46 @@ extern int hmcsim_execute_cmc(  void *hmc,
                                 uint64_t tail,
                                 uint64_t *rqst_payload,
                                 uint64_t *rsp_payload ){
-  /* perform your operation */
+  /* hmc struct pointer */
+  struct hmcsim_t *l_hmc  = (struct hmcsim_t *)(hmc);
+
+  /* data for the operation */
+  uint64_t data[2]  = {0x00ull,0x00ull};
+
+  /* function pointer */
+  int (*readmem)(struct hmcsim_t *,
+                 uint64_t,
+                 uint64_t *,
+                 uint32_t ) = NULL;
+  int (*writemem)(struct hmcsim_t *,
+                 uint64_t,
+                 uint64_t *,
+                 uint32_t ) = NULL;
+
+  /* init the function pointers */
+  readmem   = l_hmc->readmem;
+  writemem  = l_hmc->writemem;
+
+  /* read the memory */
+  if( (*readmem)(l_hmc, addr, &(data[0]), 2 ) != 0 ){
+    return -1;
+  }
+
+  if( data[0] == 0 ){
+    /* grab the lock */
+    data[0] = 0x01ull;
+    data[1] = rqst_payload[1];
+    if( (*writemem)(l_hmc, addr, &(data[0]), 2) != 0 ){
+      return -1;
+    }
+
+    /* write the response block */
+    rsp_payload[1] = data[0];
+  }else{
+    /* lock already taken */
+    /* write the response block */
+    rsp_payload[1] = data[0];
+  }
 
   return 0;
 }
