@@ -101,7 +101,45 @@ extern int hmcsim_execute_cmc(  void *hmc,
                                 uint64_t tail,
                                 uint64_t *rqst_payload,
                                 uint64_t *rsp_payload ){
-  /* perform your operation */
+  /* hmc struct pointer */
+  struct hmcsim_t *l_hmc  = (struct hmcsim_t *)(hmc);
+
+  /* data for the operation */
+  uint64_t data[2]  = {0x00ull,0x00ull};
+
+  /* function pointer */
+  int (*readmem)(struct hmcsim_t *,
+                 uint64_t,
+                 uint64_t *,
+                 uint32_t ) = NULL;
+  int (*writemem)(struct hmcsim_t *,
+                  uint64_t,
+                  uint64_t *,
+                  uint32_t ) = NULL;
+
+  /* init the function pointers */
+  readmem   = l_hmc->readmem;
+  writemem  = l_hmc->writemem;
+
+  /* read the memory */
+  if( (*readmem)(l_hmc, addr, &(data[0]), 2 ) != 0 ){
+    return -1;
+  }
+
+  if( data[0] == 0 ){
+    /* report failure */
+    rsp_payload[1] = 0x01ull;
+  }else if( data[1] != rqst_payload[1] ){
+    /* report failure */
+    rsp_payload[1] = 0x01ull;
+  }else{
+    /* success */
+    if( (*writemem)(l_hmc, addr, &(data[0]), 2) != 0 ){
+      return -1;
+    }
+    rsp_payload[1] = 0x00ull;
+    rsp_payload[2] = 0x00ull;
+  }
 
   return 0;
 }
