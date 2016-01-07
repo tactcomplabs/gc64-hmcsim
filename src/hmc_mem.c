@@ -14,6 +14,15 @@
 #include "hmc_sim.h"
 
 extern int hmcsim_free_cmc( struct hmcsim_t *hmc );
+extern int hmcsim_readmem( struct hmcsim_t *hmc,
+                            uint64_t addr,
+                            uint64_t *data,
+                            uint32_t len);
+extern int hmcsim_writemem( struct hmcsim_t *hmc,
+                            uint64_t addr,
+                            uint64_t *data,
+                            uint32_t len);
+
 
 /* ----------------------------------------------------- HMCSIM_FREE_MEMORY */
 /*
@@ -229,6 +238,9 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 #endif
 		return -1;
 	}
+
+        hmc->readmem  = &(hmcsim_readmem);
+        hmc->writemem = &(hmcsim_writemem);
 
 	return 0;
 }
