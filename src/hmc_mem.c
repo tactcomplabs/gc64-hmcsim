@@ -160,6 +160,7 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 		return -1;
 	}
 
+#if 0
 	hmc->__ptr_drams = malloc( sizeof( struct hmc_dram_t ) 
 					* hmc->num_devs * hmc->num_vaults * hmc->num_banks 
 					* hmc->num_drams );
@@ -169,7 +170,7 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 #endif
 		return -1;
 	}
-
+#endif
 	hmc->__ptr_links = malloc( sizeof( struct hmc_link_t ) * hmc->num_devs * hmc->num_links );
 	if( hmc->__ptr_links == NULL ){ 
 #ifdef HMC_DEBUG
