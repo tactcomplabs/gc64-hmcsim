@@ -203,7 +203,7 @@ struct hmc_dram_t{
 
 struct hmc_bank_t{
 
-	struct hmc_dram_t *drams;	/*! HMC-SIM: HMC_BANK_T: DRAMS */
+	//struct hmc_dram_t *drams;	/*! HMC-SIM: HMC_BANK_T: DRAMS */
 
 	uint32_t id;			/*! HMC-SIM: HMC_BANK_T: BANK ID */
 					/* 16-BYTE BANK INTERLEAVE */	

@@ -20,7 +20,7 @@ extern int  hmcsim_readmem( struct hmcsim_t *hmc,
 #ifdef HMC_ALLOC_MEM
   uint64_t phys = 0x00ull;
   uint64_t i    = 0x00ull;
-  uint64_t *ptr = hmc->__ptr_str;
+  uint64_t *ptr = hmc->__ptr_stor;
 
   phys  = (uint64_t)(ptr) + addr + (len*8);
 
@@ -51,7 +51,7 @@ extern int  hmcsim_writemem( struct hmcsim_t *hmc,
 #ifdef HMC_ALLOC_MEM
   uint64_t phys = 0x00ull;
   uint64_t i    = 0x00ull;
-  uint64_t *ptr = hmc->__ptr_str;
+  uint64_t *ptr = hmc->__ptr_stor;
 
   phys  = (uint64_t)(ptr) + addr + (len*8);
 

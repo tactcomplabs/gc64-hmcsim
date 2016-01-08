@@ -49,6 +49,7 @@ static int load_cmc_libs( struct hmcsim_t *hmc, char *libsrc ){
 
     sprintf( lib, "%s%s%s", libsrc, "/", mlibs[i] );
 
+    printf( "LOADING CMC LIBRARY: %s\n", mlibs[i] );
     if( hmcsim_load_cmc( hmc, lib ) != 0 ){
       printf( "ERROR : COULD NOT LOAD CMC LIBRARY : %s\n", mlibs[i] );
       return -1;
@@ -59,6 +60,8 @@ static int load_cmc_libs( struct hmcsim_t *hmc, char *libsrc ){
     free( lib );
     lib = NULL;
   }
+
+  fflush( stdout );
 
   return 0;
 }

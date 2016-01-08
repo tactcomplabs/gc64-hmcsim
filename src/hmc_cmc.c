@@ -217,6 +217,9 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   /* ---- */
 
   /* attempt to load the library */
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "LOADING CMC LIBRARY" );
+#endif
   handle = dlopen( cmc_lib, RTLD_NOW );
 
   if( handle == NULL ){
