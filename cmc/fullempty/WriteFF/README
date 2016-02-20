@@ -1,8 +1,15 @@
 -------------------------------------------------
-HMC-Sim 2.0 CMC Template
+WriteFF
+- write if full and set to full
+-------------------------------------------------
 
-Use this sample CMC template to implement
-your own CMC operations.  Be sure to
-read the documentation found at www.gc64.org
+if( full ){
+  mem=data
+  full=1
+  ret(1,0x00ll)
+}else{
+  ret(0,0x00ll)
+}
+
 -------------------------------------------------
 EOF
