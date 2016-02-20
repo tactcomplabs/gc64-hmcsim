@@ -7,7 +7,7 @@
 include ../Makefile.inc
 
 #-- CHANGE THE NAME OF YOUR LIBRARY HERE
-LIBNAME := hmc_lock
+LIBNAME := incff
 #---------------------------------------
 
 SRCDIR := .
