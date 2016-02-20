@@ -1,8 +1,10 @@
 -------------------------------------------------
-HMC-Sim 2.0 CMC Template
+WriteXF
+- write data and set to full
+-------------------------------------------------
 
-Use this sample CMC template to implement
-your own CMC operations.  Be sure to
-read the documentation found at www.gc64.org
+mem=data
+full=1
+
 -------------------------------------------------
 EOF
