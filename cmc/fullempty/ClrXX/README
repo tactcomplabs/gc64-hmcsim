@@ -1,8 +1,10 @@
 -------------------------------------------------
-HMC-Sim 2.0 CMC Template
+ClrXX
+- set mem=0 && full=0
+-------------------------------------------------
 
-Use this sample CMC template to implement
-your own CMC operations.  Be sure to
-read the documentation found at www.gc64.org
+mem=0
+full=0
+
 -------------------------------------------------
 EOF

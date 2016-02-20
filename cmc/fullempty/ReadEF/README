@@ -1,8 +1,14 @@
 -------------------------------------------------
-HMC-Sim 2.0 CMC Template
+ReadEF
+- Read if empty and set to full
+-------------------------------------------------
 
-Use this sample CMC template to implement
-your own CMC operations.  Be sure to
-read the documentation found at www.gc64.org
+if( !full ){
+  full=1
+  ret(1,mem)
+}else{
+  ret(0,0x00ll)
+}
+
 -------------------------------------------------
 EOF
