@@ -1,8 +1,9 @@
 -------------------------------------------------
-HMC-Sim 2.0 CMC Template
+ReadXX
+- Read memory
+-------------------------------------------------
 
-Use this sample CMC template to implement
-your own CMC operations.  Be sure to
-read the documentation found at www.gc64.org
+ret(1,mem)
+
 -------------------------------------------------
 EOF
