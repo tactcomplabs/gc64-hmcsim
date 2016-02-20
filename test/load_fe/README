@@ -1,0 +1,4 @@
+LOAD_FE HMCSIM-2.0 EXAMPLE
+
+EX:
+ ./load_fe -b 16 -c 4 -d 20 -l 4 -n 1 -q 64 -v 16 -x 128
