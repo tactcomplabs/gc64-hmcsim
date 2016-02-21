@@ -65,6 +65,24 @@ static hmc_response_t __rsp_cmd = WR_RS;
 static uint8_t __rsp_cmd_code = 0x00;
 
 
+/* ----------------------------------------------------- FE_GET_BIT */
+/*
+ * get the value of the FE bit for the corresponding addr
+ *
+ */
+unsigned int fe_get_bit( uint64_t addr ){
+}
+
+/* ----------------------------------------------------- FE_SET_BIT */
+/*
+ * set the value of the FE bit for the corresponding addr
+ *
+ */
+void fe_set_bit( uint64_t addr, unsigned int bit ){
+}
+
+
+
 /* ----------------------------------------------------- HMCSIM_EXECUTE_CMC */
 /*
  * Performs the actual CMC operation.  All your custom logic belongs in this
