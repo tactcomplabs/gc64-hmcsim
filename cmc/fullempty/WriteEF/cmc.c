@@ -55,7 +55,7 @@ static uint32_t __rsp_len   = 2;
              : enum in hmc_sim_types.h.  All normal commands are permissible.
              : If RSP_CMC is selected, you must also set __rsp_cmd_code
 */
-static hmc_response_t __rsp_cmd = RD_RS;
+static hmc_response_t __rsp_cmd = WR_RS;
 
 
 /* __rsp_cmd_code : Contains the command code for RSP_CMC command
