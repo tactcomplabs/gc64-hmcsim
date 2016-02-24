@@ -14,7 +14,7 @@ INC=-I../../../include/
 
 #-- CFLAGS
 #-- C COMPILER FLAGS
-CFLAGS=-O2 -Wall -g $(INC)
+CFLAGS=-O2 -Wall -g $(INC) -D_4GB_
 
 #-- CXXFLAGS
 #-- C++ COMPILER FLAGS
