@@ -65,6 +65,222 @@ static hmc_response_t __rsp_cmd = RD_RS;
 static uint8_t __rsp_cmd_code = 0x00;
 
 
+/* ----------------------------------------------------- FE_GET_ADDR */
+/*
+ * get the value of the FE bit for the corresponding addr
+ *
+ */
+uint64_t fe_get_addr( uint64_t addr, uint8_t *bit ){
+  uint64_t new  = 0x00ull;
+  uint64_t tmp  = 0x00ull;
+  uint16_t dram = 0x0000;
+  uint8_t bank  = 0x00;
+  uint8_t vault = 0x00;
+  uint8_t byte  = 0x00;
+  uint8_t u7    = 0x00;
+  uint8_t nbank = 0x00;
+  uint8_t nvault= 0x00;
+  uint8_t quad  = 0x00;
+  uint8_t nbyte = 0x00;
+  uint8_t nbit  = 0x00;
+#ifdef _4GB_
+  /* 4GB:256byte device config */
+
+  /* grab the lower 32 bits */
+  tmp   = (addr&0x1FFFFFFFF);
+
+  /* -- byte address : [7:4] */
+  byte  = (uint8_t)((tmp>>4)&0xF);
+
+  /* -- vault address : [10:8] */
+  vault = (uint8_t)((tmp>>8)&0x7);
+
+  /* -- bank address : [15:13] */
+  bank  = (uint8_t)((tmp>>13)&0x7);
+
+  /*-- dram address : [31:16] */
+  dram  = (uint16_t)((tmp>>16)&0xFFFF);
+
+  /* -- grab the upper 6 bits of the dram address */
+  u7  = (uint8_t)((dram>>10)&0x3F);
+  nvault = (u7&0x7);
+  nbank  = ((u7>>3)&0x7);
+  if( nvault < 2 ){
+    quad = 0x00;
+  }else if( nvault < 4 ){
+    quad = 0x01;
+  }else if( nvault < 6 ){
+    quad = 0x02;
+  }else{
+    quad = 0x03;
+  }
+
+  /* -- get the byte address */
+  nbyte = u7/8;
+
+  /* -- get the bit address */
+  nbit = u7-(nbyte*8);
+  *bit = nbit;
+
+  /* -- shift in the DRAM addr */
+  new = 0xFFFF;
+  new = (new<<16);
+
+  /* -- insert new vault address */
+  new |= ((uint64_t)(nvault)<<8);
+
+  /* -- insert quad */
+  new |= ((uint64_t)(quad)<<11);
+
+  /* -- insert bank address */
+  new |= ((uint64_t)(nbank)<<13);
+
+  /* -- insert the byte address */
+  new |= ((uint64_t)(nbyte)<<4);
+
+#else
+  /* 8GB:256byte device config */
+
+  /* grab the lower 32 bits */
+  tmp   = (addr&0x1FFFFFFFF);
+
+  /* -- byte address : [7:4] */
+  byte  = (uint8_t)((tmp>>4)&0xF);
+
+  /* -- vault address : [10:8] */
+  vault = (uint8_t)((tmp>>8)&0x7);
+
+  /* -- bank address : [15:13] */
+  bank  = (uint8_t)((tmp>>13)&0xF);
+
+  /*-- dram address : [31:16] */
+  dram  = (uint16_t)((tmp>>17)&0xFFFF);
+
+  /* -- grab the upper 6 bits of the dram address */
+  u7  = (uint8_t)((dram>>10)&0x3F);
+  nvault = (u7&0x7);
+  nbank  = ((u7>>3)&0x7);
+  if( nvault < 2 ){
+    quad = 0x00;
+  }else if( nvault < 4 ){
+    quad = 0x01;
+  }else if( nvault < 6 ){
+    quad = 0x02;
+  }else{
+    quad = 0x03;
+  }
+
+  /* -- get the byte address */
+  nbyte = u7/8;
+
+  /* -- get the bit address */
+  nbit = u7-(nbyte*8);
+  *bit = nbit;
+
+  /* -- shift in the DRAM addr */
+  new = 0xFFFF;
+  new = (new<<17);
+
+  /* -- insert new vault address */
+  new |= ((uint64_t)(nvault)<<8);
+
+  /* -- insert quad */
+  new |= ((uint64_t)(quad)<<11);
+
+  /* -- insert bank address */
+  new |= ((uint64_t)(nbank)<<13);
+
+  /* -- insert the byte address */
+  new |= ((uint64_t)(nbyte)<<4);
+
+#endif
+
+  return tmp;
+}
+
+/* ----------------------------------------------------- FE_GET_BIT */
+/*
+ * get the value of the FE bit for the corresponding addr
+ *
+ */
+uint8_t fe_get_bit( void *hmc,
+                         uint64_t addr ){
+  uint8_t bit   = 0x00;
+  uint8_t tbit  = 0x00;
+  uint64_t tmp  = fe_get_addr( addr, &bit );
+  struct hmcsim_t *l_hmc  = (struct hmcsim_t *)(hmc);
+
+  /* data for the operation */
+  uint64_t data = 0x00ll;
+
+  /* function pointer */
+  int (*readmem)(struct hmcsim_t *,
+                 uint64_t,
+                 uint64_t *,
+                 uint32_t ) = NULL;
+
+  /* init the function pointers */
+  readmem   = l_hmc->readmem;
+
+  /* read the memory */
+  (*readmem)(l_hmc, tmp, &data, 1 );
+
+  /* get the bit value */
+  tbit = (uint8_t)((data>>bit)&1);
+
+  return tbit;
+}
+
+/* ----------------------------------------------------- FE_SET_BIT */
+/*
+ * set the value of the FE bit for the corresponding addr
+ *
+ */
+void fe_set_bit( void *hmc,
+                 uint64_t addr,
+                 uint8_t febit ){
+  uint8_t bit   = 0x00;
+  uint8_t tbit  = 0x00;
+  uint64_t tmp  = fe_get_addr( addr, &bit );
+  struct hmcsim_t *l_hmc  = (struct hmcsim_t *)(hmc);
+
+  /* data for the operation */
+  uint64_t data = 0x00ll;
+
+  /* function pointer */
+  int (*readmem)(struct hmcsim_t *,
+                 uint64_t,
+                 uint64_t *,
+                 uint32_t ) = NULL;
+  int (*writemem)(struct hmcsim_t *,
+                 uint64_t,
+                 uint64_t *,
+                 uint32_t ) = NULL;
+
+  /* init the function pointers */
+  readmem   = l_hmc->readmem;
+  writemem  = l_hmc->writemem;
+
+  /* read the memory */
+  (*readmem)(l_hmc, tmp, &data, 1 );
+
+  /* get the bit value */
+  tbit = (uint8_t)((data>>bit)&1);
+
+  if( (tbit == 1) && (febit == 0) ){
+    /* clear the bit */
+    data &= ~(1<<bit);
+  }else if( (tbit == 0) && (febit == 1) ){
+    data |= (1<<bit);
+  }/* else, bit matches, do nothing */
+
+  /* write the memory back */
+  (*writemem)(l_hmc, addr, &data, 1);
+}
+
+
+
+
 /* ----------------------------------------------------- HMCSIM_EXECUTE_CMC */
 /*
  * Performs the actual CMC operation.  All your custom logic belongs in this
@@ -107,6 +323,9 @@ extern int hmcsim_execute_cmc(  void *hmc,
   /* data for the operation */
   uint64_t data[2]  = {0x00ull,0x00ull};
 
+  /* bit address */
+  uint8_t bit = 0x00;
+
   /* function pointer */
   int (*readmem)(struct hmcsim_t *,
                  uint64_t,
@@ -121,25 +340,23 @@ extern int hmcsim_execute_cmc(  void *hmc,
   readmem   = l_hmc->readmem;
   writemem  = l_hmc->writemem;
 
-  /* read the memory */
-  if( (*readmem)(l_hmc, addr, &(data[0]), 2 ) != 0 ){
-    return -1;
-  }
+  /* get the bit value */
+  bit = fe_get_bit( hmc, addr );
 
-  if( data[0] == 0 ){
-    /* grab the lock */
-    data[0] = 0x01ull;
-    data[1] = rqst_payload[1];
-    if( (*writemem)(l_hmc, addr, &(data[0]), 2) != 0 ){
+  if( bit == 1 ){
+    /* set the bit */
+    fe_set_bit( hmc, addr, 1 );
+
+    if( (*readmem)(l_hmc, addr, &(data[0]), 1 ) != 0 ){
       return -1;
     }
 
-    /* write the response block */
-    rsp_payload[1] = data[0];
+    rsp_payload[0] = data[0];
+    rsp_payload[1] = 0x01ull;
+
   }else{
-    /* lock already taken */
-    /* write the response block */
-    rsp_payload[1] = data[0];
+    rsp_payload[0] = 0x00ull;
+    rsp_payload[1] = 0x01ull;
   }
 
   return 0;
