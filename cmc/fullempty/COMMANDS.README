@@ -7,10 +7,10 @@ ReadEF        CMC71     1         2       RD_RS
 ReadFE        CMC72     1         2       RD_RS
 ReadFF        CMC73     1         2       RD_RS
 ReadXX        CMC74     1         2       RD_RS
-WriteEF       CMC75     2         1       WR_RS
-WriteFF       CMC76     2         1       WR_RS
-WriteXE       CMC77     2         1       WR_RS
-WriteXF       CMC78     2         1       WR_RS
+WriteEF       CMC75     2         2       WR_RS
+WriteFF       CMC76     2         2       WR_RS
+WriteXE       CMC77     2         2       WR_RS
+WriteXF       CMC78     2         2       WR_RS
 ClrXX         CMC85     1         0       NONE
 --------------------------------------------------------------------
 EOF
