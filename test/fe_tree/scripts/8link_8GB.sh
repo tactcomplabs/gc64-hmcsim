@@ -2,7 +2,7 @@
 
 ulimit -s unlimited
 
-MUTEX=../mutex
+MUTEX=../fe_tree
 RUNDIR=`pwd`
 
 BANKS=16
@@ -16,7 +16,7 @@ DRAMS=20
 #THREADS=16
 #THREADS=32
 THREADS=2
-LIBSRC=../../../cmc/mutex/
+LIBSRC=../../../cmc/fullempty/
 
 
 while [ $THREADS -lt 101 ]
