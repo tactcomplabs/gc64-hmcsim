@@ -278,7 +278,11 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
 
   /* done loading functions */
 
-  idx = hmcsim_cmc_cmdtoidx( cmd );
+  idx = hmcsim_cmc_rawtoidx( cmd );
+#ifdef HMC_DEBUG
+  printf( "HMCSIM_REGISTER_FUNCTIONS: Setting CMC command at IDX=%d to ACTIVE\n",
+          idx );
+#endif
 
   if( hmc->cmcs[idx].active == 1 ){
     /* previously activated, this is an error */
@@ -313,9 +317,18 @@ extern int  hmcsim_query_cmc( struct hmcsim_t *hmc,
 
   idx = hmcsim_cmc_cmdtoidx( type );
 
+#ifdef HMC_DEBUG
+  printf( "HMCSIM_QUERY_CMC: RQST_TYPE = %d; IDX = %d\n",
+       type, idx );
+#endif
+
   if( idx == HMC_MAX_CMC ){
     return -1;
   }else if( hmc->cmcs[idx].active == 0 ){
+#ifdef HMC_DEBUG
+    printf( "ERROR : HMCSIM_QUERY_CMC: CMC OP AT IDX=%d IS INACTIVE\n",
+            idx );
+#endif
     return -1;
   }
 

@@ -342,7 +342,7 @@ extern int hmcsim_execute_cmc(  void *hmc,
   }
 
   rsp_payload[0] = 0x01ull;
-  rsp_payload[1] = 0x00ull;
+  rsp_payload[1] = 0x01ull;
 
   return 0;
 }

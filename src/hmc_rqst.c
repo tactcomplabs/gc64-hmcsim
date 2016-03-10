@@ -435,6 +435,9 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
                 case CMC126:
                 case CMC127:
 
+#ifdef HMC_DEBUG
+                        printf( "HMCSIM_BUILD_MEMREQUEST : CMC PACKET TYPE = %d\n", type );
+#endif
                         /* check for an active cmc op */
                         if( hmcsim_query_cmc( hmc,
                                               type,
