@@ -16,6 +16,15 @@
 
 
 /* ------------------------------------------------- DATATYPES */
+struct node{
+  int root;     /* -- is this a root node? */
+  int parent;   /* -- is this a parent node? */
+  int pnode;    /* -- who is my parent node? */
+  int lnode;    /* -- ptr to left node */
+  int rnode;    /* -- ptr to right node */
+  int lock;     /* -- the lock for the node */
+};
+
 struct mylock{
   int64_t tid;
   uint64_t mlock;
@@ -31,6 +40,39 @@ struct mylock{
 #define TAG_ULOCK_RECV  0x0006  /* -- waiting on an unlock message */
 #define TAG_DONE        0xF000  /* -- thread is done */
 
+
+/* ------------------------------------------------- INIT_TREE */
+void init_tree( struct node *tnodes, int num_threads ){
+
+  int root = 0;
+  int i   = 0;
+
+  /* init everything */
+  for( i=0; i<num_threads; i++ ){
+    tnodes[i].root    = -1;
+    tnodes[i].parent  = -1;
+    tnodes[i].pnode   = -1;
+    tnodes[i].lnode   = -1;
+    tnodes[i].rnode   = -1;
+    tnodes[i].lock    = 0;
+  }
+
+  /* if the node count is small, do it manually */
+  if( num_threads < 3 ){
+   tnodes[0].pnode  = 1;
+   tnodes[2].pnode  = 1;
+   tnodes[1].root   = 1;
+   tnodes[1].parent = 1;
+   tnodes[1].lnode  = 0;
+   tnodes[1].rnode  = 2;
+   return ;
+  }
+
+  /* set the root */
+  root = num_threads/2;
+  tnodes[root].root = 1;
+
+}
 
 /* ------------------------------------------------- FIND_MIN_CYCLE */
 static uint64_t find_min_cycle( uint64_t *cycles, uint32_t num_threads ){
@@ -221,6 +263,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
   uint8_t d_rtc;
   uint32_t d_crc;
 
+  struct node *tnodes   = NULL;         /* tree nodes */
   struct mylock *wlocks = NULL;         /* current thread lock copy */
   uint64_t *status      = NULL;         /* current thread status */
   uint64_t *cycles      = NULL;         /* thread local cycle count */
@@ -235,6 +278,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
   wstatus = malloc( sizeof( int ) * num_threads );
   wtags   = malloc( sizeof( uint16_t ) * num_threads );
   wlocks  = malloc( sizeof( struct mylock ) * num_threads );
+  tnodes  = malloc( sizeof( struct node ) * num_threads );
   for( i=0; i<num_threads; i++ ){
     status[i]   = TAG_START;
     cycles[i]   = 0x00ll;
@@ -243,6 +287,9 @@ extern int execute_test(        struct hmcsim_t *hmc,
     wlocks[i].tid = (int64_t)(-1);
     wlocks[i].mlock= (uint64_t)(0);
   }
+
+  /* init the tree */
+  init_tree( tnodes, num_threads );
 
   /* init the lock */
   lock.tid  = (int64_t)(-1);
@@ -569,6 +616,7 @@ complete_failure:
   free( wstatus);
   free( wtags);
   free( wlocks);
+  free( tnodes );
 
   return 0;
 }
