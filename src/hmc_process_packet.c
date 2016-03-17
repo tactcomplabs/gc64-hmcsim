@@ -41,16 +41,16 @@ extern int	hmcsim_util_decode_bank( struct hmcsim_t *hmc,
 extern int	hmcsim_decode_rsp_cmd( 	hmc_response_t rsp_cmd,
 					uint8_t *cmd );
 extern uint32_t hmcsim_cmc_cmdtoidx( hmc_rqst_t rqst );
-extern int hmcsim_process_cmc(  struct hmcsim_t *hmc,
+extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                                 uint32_t rawcmd,
                                 uint32_t dev,
                                 uint32_t quad,
                                 uint32_t vault,
                                 uint32_t bank,
-                                uint32_t addr,
+                                uint64_t addr,
                                 uint32_t length,
-                                uint32_t head,
-                                uint32_t tail,
+                                uint64_t head,
+                                uint64_t tail,
                                 uint64_t *rqst_payload,
                                 uint64_t *rsp_payload,
                                 uint32_t *rsp_len,
@@ -101,7 +101,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	uint32_t tag			= 0x00;
 	uint32_t bsize			= 0x00;
 	uint32_t bank			= 0x00;
-	uint64_t addr			= 0x00ll;
+	uint64_t addr			= 0x00ull;
 	int no_response			= 0x00;
         int use_cmc                     = 0x00;
 	hmc_response_t rsp_cmd		= RSP_ERROR;
