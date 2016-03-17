@@ -195,7 +195,7 @@ uint64_t fe_get_addr( uint64_t addr, uint8_t *bit ){
 
 #endif
 
-  return tmp;
+  return new;
 }
 
 /* ----------------------------------------------------- FE_GET_BIT */
@@ -209,6 +209,9 @@ uint8_t fe_get_bit( void *hmc,
   uint8_t tbit  = 0x00;
   uint64_t tmp  = fe_get_addr( addr, &bit );
   struct hmcsim_t *l_hmc  = (struct hmcsim_t *)(hmc);
+
+  printf( "SRC_ADDR = 0x%016llx\n", addr );
+  printf( "TAG_ADDR = 0x%016llx\n", tmp );
 
   /* data for the operation */
   uint64_t data = 0x00ll;

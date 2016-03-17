@@ -195,7 +195,7 @@ uint64_t fe_get_addr( uint64_t addr, uint8_t *bit ){
 
 #endif
 
-  return tmp;
+  return new;
 }
 
 /* ----------------------------------------------------- FE_GET_BIT */
