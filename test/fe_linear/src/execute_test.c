@@ -200,8 +200,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
   uint32_t i		= 0;
   uint64_t packet[HMC_MAX_UQ_PACKET];
 
-  //uint64_t addr         = 0x000000000012e4600;
-  uint64_t addr         = 0x3B5A0ull;
+  uint64_t addr         = 0x5B5B0ull;
 
   FILE *ofile		= NULL;
 
