@@ -65,6 +65,21 @@ static hmc_response_t __rsp_cmd = RD_RS;
 static uint8_t __rsp_cmd_code = 0x00;
 
 
+/* ----------------------------------------------------- SELECT_ODD_BITS */
+uint8_t select_odd_bits( uint16_t dram ){
+  uint8_t s7  = 0x00;
+
+  s7 |= ((dram&0x2)>>1);      /* 1  */
+  s7 |= ((dram&0x8)>>2);      /* 3  */
+  s7 |= ((dram&0x20)>>3);     /* 5  */
+  s7 |= ((dram&0x80)>>4);     /* 7  */
+  s7 |= ((dram&0x200)>>5);    /* 9  */
+  s7 |= ((dram&0x800)>>6);    /* 11 */
+  s7 |= ((dram&0x2000)>>7);   /* 13 */
+  s7 |= ((dram&0x8000)>>8);   /* 15 */
+  return s7;
+}
+
 /* ----------------------------------------------------- FE_GET_ADDR */
 /*
  * get the value of the FE bit for the corresponding addr
@@ -102,7 +117,8 @@ uint64_t fe_get_addr( uint64_t addr, uint8_t *bit ){
   dram  = (uint16_t)((tmp>>16)&0xFFFF);
 
   /* -- grab the upper 6 bits of the dram address */
-  u7  = (uint8_t)((dram>>10)&0x3F);
+  //u7  = (uint8_t)((dram>>10)&0x3F);
+  u7  = select_odd_bits(dram);
   nvault = (u7&0x7);
   nbank  = ((u7>>3)&0x7);
   if( nvault < 2 ){
