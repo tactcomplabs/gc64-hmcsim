@@ -72,127 +72,14 @@ static uint8_t __rsp_cmd_code = 0x00;
 uint64_t fe_get_addr( uint64_t addr, uint8_t *bit ){
   uint64_t new  = 0x00ull;
   uint64_t tmp  = 0x00ull;
-  uint16_t dram = 0x0000;
-  uint8_t bank  = 0x00;
-  uint8_t vault = 0x00;
-  uint8_t byte  = 0x00;
-  uint8_t u7    = 0x00;
-  uint8_t nbank = 0x00;
-  uint8_t nvault= 0x00;
-  uint8_t quad  = 0x00;
-  uint8_t nbyte = 0x00;
-  uint8_t nbit  = 0x00;
+
+  tmp   = (addr>>4);
 #ifdef _4GB_
-  /* 4GB:256byte device config */
-
-  /* grab the lower 32 bits */
-  tmp   = (addr&0x1FFFFFFFF);
-
-  /* -- byte address : [7:4] */
-  byte  = (uint8_t)((tmp>>4)&0xF);
-
-  /* -- vault address : [10:8] */
-  vault = (uint8_t)((tmp>>8)&0x7);
-
-  /* -- bank address : [15:13] */
-  bank  = (uint8_t)((tmp>>13)&0x7);
-
-  /*-- dram address : [31:16] */
-  dram  = (uint16_t)((tmp>>16)&0xFFFF);
-
-  /* -- grab the upper 6 bits of the dram address */
-  u7  = (uint8_t)((dram>>10)&0x3F);
-  nvault = (u7&0x7);
-  nbank  = ((u7>>3)&0x7);
-  if( nvault < 2 ){
-    quad = 0x00;
-  }else if( nvault < 4 ){
-    quad = 0x01;
-  }else if( nvault < 6 ){
-    quad = 0x02;
-  }else{
-    quad = 0x03;
-  }
-
-  /* -- get the byte address */
-  nbyte = u7/8;
-
-  /* -- get the bit address */
-  nbit = u7-(nbyte*8);
-  *bit = nbit;
-
-  /* -- shift in the DRAM addr */
-  new = 0xFFFF;
-  new = (new<<16);
-
-  /* -- insert new vault address */
-  new |= ((uint64_t)(nvault)<<8);
-
-  /* -- insert quad */
-  new |= ((uint64_t)(quad)<<11);
-
-  /* -- insert bank address */
-  new |= ((uint64_t)(nbank)<<13);
-
-  /* -- insert the byte address */
-  new |= ((uint64_t)(nbyte)<<4);
-
+  new   = ((0xFFFFFFFF-(tmp/8))<<4);
 #else
-  /* 8GB:256byte device config */
-
-  /* grab the lower 32 bits */
-  tmp   = (addr&0x1FFFFFFFF);
-
-  /* -- byte address : [7:4] */
-  byte  = (uint8_t)((tmp>>4)&0xF);
-
-  /* -- vault address : [10:8] */
-  vault = (uint8_t)((tmp>>8)&0x7);
-
-  /* -- bank address : [15:13] */
-  bank  = (uint8_t)((tmp>>13)&0xF);
-
-  /*-- dram address : [31:16] */
-  dram  = (uint16_t)((tmp>>17)&0xFFFF);
-
-  /* -- grab the upper 6 bits of the dram address */
-  u7  = (uint8_t)((dram>>10)&0x3F);
-  nvault = (u7&0x7);
-  nbank  = ((u7>>3)&0x7);
-  if( nvault < 2 ){
-    quad = 0x00;
-  }else if( nvault < 4 ){
-    quad = 0x01;
-  }else if( nvault < 6 ){
-    quad = 0x02;
-  }else{
-    quad = 0x03;
-  }
-
-  /* -- get the byte address */
-  nbyte = u7/8;
-
-  /* -- get the bit address */
-  nbit = u7-(nbyte*8);
-  *bit = nbit;
-
-  /* -- shift in the DRAM addr */
-  new = 0xFFFF;
-  new = (new<<17);
-
-  /* -- insert new vault address */
-  new |= ((uint64_t)(nvault)<<8);
-
-  /* -- insert quad */
-  new |= ((uint64_t)(quad)<<11);
-
-  /* -- insert bank address */
-  new |= ((uint64_t)(nbank)<<13);
-
-  /* -- insert the byte address */
-  new |= ((uint64_t)(nbyte)<<4);
-
+  new   = ((0x1FFFFFFFF-(tmp/8))<<4);
 #endif
+  *bit  = (tmp%8);
 
   return new;
 }

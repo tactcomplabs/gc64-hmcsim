@@ -72,23 +72,13 @@ static uint8_t __rsp_cmd_code = 0x00;
 uint64_t fe_get_addr( uint64_t addr, uint8_t *bit ){
   uint64_t new  = 0x00ull;
   uint64_t tmp  = 0x00ull;
-  uint16_t dram = 0x0000;
-  uint8_t bank  = 0x00;
-  uint8_t vault = 0x00;
-  uint8_t byte  = 0x00;
-  uint8_t u7    = 0x00;
-  uint8_t nbank = 0x00;
-  uint8_t nvault= 0x00;
-  uint8_t quad  = 0x00;
-  uint8_t nbyte = 0x00;
-  uint8_t nbit  = 0x00;
 
   /* grab the address */
   tmp   = (addr>>4);
 #ifdef _4GB_
-  new   = (0xFFFFFFFF-(tmp/8)<<4);
+  new   = ((0xFFFFFFFF-(tmp/8))<<4);
 #else
-  new   = (0x1FFFFFFFF-(tmp/8)<<4);
+  new   = ((0x1FFFFFFFF-(tmp/8))<<4);
 #endif
   *bit  = (tmp%8);
 
