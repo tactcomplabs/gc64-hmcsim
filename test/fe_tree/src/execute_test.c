@@ -17,12 +17,13 @@
 
 /* ------------------------------------------------- DATATYPES */
 struct node{
-  int root;     /* -- is this a root node? */
-  int parent;   /* -- is this a parent node? */
-  int pnode;    /* -- who is my parent node? */
-  int lnode;    /* -- ptr to left node */
-  int rnode;    /* -- ptr to right node */
-  int lock;     /* -- the lock for the node */
+  int root;           /* -- is this a root node? */
+  int parent;         /* -- is this a parent node? */
+  int pnode;          /* -- who is my parent node? */
+  int lnode;          /* -- ptr to left node */
+  int rnode;          /* -- ptr to right node */
+  int nchild;         /* -- number of children */
+  uint64_t lock;      /* -- the lock for the node */
 };
 
 struct mylock{
@@ -54,17 +55,29 @@ void init_tree( struct node *tnodes, int num_threads ){
     tnodes[i].pnode   = -1;
     tnodes[i].lnode   = -1;
     tnodes[i].rnode   = -1;
-    tnodes[i].lock    = 0;
+    tnodes[i].nchild  = -1;
+    tnodes[i].lock    = 0x5B5B0ull+(8*i);
   }
 
   /* if the node count is small, do it manually */
-  if( num_threads < 3 ){
+  if( num_threads == 2 ){
+   tnodes[0].pnode  = 1;
+   tnodes[1].root   = 1;
+   tnodes[1].parent = 1;
+   tnodes[1].lnode  = 0;
+   tnodes[1].rnode  = -1;
+   tnodes[1].nchild = 1;
+   return ;
+  }
+
+  if( num_threads == 3 ){
    tnodes[0].pnode  = 1;
    tnodes[2].pnode  = 1;
    tnodes[1].root   = 1;
    tnodes[1].parent = 1;
    tnodes[1].lnode  = 0;
    tnodes[1].rnode  = 2;
+   tnodes[1].nchild = 2;
    return ;
   }
 
@@ -242,7 +255,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
   uint32_t i		= 0;
   uint64_t packet[HMC_MAX_UQ_PACKET];
 
-  uint64_t addr         = 0x00000001a45e4600;
+  uint64_t addr         = 0x5B5B0ull;
 
   FILE *ofile		= NULL;
 
