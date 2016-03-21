@@ -83,8 +83,16 @@ void init_tree( struct node *tnodes, int num_threads ){
 
   /* set the root */
   root = num_threads/2;
+  tnodes[root].nchild = 2;
   tnodes[root].root = 1;
+  tnodes[root].lnode = root/2;
+  tnodes[root].rnode = ((num_threads-root)/2) + root;
 
+  /* setup the lhs and rhs parents */
+  tnodes[tnodes[root].lnode].pnode  = root;
+  tnodes[tnodes[root].lnode].pnode  = root;
+
+  /* initiate rhs and lhs */
 }
 
 /* ------------------------------------------------- FIND_MIN_CYCLE */
