@@ -23,6 +23,8 @@ struct node{
   int lnode;          /* -- ptr to left node */
   int rnode;          /* -- ptr to right node */
   int nchild;         /* -- number of children */
+  int arrived;        /* -- has the parent arrived */
+  int mlock;          /* -- the lock bits */
   uint64_t lock;      /* -- the lock for the node */
 };
 
@@ -50,18 +52,9 @@ void recur( struct node *tnodes,
 #define TAG_INC_R       0x0008  /* -- IncFF(ParentLock) recv */
 #define TAG_RXX_S       0x0009  /* -- ReadXX(Sense) send */
 #define TAG_RXX_R       0x000A  /* -- ReadXX(Sense) recv */
-
-
-#define TAG_START       0x0000  /* -- start state */
-#define TAG_LOCK_SEND   0x0001  /* -- sent a lock message */
-#define TAG_LOCK_RECV   0x0002  /* -- waiting on lock receipt */
-#define TAG_TLOCK_SEND  0x0003  /* -- sent a trylock message */
-#define TAG_TLOCK_RECV  0x0004  /* -- waiting on a tlock receipt */
-#define TAG_ULOCK_SEND  0x0005  /* -- sent an unlock message */
-#define TAG_ULOCK_RECV  0x0006  /* -- waiting on an unlock message */
-#define TAG_DONE        0xF000  /* -- thread is done */
-
-
+#define TAG_RF_LOCAL_S  0x000B  /* -- ReadFF(LocalLock) send */
+#define TAG_RF_LOCAL_R  0x000C  /* -- ReadFF(LocalLock) recv */
+#define TAG_DONE        0x000F  /* -- DONE! */
 
 /* ------------------------------------------------- PRINT_TREE */
 void print_tree( struct node *tnodes,
@@ -153,6 +146,8 @@ void init_tree( struct node *tnodes, int num_threads ){
     tnodes[i].lnode   = -1;
     tnodes[i].rnode   = -1;
     tnodes[i].nchild  = -1;
+    tnodes[i].arrived = 0;
+    tnodes[i].mlock   = 0;
     tnodes[i].lock    = 0x5B5B0ull+(8*i);
   }
 
@@ -182,6 +177,7 @@ void init_tree( struct node *tnodes, int num_threads ){
   root = num_threads/2;
   tnodes[root].nchild = 2;
   tnodes[root].root = 1;
+  tnodes[root].parent = 1;
   tnodes[root].pnode = -1;
   tnodes[root].lnode = root/2;
   tnodes[root].rnode = ((num_threads-1-root)/2) + root + 1;
@@ -302,6 +298,8 @@ static void trigger_mutex_response( hmc_response_t type,
   int found     = -1;
   /* ---- */
 
+  /* FIXME */
+
   for( i=0; i<num_threads; i++ ){
     if( wstatus[i] != HMC_STALL ){
       /* -- thread is not stalled, it is waiting on response */
@@ -374,6 +372,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
   uint64_t packet[HMC_MAX_UQ_PACKET];
 
   uint64_t addr         = 0x3B5B0ull; /* SENSE */
+  uint64_t sense        = 0;
 
   FILE *ofile		= NULL;
 
@@ -467,17 +466,27 @@ extern int execute_test(        struct hmcsim_t *hmc,
       /* -- if the thread is not done, try to perform an op */
       switch( status[i] ){
 
-      /* -- TAG_START */
       case TAG_START:
+        cycles[i]++;
+        if( tnodes[i].parent == 1 ){
+          /* parent node */
+          status[i] = TAG_RD_LOCAL_S;
+        }else{
+          /* leaf node */
+          status[i] = TAG_INC_S;
+        }
+        break;
+
+      case TAG_RD_LOCAL_S:
         /* -- Build a ReadEF */
         cycles[i]++;
         ret = hmcsim_build_memrequest( hmc,
                                        0,
-                                       addr,
+                                       tnodes[i].lock,
                                        tag,
-                                       CMC71,    /* READFE */
+                                       CMC71,    /* READEF */
                                        link,
-                                       &(packet[0]),
+                                       &(payload[0]),
                                        &head,
                                        &tail);
         if( ret == 0 ){
@@ -487,30 +496,23 @@ extern int execute_test(        struct hmcsim_t *hmc,
         }else{
           printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
         }
-
         switch( ret ){
         case 0:
           /* success */
-          status[i]       = TAG_LOCK_RECV;
-          wlocks[i].mlock  = 0;
-          wstatus[i]      = 0;
-          wtags[i]        = tag;
+          status[i]         = TAG_RD_LOCAL_R;
+          tnodes[i].arrived = 1;  /* signal arrival */
+          wtags[i]          = tag;
+          wlocks[i].mlock   = 0;  /* old */
+          wstatus[i]        = 0;  /* old */
           inc_tag( &tag );
           inc_link(hmc, &link);
-          /* try to set the lock */
-          if( lock.mlock == 0 ){
-            //printf( "...thread %d acquired the lock\n", i );
-            lock.mlock = 1;
-            lock.tid  = i;
-          }
-          //printf( "THREAD %d SENT HMC_LOCK PACKET; TAG=%d\n", i, wtags[i] );
           break;
         case HMC_STALL:
           /* stalled */
           wstatus[i]  = HMC_STALL;
           wtags[i]    = 0;
           /* drop to lock */
-          status[i]   = TAG_LOCK_SEND;
+          status[i]   = TAG_RD_LOCAL_S;
           break;
         case -1:
         default:
@@ -521,45 +523,52 @@ extern int execute_test(        struct hmcsim_t *hmc,
 
         break;
 
-      /* -- TAG_LOCK_RECV */
-      case TAG_LOCK_RECV:
+      case TAG_RD_LOCAL_R:
+        /* -- READEF Recv */
         cycles[i]++;
 
-        switch( wlocks[i].mlock ){
-        case 0:
-          /* still waiting */
-          break;
-        case 1:
-          /* i have the lock */
-          status[i]       = TAG_ULOCK_SEND;
-          wlocks[i].mlock = 0;
-          wtags[i]        = 0;
-          //printf( "THREAD %d RECEIVED A RESPONSE: I HAVE THE LOCK\n", i );
-          break;
-        case 2:
-          /* the lock is set, but it is not me */
-          status[i]       = TAG_LOCK_SEND;
-          wlocks[i].mlock = 0;
-          wtags[i]        = 0;
-          //printf( "THREAD %d RECEIVED A RESPONSE: I DO NOT HAVE THE LOCK\n", i );
-          break;
-        default:
-          printf( "FAILED : LOCK PACKET RECV FAILURE\n" );
-          goto complete_failure;
-          break;
+        if( wstatus[i] == 1 ){
+          if( tnodes[i].mlock == tnodes[i].nchild ){
+            /* end while loop */
+            if( tnodes[i].root == 1 ){
+              /* i am a root node */
+              if( sense == 1 ){
+                status[i]       = TAG_WR_SENSE0_S;
+                wlocks[i].mlock = 0;
+                wtags[i]        = 0;
+              }else{
+                status[i]       = TAG_WR_SENSE1_S;
+                wlocks[i].mlock = 0;
+                wtags[i]        = 0;
+              }
+            }else{
+              /* i am a parent, but not a root */
+              status[i] = TAG_INC_S;
+              wlocks[i].mlock = 0;
+              wtags[i]        = 0;
+            }
+          }else{
+            /* still waiting; goto ReadFF */
+            status[i]       = TAG_RF_LOCAL_S;
+            wlocks[i].mlock = 0;
+            wtags[i]        = 0;
+          }
+        }else{
+          /* recv not arrived */
+          status[i] = TAG_RD_LOCAL_R;
         }
 
         break;
 
-      /* -- TAG_LOCK_SEND */
-      case TAG_LOCK_SEND:
+      case TAG_RF_LOCAL_S:
+        /* -- ReadFF Send */
         /* -- Build a ReadEF */
         cycles[i]++;
         ret = hmcsim_build_memrequest( hmc,
                                        0,
-                                       addr,
+                                       tnodes[i].lock,
                                        tag,
-                                       CMC71,    /* READFE */
+                                       CMC73,    /* READFF */
                                        link,
                                        &(payload[0]),
                                        &head,
@@ -574,52 +583,88 @@ extern int execute_test(        struct hmcsim_t *hmc,
         switch( ret ){
         case 0:
           /* success */
-          status[i]       = TAG_LOCK_RECV;
-          wlocks[i].mlock = 0;
-          wstatus[i]      = 0;
-          wtags[i]        = tag;
+          status[i]         = TAG_RD_LOCAL_R;
+          tnodes[i].arrived = 1;  /* signal arrival */
+          wtags[i]          = tag;
+          wlocks[i].mlock   = 0;  /* old */
+          wstatus[i]        = 0;  /* old */
           inc_tag( &tag );
           inc_link(hmc, &link);
-          /* try to set the lock */
-          if( lock.mlock == 0 ){
-            lock.mlock = 1;
-            lock.tid  = i;
-          }
-          //printf( "THREAD %d SENT HMC_TRYLOCK PACKET; TAG=%d\n", i, wtags[i] );
           break;
         case HMC_STALL:
           /* stalled */
           wstatus[i]  = HMC_STALL;
           wtags[i]    = 0;
+          /* drop to lock */
+          status[i]   = TAG_RD_LOCAL_S;
           break;
         case -1:
         default:
-          printf( "FAILED : READFE LOCK PACKET SEND FAILURE\n" );
+          printf( "FAILED : INITIAL READEF PACKET SEND FAILURE\n" );
           goto complete_failure;
           break;
         }
 
         break;
-
-      /* -- TAG_ULOCK_SEND */
-      case TAG_ULOCK_SEND:
-        /* -- Send WriteXE */
+      case TAG_RF_LOCAL_R:
+        /* -- ReadFF Recv */
         cycles[i]++;
 
-        payload[0] = (uint64_t)(i);
+        if( wstatus[i] == 1 ){
+          if( tnodes[i].mlock == tnodes[i].nchild ){
+            /* end while loop */
+            if( tnodes[i].root == 1 ){
+              /* i am a root node */
+              if( sense == 1 ){
+                status[i]       = TAG_WR_SENSE0_S;
+                wlocks[i].mlock = 0;
+                wtags[i]        = 0;
+              }else{
+                status[i]       = TAG_WR_SENSE1_S;
+                wlocks[i].mlock = 0;
+                wtags[i]        = 0;
+              }
+            }else{
+              /* i am a parent, but not a root */
+              status[i] = TAG_INC_S;
+              wlocks[i].mlock = 0;
+              wtags[i]        = 0;
+            }
+          }else{
+            /* still waiting; goto ReadFF */
+            status[i]       = TAG_RF_LOCAL_S;
+            wlocks[i].mlock = 0;
+            wtags[i]        = 0;
+          }
+        }else{
+          /* recv not arrived */
+          status[i] = TAG_RD_LOCAL_R;
+        }
+
+        break;
+      case TAG_WR_SENSE0_S:
+        /* unused */
+        break;
+      case TAG_WR_SENSE0_R:
+        /* unused */
+        break;
+      case TAG_WR_SENSE1_S:
+        /* -- WriteXF(Sense,1) send */
+        cycles[i]++;
+        payload[0] = (uint64_t)(0x01);
         ret = hmcsim_build_memrequest( hmc,
                                        0,
                                        addr,
                                        tag,
-                                       CMC77,    /* WriteXE */
+                                       CMC78,    /* WriteXF */
                                        link,
                                        &(payload[0]),
                                        &head,
                                        &tail);
         if( ret == 0 ){
           packet[0] = head;
-          packet[1] = (uint64_t)(i);  /* TODO, make this th++ */
-          packet[2] = 0x00ll;
+          packet[1] = 0x01ull;
+          packet[2] = 0x00ull;
           packet[3] = tail;
           ret = hmcsim_send( hmc, &(packet[0]) );
         }else{
@@ -628,52 +673,164 @@ extern int execute_test(        struct hmcsim_t *hmc,
         switch( ret ){
         case 0:
           /* success */
-          status[i]       = TAG_ULOCK_RECV;
-          wlocks[i].mlock = 0;
-          wstatus[i]      = 0;
-          wtags[i]        = tag;
+          status[i]         = TAG_WR_SENSE1_R;
+          wtags[i]          = tag;
+          wlocks[i].mlock   = 0;  /* old */
+          wstatus[i]        = 0;  /* old */
+          sense             = 1;
           inc_tag( &tag );
           inc_link(hmc, &link);
-          /* try to set the lock */
-          if( (lock.mlock == 1) /*&& (lock.tid == i)*/ ){
-            lock.mlock = 0;
-            lock.tid  = i;
-            //printf( "THREAD %d SENT HMC_ULOCK PACKET; TAG=%d\n", i, wtags[i] );
-          }
           break;
         case HMC_STALL:
           /* stalled */
           wstatus[i]  = HMC_STALL;
           wtags[i]    = 0;
+          /* drop to lock */
+          status[i]   = TAG_WR_SENSE1_S;
           break;
         case -1:
         default:
-          printf( "FAILED : WRITEXE PACKET SEND FAILURE\n" );
+          printf( "FAILED : INITIAL READEF PACKET SEND FAILURE\n" );
           goto complete_failure;
           break;
         }
+
         break;
-
-
-      /* -- TAG_ULOCK_RECV */
-      case TAG_ULOCK_RECV:
+      case TAG_WR_SENSE1_R:
+        /* -- WriteXE(Sense,0) recv */
+        /* ignore me... */
         cycles[i]++;
-
-        switch( wlocks[i].mlock ){
+        status[i] = TAG_DONE;
+        break;
+      case TAG_INC_S:
+        cycles[i]++;
+        payload[0] = (uint64_t)(0x01);
+        ret = hmcsim_build_memrequest( hmc,
+                                       0,
+                                       addr,
+                                       tag,
+                                       CMC70,    /* IncFF */
+                                       link,
+                                       &(payload[0]),
+                                       &head,
+                                       &tail);
+        if( ret == 0 ){
+          packet[0] = head;
+          packet[1] = 0x01ull;
+          packet[2] = 0x00ull;
+          packet[3] = tail;
+          ret = hmcsim_send( hmc, &(packet[0]) );
+        }else{
+          printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
+        }
+        switch( ret ){
         case 0:
-          /* still waiting */
+          /* success */
+          if( tnodes[tnodes[i].pnode].arrived == 1 ){
+            /* parent has arrived; inc the lock */
+            tnodes[tnodes[i].pnode].mlock++;
+            status[i]         = TAG_INC_R;
+            wtags[i]          = tag;
+            wlocks[i].mlock   = 0;  /* old */
+            wstatus[i]        = 0;  /* old */
+          }else{
+            /* parent has not arrived, cycle */
+            status[i]         = TAG_INC_R;
+            wtags[i]          = tag;
+            wlocks[i].mlock   = 0;  /* old */
+            wstatus[i]        = -1;  /* old */
+          }
+          inc_tag( &tag );
+          inc_link(hmc, &link);
           break;
-        case 1:
-        case 2:
+        case HMC_STALL:
+          /* stalled */
+          wstatus[i]  = HMC_STALL;
+          wtags[i]    = 0;
+          /* drop to lock */
+          status[i]   = TAG_INC_S;
+          break;
+        case -1:
         default:
-          /* i have the lock */
-          status[i]       = TAG_DONE;
-          done++;
-          //printf( "THREAD %d RECEIVED A RESPONSE: UNLOCK SUCCESS\n", i );
+          printf( "FAILED : INITIAL READEF PACKET SEND FAILURE\n" );
+          goto complete_failure;
           break;
         }
 
         break;
+      case TAG_INC_R:
+        /* -- IncFF Recv */
+        cycles[i]++;
+        if( wstatus[i] == 1 ){
+          status[i]         = TAG_RXX_S;
+          wlocks[i].mlock   = 0;  /* old */
+          wstatus[i]        = 0;  /* old */
+        }else if( wstatus[i] == 2){
+          status[i]         = TAG_INC_S;
+          wlocks[i].mlock   = 0;  /* old */
+          wstatus[i]        = 0;  /* old */
+        }
+        break;
+      case TAG_RXX_S:
+        /* -- ReadXX send */
+        cycles[i]++;
+        ret = hmcsim_build_memrequest( hmc,
+                                       0,
+                                       addr,
+                                       tag,
+                                       CMC74,    /* READXX */
+                                       link,
+                                       &(payload[0]),
+                                       &head,
+                                       &tail);
+        if( ret == 0 ){
+          packet[0] = head;
+          packet[1] = tail;
+          ret = hmcsim_send( hmc, &(packet[0]) );
+        }else{
+          printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
+        }
+        switch( ret ){
+        case 0:
+          /* success */
+          status[i]         = TAG_RXX_R;
+          wtags[i]          = tag;
+          wlocks[i].mlock   = 0;  /* old */
+          wstatus[i]        = 0;  /* old */
+          inc_tag( &tag );
+          inc_link(hmc, &link);
+          break;
+        case HMC_STALL:
+          /* stalled */
+          wstatus[i]  = HMC_STALL;
+          wtags[i]    = 0;
+          /* drop to lock */
+          status[i]   = TAG_RXX_S;
+          break;
+        case -1:
+        default:
+          printf( "FAILED : INITIAL READEF PACKET SEND FAILURE\n" );
+          goto complete_failure;
+          break;
+        }
+
+        break;
+      case TAG_RXX_R:
+        cycles[i]++;
+        if( wstatus[i] == 1 ){
+          /* recv processed */
+          if( sense == 1 ){
+            done++;
+            status[i] = TAG_DONE;
+          }else{
+            status[i] = TAG_RXX_S;
+            wstatus[i] = 0;
+          }
+        }else{
+          status[i] = TAG_RXX_R;
+        }
+        break;
+
       case TAG_DONE:
         /* thread is done, do nothing */
         break;
