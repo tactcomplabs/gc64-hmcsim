@@ -40,6 +40,19 @@ void recur( struct node *tnodes,
 
 /* ------------------------------------------------- TAG MACROS */
 #define TAG_START       0x0000  /* -- start state */
+#define TAG_RD_LOCAL_S  0x0001  /* -- ReadEF(LocalLock) send */
+#define TAG_RD_LOCAL_R  0x0002  /* -- ReadEF(LocalLock) recv */
+#define TAG_WR_SENSE0_S 0x0003  /* -- WriteXE(Sense) send */
+#define TAG_WR_SENSE0_R 0x0004  /* -- WriteXE(Sense) recv */
+#define TAG_WR_SENSE1_S 0x0005  /* -- WriteXF(Sense) send */
+#define TAG_WR_SENSE1_R 0x0006  /* -- WriteXF(Sense) recv */
+#define TAG_INC_S       0x0007  /* -- IncFF(ParentLock) send */
+#define TAG_INC_R       0x0008  /* -- IncFF(ParentLock) recv */
+#define TAG_RXX_S       0x0009  /* -- ReadXX(Sense) send */
+#define TAG_RXX_R       0x000A  /* -- ReadXX(Sense) recv */
+
+
+#define TAG_START       0x0000  /* -- start state */
 #define TAG_LOCK_SEND   0x0001  /* -- sent a lock message */
 #define TAG_LOCK_RECV   0x0002  /* -- waiting on lock receipt */
 #define TAG_TLOCK_SEND  0x0003  /* -- sent a trylock message */
