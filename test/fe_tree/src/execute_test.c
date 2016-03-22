@@ -291,45 +291,52 @@ static void trigger_mutex_response( hmc_response_t type,
                                     uint64_t *status,
                                     int *wstatus,
                                     struct mylock lock,
-                                    uint32_t num_threads ){
+                                    uint32_t num_threads,
+                                    struct node *tnodes ){
   /* vars */
   uint32_t i    = 0;
   uint32_t th   = 0;
   int found     = -1;
   /* ---- */
 
-  /* FIXME */
-
   for( i=0; i<num_threads; i++ ){
     if( wstatus[i] != HMC_STALL ){
-      /* -- thread is not stalled, it is waiting on response */
       if( wtags[i] == tag ){
-        if( (status[i] == TAG_LOCK_RECV) && (type == RD_RS) ){
+        if( (status[i] == TAG_RXX_R) ||
+            (status[i] == TAG_INC_R) ||
+            (status[i] == TAG_RF_LOCAL_R) ||
+            (status[i] == TAG_RD_LOCAL_R) ){
           th = i;
           found = 1;
-          //printf( "matched tag = thread; %d = %d\n", tag, th );
-          goto complete_trigger;
-        }else if( (status[i] == TAG_ULOCK_RECV) && (type == WR_RS) ){
-          th = i;
-          found = 1;
-          //printf( "matched tag = thread; %d = %d\n", tag, th );
           goto complete_trigger;
         }
-      } /* -- the tags match */
-    }/* -- end if */
+      }
+    }
   }
 
 complete_trigger:
   if( found == 1 ){
-    if( lock.tid == th ){
-      wlocks[th].mlock = 1;
-    }else{
-      wlocks[th].mlock = 2;
-    }
-  }else{
-    printf( "ERROR: FATAL : COULD TRIGGER EVENT ON TAG  = %d; ABORTING\n", tag );
-    abort();
-  }
+    switch( status[i] ){
+    case TAG_INC_R:
+      if( wstatus[th] == 0 ){
+        /* arrived */
+        wstatus[th] = 1;
+      }else{
+        /* cycle */
+        wstatus[th] = 3;
+      }
+      break;
+    case TAG_RXX_R:
+    case TAG_RF_LOCAL_R:
+    case TAG_RD_LOCAL_R:
+      wstatus[th] = 1;
+      break;
+    default:
+      printf( "ERROR: FATAL : COULD TRIGGER EVENT ON TAG  = %d; ABORTING\n", tag );
+      abort();
+      break;
+    }/* -- end switch */
+  }/* -- end if */
 }
 
 /* ------------------------------------------------- EXECUTE_TEST */
@@ -422,8 +429,8 @@ extern int execute_test(        struct hmcsim_t *hmc,
   init_tree( tnodes, num_threads );
 
   /* temporary */
-  print_tree(tnodes, num_threads );
-  goto complete_failure;
+  //print_tree(tnodes, num_threads );
+  //goto complete_failure;
 
   /* init the lock */
   lock.tid  = (int64_t)(-1);
@@ -433,7 +440,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
    * setup the tracing mechanisms
    *
    */
-  printf( "...INITIALIZING TRACE FILE\n" );
+  printf( "INITIALIZING TRACE FILE\n" );
   ofile = fopen( "fe_linear.out", "w" );
   if( ofile == NULL ){
     printf( "FAILED : COULD NOT OPEN OUPUT FILE mutex.out\n" );
@@ -467,6 +474,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
       switch( status[i] ){
 
       case TAG_START:
+        printf( "TAG_START: THREAD %d\n", i );
         cycles[i]++;
         if( tnodes[i].parent == 1 ){
           /* parent node */
@@ -479,6 +487,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
 
       case TAG_RD_LOCAL_S:
         /* -- Build a ReadEF */
+        printf( "TAG_RD_LOCAL_S: THREAD %d\n", i );
         cycles[i]++;
         ret = hmcsim_build_memrequest( hmc,
                                        0,
@@ -525,6 +534,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
 
       case TAG_RD_LOCAL_R:
         /* -- READEF Recv */
+        printf( "TAG_RD_LOCAL_S: THREAD %d\n", i );
         cycles[i]++;
 
         if( wstatus[i] == 1 ){
@@ -536,26 +546,31 @@ extern int execute_test(        struct hmcsim_t *hmc,
                 status[i]       = TAG_WR_SENSE0_S;
                 wlocks[i].mlock = 0;
                 wtags[i]        = 0;
+                wstatus[i]      = 0;
               }else{
                 status[i]       = TAG_WR_SENSE1_S;
                 wlocks[i].mlock = 0;
                 wtags[i]        = 0;
+                wstatus[i]      = 0;
               }
             }else{
               /* i am a parent, but not a root */
               status[i] = TAG_INC_S;
               wlocks[i].mlock = 0;
               wtags[i]        = 0;
+              wstatus[i]      = 0;
             }
           }else{
             /* still waiting; goto ReadFF */
             status[i]       = TAG_RF_LOCAL_S;
             wlocks[i].mlock = 0;
             wtags[i]        = 0;
+            wstatus[i]      = 0;
           }
         }else{
           /* recv not arrived */
           status[i] = TAG_RD_LOCAL_R;
+          wstatus[i]      = 0;
         }
 
         break;
@@ -583,7 +598,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
         switch( ret ){
         case 0:
           /* success */
-          status[i]         = TAG_RD_LOCAL_R;
+          status[i]         = TAG_RF_LOCAL_R;
           tnodes[i].arrived = 1;  /* signal arrival */
           wtags[i]          = tag;
           wlocks[i].mlock   = 0;  /* old */
@@ -596,7 +611,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
           wstatus[i]  = HMC_STALL;
           wtags[i]    = 0;
           /* drop to lock */
-          status[i]   = TAG_RD_LOCAL_S;
+          status[i]   = TAG_RF_LOCAL_S;
           break;
         case -1:
         default:
@@ -619,26 +634,31 @@ extern int execute_test(        struct hmcsim_t *hmc,
                 status[i]       = TAG_WR_SENSE0_S;
                 wlocks[i].mlock = 0;
                 wtags[i]        = 0;
+                wstatus[i]      = 0;
               }else{
                 status[i]       = TAG_WR_SENSE1_S;
                 wlocks[i].mlock = 0;
                 wtags[i]        = 0;
+                wstatus[i]      = 0;
               }
             }else{
               /* i am a parent, but not a root */
               status[i] = TAG_INC_S;
               wlocks[i].mlock = 0;
               wtags[i]        = 0;
+                wstatus[i]      = 0;
             }
           }else{
             /* still waiting; goto ReadFF */
             status[i]       = TAG_RF_LOCAL_S;
             wlocks[i].mlock = 0;
             wtags[i]        = 0;
+            wstatus[i]      = 0;
           }
         }else{
           /* recv not arrived */
           status[i] = TAG_RD_LOCAL_R;
+          wstatus[i]      = 0;
         }
 
         break;
@@ -703,6 +723,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
         status[i] = TAG_DONE;
         break;
       case TAG_INC_S:
+        printf( "TAG_INC_S: THREAD %d\n", i );
         cycles[i]++;
         payload[0] = (uint64_t)(0x01);
         ret = hmcsim_build_memrequest( hmc,
@@ -760,12 +781,13 @@ extern int execute_test(        struct hmcsim_t *hmc,
         break;
       case TAG_INC_R:
         /* -- IncFF Recv */
+        printf( "TAG_INC_R: THREAD %d\n", i );
         cycles[i]++;
         if( wstatus[i] == 1 ){
           status[i]         = TAG_RXX_S;
           wlocks[i].mlock   = 0;  /* old */
           wstatus[i]        = 0;  /* old */
-        }else if( wstatus[i] == 2){
+        }else if( wstatus[i] == 3 ){
           status[i]         = TAG_INC_S;
           wlocks[i].mlock   = 0;  /* old */
           wstatus[i]        = 0;  /* old */
@@ -875,7 +897,8 @@ extern int execute_test(        struct hmcsim_t *hmc,
                                   status,
                                   wstatus,
                                   lock,
-                                  num_threads );
+                                  num_threads,
+                                  tnodes );
 
         }/* -- good response */
       }/* -- get all the responses */
