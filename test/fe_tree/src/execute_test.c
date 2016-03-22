@@ -99,6 +99,7 @@ void recur( struct node *tnodes,
     /* > 1 lhs children */
     tnodes[parent].lnode  = start + ((parent-start)/2);
     tnodes[parent].nchild = 1;
+    tnodes[parent].parent = 1;
     tnodes[tnodes[parent].lnode].pnode  = parent;
     tnodes[tnodes[parent].lnode].parent = 1;
     recur(tnodes, num_threads,
@@ -124,6 +125,7 @@ void recur( struct node *tnodes,
     /* > 1 rhs children */
     tnodes[parent].rnode = ((end-parent)/2) + parent + 1;
     tnodes[parent].nchild = 2;
+    tnodes[parent].parent = 1;
     tnodes[tnodes[parent].rnode].pnode  = parent;
     tnodes[tnodes[parent].rnode].parent = 1;
     recur(tnodes, num_threads,
@@ -302,10 +304,10 @@ static void trigger_mutex_response( hmc_response_t type,
   for( i=0; i<num_threads; i++ ){
     if( wstatus[i] != HMC_STALL ){
       if( wtags[i] == tag ){
-        if( (status[i] == TAG_RXX_R) ||
-            (status[i] == TAG_INC_R) ||
-            (status[i] == TAG_RF_LOCAL_R) ||
-            (status[i] == TAG_RD_LOCAL_R) ){
+        if( ( (status[i] == TAG_RXX_R)      && (type == RD_RS) ) ||
+            ( (status[i] == TAG_INC_R)      && (type == WR_RS) ) ||
+            ( (status[i] == TAG_RF_LOCAL_R) && (type == RD_RS) ) ||
+            ( (status[i] == TAG_RD_LOCAL_R) && (type == RD_RS) )) {
           th = i;
           found = 1;
           goto complete_trigger;
@@ -474,7 +476,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
       switch( status[i] ){
 
       case TAG_START:
-        printf( "TAG_START: THREAD %d\n", i );
+        //printf( "TAG_START: THREAD %d\n", i );
         cycles[i]++;
         if( tnodes[i].parent == 1 ){
           /* parent node */
@@ -487,7 +489,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
 
       case TAG_RD_LOCAL_S:
         /* -- Build a ReadEF */
-        printf( "TAG_RD_LOCAL_S: THREAD %d\n", i );
+        //printf( "TAG_RD_LOCAL_S: THREAD %d\n", i );
         cycles[i]++;
         ret = hmcsim_build_memrequest( hmc,
                                        0,
@@ -534,7 +536,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
 
       case TAG_RD_LOCAL_R:
         /* -- READEF Recv */
-        printf( "TAG_RD_LOCAL_S: THREAD %d\n", i );
+        //printf( "TAG_RD_LOCAL_S: THREAD %d\n", i );
         cycles[i]++;
 
         if( wstatus[i] == 1 ){
@@ -555,6 +557,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
               }
             }else{
               /* i am a parent, but not a root */
+              //printf( "sending parent to INCFF : %d\n", i );
               status[i] = TAG_INC_S;
               wlocks[i].mlock = 0;
               wtags[i]        = 0;
@@ -562,6 +565,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
             }
           }else{
             /* still waiting; goto ReadFF */
+            //printf( "sending parent to READXX : %d\n", i );
             status[i]       = TAG_RF_LOCAL_S;
             wlocks[i].mlock = 0;
             wtags[i]        = 0;
@@ -643,10 +647,11 @@ extern int execute_test(        struct hmcsim_t *hmc,
               }
             }else{
               /* i am a parent, but not a root */
+              //printf( "sending parent to INCFF %d\n", i );
               status[i] = TAG_INC_S;
               wlocks[i].mlock = 0;
               wtags[i]        = 0;
-                wstatus[i]      = 0;
+              wstatus[i]      = 0;
             }
           }else{
             /* still waiting; goto ReadFF */
@@ -697,7 +702,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
           wtags[i]          = tag;
           wlocks[i].mlock   = 0;  /* old */
           wstatus[i]        = 0;  /* old */
-          sense             = 1;
+          sense             = 1;  printf( "SETTING SENSE TO 1\n" );
           inc_tag( &tag );
           inc_link(hmc, &link);
           break;
@@ -721,9 +726,10 @@ extern int execute_test(        struct hmcsim_t *hmc,
         /* ignore me... */
         cycles[i]++;
         status[i] = TAG_DONE;
+        done++;
         break;
       case TAG_INC_S:
-        printf( "TAG_INC_S: THREAD %d\n", i );
+        //printf( "TAG_INC_S: THREAD %d\n", i );
         cycles[i]++;
         payload[0] = (uint64_t)(0x01);
         ret = hmcsim_build_memrequest( hmc,
@@ -781,13 +787,14 @@ extern int execute_test(        struct hmcsim_t *hmc,
         break;
       case TAG_INC_R:
         /* -- IncFF Recv */
-        printf( "TAG_INC_R: THREAD %d\n", i );
+        //printf( "TAG_INC_R: THREAD %d\n", i );
         cycles[i]++;
         if( wstatus[i] == 1 ){
           status[i]         = TAG_RXX_S;
           wlocks[i].mlock   = 0;  /* old */
           wstatus[i]        = 0;  /* old */
         }else if( wstatus[i] == 3 ){
+          //printf( "parent not arrived: %d\n", i );
           status[i]         = TAG_INC_S;
           wlocks[i].mlock   = 0;  /* old */
           wstatus[i]        = 0;  /* old */
@@ -838,6 +845,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
 
         break;
       case TAG_RXX_R:
+        //printf( "checking sense from thread %d\n", i );
         cycles[i]++;
         if( wstatus[i] == 1 ){
           /* recv processed */
