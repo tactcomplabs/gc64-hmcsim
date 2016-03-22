@@ -31,6 +31,13 @@ struct mylock{
   uint64_t mlock;
 };
 
+/* ------------------------------------------------- PROTOTYPES */
+void recur( struct node *tnodes,
+            int num_threads,
+            int start,
+            int end,
+            int parent );
+
 /* ------------------------------------------------- TAG MACROS */
 #define TAG_START       0x0000  /* -- start state */
 #define TAG_LOCK_SEND   0x0001  /* -- sent a lock message */
@@ -41,6 +48,77 @@ struct mylock{
 #define TAG_ULOCK_RECV  0x0006  /* -- waiting on an unlock message */
 #define TAG_DONE        0xF000  /* -- thread is done */
 
+
+
+/* ------------------------------------------------- PRINT_TREE */
+void print_tree( struct node *tnodes,
+                 int num_threads ){
+  int i = 0;
+
+  for( i=0; i<num_threads; i++ ){
+    printf( "\n" );
+    printf( "Node %d\n", i );
+    printf( "-- root   = %d\n", tnodes[i].root );
+    printf( "-- parent = %d\n", tnodes[i].parent );
+    printf( "-- pnode  = %d\n", tnodes[i].pnode );
+    printf( "-- lnode  = %d\n", tnodes[i].pnode );
+    printf( "-- rnode  = %d\n", tnodes[i].rnode );
+    printf( "-- nchild = %d\n", tnodes[i].nchild );
+    printf( "-- lock   = 0x%016llx\n", tnodes[i].lock );
+  }
+}
+
+/* ------------------------------------------------- RHS */
+void recur( struct node *tnodes,
+            int num_threads,
+            int start,
+            int end,
+            int parent ){
+
+  /* lhs */
+  if( (parent-start) == 0 ){
+    /* no lhs children */
+    return;
+  }else if( (parent-start) == 1 ){
+    /* 1 lhs child */
+    tnodes[start].lnode   = -1;
+    tnodes[start].rnode   = -1;
+    tnodes[start].nchild  = 0;
+    tnodes[start].pnode   = parent;
+    tnodes[parent].lnode  = start;
+    tnodes[parent].nchild = 1;
+  }else{
+    /* > 1 lhs children */
+    tnodes[parent].lnode  = parent/2;
+    tnodes[parent].nchild = 1;
+    tnodes[tnodes[parent].lnode].pnode  = parent;
+    recur(tnodes, num_threads,
+        start, parent-1,
+        tnodes[parent].lnode);
+  }
+
+  /* rhs */
+  if( (end-parent) == 0 ){
+    /* no rhs children */
+    return;
+  }else if( (end-parent) == 1 ){
+    /* 1 rhs child */
+    tnodes[end].lnode     = -1;
+    tnodes[end].rnode     = -1;
+    tnodes[end].nchild    = 0;
+    tnodes[end].pnode     = parent;
+    tnodes[parent].rnode  = end;
+    tnodes[parent].nchild = 2;
+  }else{
+    /* > 1 rhs children */
+    tnodes[parent].rnode = ((end-parent)/2) + parent + 1;
+    tnodes[parent].nchild = 2;
+    tnodes[tnodes[parent].rnode].pnode  = parent;
+    recur(tnodes, num_threads,
+        parent+1, end,
+        tnodes[parent].rnode);
+  }
+}
 
 /* ------------------------------------------------- INIT_TREE */
 void init_tree( struct node *tnodes, int num_threads ){
@@ -86,13 +164,15 @@ void init_tree( struct node *tnodes, int num_threads ){
   tnodes[root].nchild = 2;
   tnodes[root].root = 1;
   tnodes[root].lnode = root/2;
-  tnodes[root].rnode = ((num_threads-root)/2) + root;
+  tnodes[root].rnode = ((num_threads-root)/2) + root + 1;
 
   /* setup the lhs and rhs parents */
   tnodes[tnodes[root].lnode].pnode  = root;
-  tnodes[tnodes[root].lnode].pnode  = root;
+  tnodes[tnodes[root].rnode].pnode  = root;
 
   /* initiate rhs and lhs */
+  recur( tnodes, num_threads, 0, root-1, tnodes[root].lnode );
+  recur( tnodes, num_threads, root-1, num_threads-1, tnodes[root].rnode );
 }
 
 /* ------------------------------------------------- FIND_MIN_CYCLE */
@@ -263,7 +343,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
   uint32_t i		= 0;
   uint64_t packet[HMC_MAX_UQ_PACKET];
 
-  uint64_t addr         = 0x5B5B0ull;
+  uint64_t addr         = 0x3B5B0ull; /* SENSE */
 
   FILE *ofile		= NULL;
 
@@ -311,6 +391,10 @@ extern int execute_test(        struct hmcsim_t *hmc,
 
   /* init the tree */
   init_tree( tnodes, num_threads );
+
+  /* temporary */
+  print_tree(tnodes, num_threads );
+  goto complete_failure;
 
   /* init the lock */
   lock.tid  = (int64_t)(-1);
