@@ -61,7 +61,7 @@ void print_tree( struct node *tnodes,
     printf( "-- root   = %d\n", tnodes[i].root );
     printf( "-- parent = %d\n", tnodes[i].parent );
     printf( "-- pnode  = %d\n", tnodes[i].pnode );
-    printf( "-- lnode  = %d\n", tnodes[i].pnode );
+    printf( "-- lnode  = %d\n", tnodes[i].lnode );
     printf( "-- rnode  = %d\n", tnodes[i].rnode );
     printf( "-- nchild = %d\n", tnodes[i].nchild );
     printf( "-- lock   = 0x%016llx\n", tnodes[i].lock );
@@ -85,13 +85,16 @@ void recur( struct node *tnodes,
     tnodes[start].rnode   = -1;
     tnodes[start].nchild  = 0;
     tnodes[start].pnode   = parent;
+    tnodes[start].parent  = -1;
+    tnodes[parent].parent = 1;
     tnodes[parent].lnode  = start;
     tnodes[parent].nchild = 1;
   }else{
     /* > 1 lhs children */
-    tnodes[parent].lnode  = parent/2;
+    tnodes[parent].lnode  = start + ((parent-start)/2);
     tnodes[parent].nchild = 1;
     tnodes[tnodes[parent].lnode].pnode  = parent;
+    tnodes[tnodes[parent].lnode].parent = 1;
     recur(tnodes, num_threads,
         start, parent-1,
         tnodes[parent].lnode);
@@ -107,6 +110,8 @@ void recur( struct node *tnodes,
     tnodes[end].rnode     = -1;
     tnodes[end].nchild    = 0;
     tnodes[end].pnode     = parent;
+    tnodes[end].parent    = -1;
+    tnodes[parent].parent = 1;
     tnodes[parent].rnode  = end;
     tnodes[parent].nchild = 2;
   }else{
@@ -114,6 +119,7 @@ void recur( struct node *tnodes,
     tnodes[parent].rnode = ((end-parent)/2) + parent + 1;
     tnodes[parent].nchild = 2;
     tnodes[tnodes[parent].rnode].pnode  = parent;
+    tnodes[tnodes[parent].rnode].parent = 1;
     recur(tnodes, num_threads,
         parent+1, end,
         tnodes[parent].rnode);
@@ -163,16 +169,27 @@ void init_tree( struct node *tnodes, int num_threads ){
   root = num_threads/2;
   tnodes[root].nchild = 2;
   tnodes[root].root = 1;
+  tnodes[root].pnode = -1;
   tnodes[root].lnode = root/2;
-  tnodes[root].rnode = ((num_threads-root)/2) + root + 1;
+  tnodes[root].rnode = ((num_threads-1-root)/2) + root + 1;
 
   /* setup the lhs and rhs parents */
   tnodes[tnodes[root].lnode].pnode  = root;
   tnodes[tnodes[root].rnode].pnode  = root;
 
   /* initiate rhs and lhs */
+  /* -- lhs */
   recur( tnodes, num_threads, 0, root-1, tnodes[root].lnode );
-  recur( tnodes, num_threads, root-1, num_threads-1, tnodes[root].rnode );
+
+  if( (num_threads-1-root) == 1){
+    /* one rhs node */
+    tnodes[root+1].nchild = 0;
+    tnodes[root+1].lnode  = -1;
+    tnodes[root+1].rnode  = -1;
+  }else{
+    /* -- rhs */
+    recur( tnodes, num_threads, root+1, num_threads-1, tnodes[root].rnode );
+  }
 }
 
 /* ------------------------------------------------- FIND_MIN_CYCLE */
