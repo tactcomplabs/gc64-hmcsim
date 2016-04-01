@@ -1,4 +1,19 @@
 HMCSIM TEST: FE_LINEAR
 -------------------------------------------
+Executes a test of a parallel, static
+tree barrier using cmc libraries
+using the following cmc libaries:
+
+- ReadXX
+- ReadEF
+- ReadFF
+- WriteXE
+- WriteXF
+- IncFF
+
+These libraries can be found in the
+~/cmc/fullempty/ directory.
+They are built by default with "make"
+
 -------------------------------------------
 EOF
