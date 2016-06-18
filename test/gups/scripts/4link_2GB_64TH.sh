@@ -2,6 +2,18 @@
 
 ulimit -s unlimited 
 
+MACROS="../../../include/hmc_sim_macros.h"
+
+REV=`cat $MACROS | grep HMC_PRODUCT_REVISION | grep define | awk '{print $3}'`
+
+if [ -z $REV ]; then
+  echo "Error : only valid in Gen1 HMC Devices";
+  exit 1;
+elif [ "$REV" == "0x2" ]; then
+  echo "Error : only valid in Gen1 HMC Devices";
+  exit 1;
+fi
+
 GUPS=../gups
 RUNDIR=`pwd`
 

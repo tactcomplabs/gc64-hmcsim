@@ -18,11 +18,11 @@ extern "C" {
 
 /* -------------------------------------------- VERSION MACROS */
 #ifndef 	HMC_MAJOR_VERSION
-#define		HMC_MAJOR_VERSION	0
+#define		HMC_MAJOR_VERSION	2
 #endif
 
 #ifndef		HMC_MINOR_VERSION
-#define		HMC_MINOR_VERSION	1
+#define		HMC_MINOR_VERSION	0
 #endif
 
 /* -------------------------------------------- VENDOR ID DATA */
