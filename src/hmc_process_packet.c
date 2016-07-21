@@ -1688,16 +1688,17 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                            -- to send a response
                         */
                         switch( rsp_cmd ){
-                          case MD_RD_RS:
-                          case MD_WR_RS:
-                          case RSP_NONE:
-                            /* no response packet */
-                            no_response = 1;
-                            break;
-                          default:
-                            /* response packet */
-                            no_response = 0;
-                            break;
+                        case RSP_NONE:
+                        case 0x00:
+                          /* no response packet */
+                          no_response = 1;
+                          break;
+                        case MD_RD_RS:
+                        case MD_WR_RS:
+                        default:
+                          /* response packet */
+                          no_response = 0;
+                          break;
                         }
 
                         break;
@@ -1742,6 +1743,13 @@ step4_vr:
 
 		packet[0] 		= rsp_head;
 		packet[((rsp_len*2)-1)]	= rsp_tail;
+
+                if( use_cmc == 1 ){
+                  /* build the cmc data payload */
+                  for( j=1; j<((rsp_len-1)*2); j++ ){
+                    packet[j] = rsp_payload[j];
+                  }
+                }
 
 		/* -- register the response */
 		hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].valid = HMC_RQST_VALID;
