@@ -48,7 +48,7 @@ static uint32_t __rqst_len  = 1;
              : and tail flits.  If __rsp_len is 0, then the operation
              : is assumed to be posted.
 */
-static uint32_t __rsp_len   = 3;
+static uint32_t __rsp_len   = 2;
 
 /* __rsp_cmd : Contains the respective response command.  See hmc_response_t
              : enum in hmc_sim_types.h.  All normal commands are permissible.
