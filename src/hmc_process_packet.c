@@ -1688,13 +1688,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                            -- to send a response
                         */
                         switch( rsp_cmd ){
+                        case MD_RD_RS:
+                        case MD_WR_RS:
                         case RSP_NONE:
-                        case 0x00:
                           /* no response packet */
                           no_response = 1;
                           break;
-                        case MD_RD_RS:
-                        case MD_WR_RS:
                         default:
                           /* response packet */
                           no_response = 0;
