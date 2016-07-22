@@ -1743,11 +1743,9 @@ step4_vr:
 		packet[0] 		= rsp_head;
 		packet[((rsp_len*2)-1)]	= rsp_tail;
 
-                if( use_cmc == 1 ){
-                  /* build the cmc data payload */
-                  for( j=1; j<((rsp_len-1)*2); j++ ){
-                    packet[j] = rsp_payload[j];
-                  }
+                /* build the cmc data payload */
+                for( j=1; j<((rsp_len-1)*2); j++ ){
+                  packet[j] = rsp_payload[j];
                 }
 
 		/* -- register the response */
