@@ -5,7 +5,7 @@
 # Drives building all the hmcsim tests
 
 
-SUBDIRS :=	simple simple_cmc hmc_physrand decode_physrand 1dfft 2dfft stream mutex sst_init
+SUBDIRS :=	simple simple_cmc hmc_physrand decode_physrand stream mutex sst_init fe_linear fe_tree load_fe
 
 CLEANDIRS :=	$(addsuffix .clean, $(SUBDIRS))
 
