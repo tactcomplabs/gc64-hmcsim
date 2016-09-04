@@ -101,7 +101,7 @@ static void inc_link( struct hmcsim_t *hmc, uint8_t *link ){
  *
  */
 static void zero_packet( uint64_t *packet ) {
-uint64_t i = 0x00ll;
+  uint64_t i = 0x00ll;
 
   /*
    * zero the packet
@@ -167,20 +167,30 @@ complete_trigger:
  *
  * FINITE STATE MACHINE FOR MULTITHREADED MUTEX TEST
  * ALL THREADS ATTEMPT TO ACQUIRE THE LOCK FOR AT LEAST ONE CYCLE
- * THIS IS DELIBERATEY A NAIVE IMPLEMENTATION
+ * THIS IS DELIBERATELY A NAIVE IMPLEMENTATION
+ * WE USE THE BASIC SENSED CENTRAL LOCK APPROACH
  *
- * WHILE( NUM_LOCKS < NUM_THREADS ){
- *    IF( NOT_LOCKED ){
- *      ATTEMPT TO LOCK()
- *      IF( SUCCESS ){
- *        UPDATE GLOBAL
- *        UNLOCK
- *      }ELSE{
- *        TRYLOCK UNTIL SUCCESS
- *        UNLOCK
- *      }
+ * SENSE = 0
+ * ORIG  = 0
+ *
+ * FOREACH THREAD{
+ *  READ ORIG
+ *  ATTEMPT TO LOCK
+ *  IF( SUCCESS ){
+ *    UPDATE GLOBAL
+ *    UNLOCK
+ *    IF( GLOBAL == NUM_THREADS ){
+ *      UPDATE SENSE
  *    }
+ *  }ELSE{
+ *    SPINLOCK
+ *  }
+ *  READ SENSE
+ *  WHILE( SENSE == ORIG ){
+ *    SPINWAIT
+ *  }
  * }
+ * DO{
  *
  */
 extern int execute_test(        struct hmcsim_t *hmc,
@@ -201,6 +211,9 @@ extern int execute_test(        struct hmcsim_t *hmc,
   uint64_t packet[HMC_MAX_UQ_PACKET];
 
   uint64_t addr         = 0x5B5B0ull;
+  uint64_t saddr        = 0x5B5B8ull;
+
+  uint64_t sense        = 0;
 
   FILE *ofile		= NULL;
 
@@ -223,6 +236,8 @@ extern int execute_test(        struct hmcsim_t *hmc,
 
   struct mylock *wlocks = NULL;         /* current thread lock copy */
   uint64_t *status      = NULL;         /* current thread status */
+  uint64_t *orig        = NULL;         /* original sense */
+  uint64_t *tsense      = NULL;         /* sense value */
   uint64_t *cycles      = NULL;         /* thread local cycle count */
   int *wstatus          = NULL;         /* current thread wait status */
   uint16_t *wtags       = NULL;         /* current thread wait tags */
@@ -232,10 +247,14 @@ extern int execute_test(        struct hmcsim_t *hmc,
   /* allocate memory & init thread state */
   cycles  = malloc( sizeof( uint64_t ) * num_threads );
   status  = malloc( sizeof( uint64_t ) * num_threads );
+  orig    = malloc( sizeof( uint64_t ) * num_threads );
+  tsense  = malloc( sizeof( uint64_t ) * num_threads );
   wstatus = malloc( sizeof( int ) * num_threads );
   wtags   = malloc( sizeof( uint16_t ) * num_threads );
   wlocks  = malloc( sizeof( struct mylock ) * num_threads );
   for( i=0; i<num_threads; i++ ){
+    orig[i]     = 0x00ull;
+    tsense[i]   = 0x00ull;
     status[i]   = TAG_START;
     cycles[i]   = 0x00ll;
     wstatus[i]  = -1;
@@ -275,6 +294,15 @@ extern int execute_test(        struct hmcsim_t *hmc,
 
   printf( "BEGINNING EXECUTION\n" );
 
+  /*
+   * -----------------
+   * COMMAND PACKETS
+   * -----------------
+   * LOCK    = CMC125
+   * TRYLOCK = CMC126
+   * UNLOCK  = CMC127
+   * -----------------
+   */
 
   /* -- begin cycle loop */
   while( done < num_threads ){
@@ -569,6 +597,8 @@ complete_failure:
   free( wstatus);
   free( wtags);
   free( wlocks);
+  free( tsense );
+  free( orig );
 
   return 0;
 }

@@ -34,11 +34,12 @@ static int load_cmc_libs( struct hmcsim_t *hmc, char *libsrc ){
   int srclen  = strlen( libsrc ) + 1;
   int i       = 0;
   char *lib   = NULL;
-  char *mlibs[] = { "/ReadEF/libreadef.so",
-                    "/WriteXE/libwritexe.so" };
+  char *mlibs[] = { "/hmc_lock/libhmc_lock.so",
+                    "/hmc_trylock/libhmc_trylock.so",
+                    "/hmc_unlock/libhmc_unlock.so"};
   /* ---- */
 
-  for( i=0; i<2; i++ ){
+  for( i=0; i<3; i++ ){
 
     lib = malloc( sizeof( char ) * (strlen(mlibs[i])+srclen) );
     if( lib == NULL ){
