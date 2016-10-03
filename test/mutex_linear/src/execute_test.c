@@ -141,12 +141,37 @@ static void trigger_mutex_response( hmc_response_t type,
     if( wstatus[i] != HMC_STALL ){
       /* -- thread is not stalled, it is waiting on response */
       if( wtags[i] == tag ){
-        if( (status[i] == TAG_LOCK_RECV) && (type == RD_RS) ){
+        if( (status[i] == TAG_LOCK_RECV) && (type == WR_RS) ){
           th = i;
           found = 1;
           //printf( "matched tag = thread; %d = %d\n", tag, th );
           goto complete_trigger;
         }else if( (status[i] == TAG_ULOCK_RECV) && (type == WR_RS) ){
+          th = i;
+          found = 1;
+          //printf( "matched tag = thread; %d = %d\n", tag, th );
+          goto complete_trigger;
+        }else if( (status[i] == TAG_TLOCK_RECV) && (type == RD_RS) ){
+          th = i;
+          found = 1;
+          //printf( "matched tag = thread; %d = %d\n", tag, th );
+          goto complete_trigger;
+        }else if( (status[i] == TAG_RS_RECV) && (type == RD_RS) ){
+          th = i;
+          found = 1;
+          //printf( "matched tag = thread; %d = %d\n", tag, th );
+          goto complete_trigger;
+        }else if( (status[i] == TAG_WS_RECV) && (type == WR_RS) ){
+          th = i;
+          found = 1;
+          //printf( "matched tag = thread; %d = %d\n", tag, th );
+          goto complete_trigger;
+        }else if( (status[i] == TAG_INC_RECV) && (type == WR_RS) ){
+          th = i;
+          found = 1;
+          //printf( "matched tag = thread; %d = %d\n", tag, th );
+          goto complete_trigger;
+        }else if( (status[i] == TAG_SPIN_RECV) && (type == RD_RS) ){
           th = i;
           found = 1;
           //printf( "matched tag = thread; %d = %d\n", tag, th );
@@ -164,7 +189,7 @@ complete_trigger:
       wlocks[th].mlock = 2;
     }
   }else{
-    printf( "ERROR: FATAL : COULD TRIGGER EVENT ON TAG  = %d; ABORTING\n", tag );
+    printf( "ERROR: FATAL : COULD NOT TRIGGER EVENT ON TAG  = %d; ABORTING\n", tag );
     abort();
   }
 }
@@ -430,7 +455,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
         case 0:
           /* still waiting */
           break;
-        case 1:
+        case 2:
           orig[i] = sense;
           status[i] = TAG_START;
           break;
@@ -491,7 +516,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
         case 0:
           /* still waiting */
           break;
-        case 1:
+        case 2:
           /* got the response, we're done now */
           status[i] = TAG_DONE;
           break;
@@ -557,7 +582,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
         case 0:
           /* still waiting */
           break;
-        case 1:
+        case 2:
           /* got the response */
           status[i] = TAG_ULOCK_SEND;
 
@@ -623,7 +648,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
         case 0:
           /* still waiting */
           break;
-        case 1:
+        case 2:
           /* got the response */
           if( orig[i] != sense ){
             /* sense has changed */
