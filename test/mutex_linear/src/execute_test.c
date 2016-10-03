@@ -29,6 +29,14 @@ struct mylock{
 #define TAG_TLOCK_RECV  0x0004  /* -- waiting on a tlock receipt */
 #define TAG_ULOCK_SEND  0x0005  /* -- sent an unlock message */
 #define TAG_ULOCK_RECV  0x0006  /* -- waiting on an unlock message */
+#define TAG_RS_SEND     0x0007  /* -- read request for sense value */
+#define TAG_RS_RECV     0x0008  /* -- waiting on receive request for sense */
+#define TAG_WS_SEND     0x0009  /* -- write requests for sense value */
+#define TAG_WS_RECV     0x000A  /* -- waiting on receive request for sense */
+#define TAG_INC_SEND    0x000B  /* -- send an incrememnt request */
+#define TAG_INC_RECV    0x000C  /* -- recv an increment request */
+#define TAG_SPIN_SEND   0x000D  /* -- spinwait on sense read */
+#define TAG_SPIN_RECV   0x000E  /* -- spintwait on sense receive */
 #define TAG_DONE        0xF000  /* -- thread is done */
 
 
@@ -174,20 +182,18 @@ complete_trigger:
  * ORIG  = 0
  *
  * FOREACH THREAD{
- *  READ ORIG
+ *  READ ORIG(sense)
  *  ATTEMPT TO LOCK
  *  IF( SUCCESS ){
- *    UPDATE GLOBAL
+ *    UPDATE GLOBAL (read-modify-write)
  *    UNLOCK
  *    IF( GLOBAL == NUM_THREADS ){
  *      UPDATE SENSE
+ *    }ELSE{
+ *      SPINWAIT(SENSE != ORIG)
  *    }
  *  }ELSE{
- *    SPINLOCK
- *  }
- *  READ SENSE
- *  WHILE( SENSE == ORIG ){
- *    SPINWAIT
+ *    SPINLOCK(lock)
  *  }
  * }
  * DO{
@@ -212,8 +218,10 @@ extern int execute_test(        struct hmcsim_t *hmc,
 
   uint64_t addr         = 0x5B5B0ull;
   uint64_t saddr        = 0x5B5B8ull;
+  uint64_t gaddr        = 0x5B5C0ull;
 
   uint64_t sense        = 0;
+  uint64_t global       = 0;
 
   FILE *ofile		= NULL;
 
@@ -255,7 +263,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
   for( i=0; i<num_threads; i++ ){
     orig[i]     = 0x00ull;
     tsense[i]   = 0x00ull;
-    status[i]   = TAG_START;
+    status[i]   = TAG_RS_SEND;
     cycles[i]   = 0x00ll;
     wstatus[i]  = -1;
     wtags[i]    = 0;
@@ -272,7 +280,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
    *
    */
   printf( "...INITIALIZING TRACE FILE\n" );
-  ofile = fopen( "fe_linear.out", "w" );
+  ofile = fopen( "mutex_linear.out", "w" );
   if( ofile == NULL ){
     printf( "FAILED : COULD NOT OPEN OUPUT FILE mutex.out\n" );
     return -1;
@@ -315,13 +323,14 @@ extern int execute_test(        struct hmcsim_t *hmc,
 
       /* -- TAG_START */
       case TAG_START:
-        /* -- Build a ReadEF */
+        /* -- Build a Lock Request */
         cycles[i]++;
+        payload[0] = (uint64_t)(i);
         ret = hmcsim_build_memrequest( hmc,
                                        0,
                                        addr,
                                        tag,
-                                       CMC71,    /* READFE */
+                                       CMC125,    /* LOCK */
                                        link,
                                        &(packet[0]),
                                        &head,
@@ -360,11 +369,272 @@ extern int execute_test(        struct hmcsim_t *hmc,
           break;
         case -1:
         default:
-          printf( "FAILED : INITIAL READEF PACKET SEND FAILURE\n" );
+          printf( "FAILED : INITIAL HMC_LOCK PACKET SEND FAILURE\n" );
           goto complete_failure;
           break;
         }
 
+        break;
+
+      /* -- TAG_RS_SEND */
+      case TAG_RS_SEND:
+        /* build a read sense (RD16) request */
+        cycles[i]++;
+        ret = hmcsim_build_memrequest( hmc,
+                                       0,
+                                       saddr,
+                                       tag,
+                                       RD16,
+                                       link,
+                                       &(packet[0]),
+                                       &head,
+                                       &tail);
+        if( ret == 0 ){
+          packet[0] = head;
+          packet[1] = tail;
+          ret = hmcsim_send( hmc, &(packet[0]) );
+        }else{
+          printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
+        }
+
+        switch( ret ){
+        case 0:
+          /* success: wait for the return */
+          status[i]       = TAG_RS_RECV;
+          wlocks[i].mlock  = 0;
+          wstatus[i]      = 0;
+          wtags[i]        = tag;
+          inc_tag( &tag );
+          inc_link(hmc, &link);
+          break;
+        case HMC_STALL:
+          /* stalled */
+          wstatus[i]  = HMC_STALL;
+          wtags[i]    = 0;
+          /* drop to read sense */
+          status[i]   = TAG_RS_SEND;
+          break;
+        case -1:
+        default:
+          printf( "FAILED : RD16 PACKET SEND FAILURE\n" );
+          goto complete_failure;
+          break;
+        }
+
+        break;
+
+      /* -- TAG_RS_RECV */
+      case TAG_RS_RECV:
+        cycles[i]++;
+        switch( wlocks[i].mlock ){
+        case 0:
+          /* still waiting */
+          break;
+        case 1:
+          orig[i] = sense;
+          status[i] = TAG_START;
+          break;
+        }
+        break;
+
+      /* -- TAG_WS_SEND */
+      case TAG_WS_SEND:
+        cycles[i]++;
+        packet[0] = 0x01ull;
+        ret = hmcsim_build_memrequest( hmc,
+                                       0,
+                                       saddr,
+                                       tag,
+                                       WR16,
+                                       link,
+                                       &(packet[0]),
+                                       &head,
+                                       &tail);
+        if( ret == 0 ){
+          packet[0] = head;
+          packet[1] = tail;
+          ret = hmcsim_send( hmc, &(packet[0]) );
+        }else{
+          printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
+        }
+
+        switch( ret ){
+        case 0:
+          /* success: wait for the return */
+          status[i]       = TAG_WS_RECV;
+          wlocks[i].mlock  = 0;
+          wstatus[i]      = 0;
+          wtags[i]        = tag;
+          inc_tag( &tag );
+          inc_link(hmc, &link);
+          break;
+        case HMC_STALL:
+          /* stalled */
+          wstatus[i]  = HMC_STALL;
+          wtags[i]    = 0;
+          /* drop to read sense */
+          status[i]   = TAG_RS_SEND;
+          break;
+        case -1:
+        default:
+          printf( "FAILED : RD16 PACKET SEND FAILURE\n" );
+          goto complete_failure;
+          break;
+        }
+
+        break;
+
+      /* -- TAG_WS_RECV */
+      case TAG_WS_RECV:
+        cycles[i]++;
+        switch( wlocks[i].mlock ){
+        case 0:
+          /* still waiting */
+          break;
+        case 1:
+          /* got the response, we're done now */
+          status[i] = TAG_DONE;
+          break;
+        }
+        break;
+
+      /* -- TAG_INC_SEND */
+      case TAG_INC_SEND:
+        /* increment the global value */
+        /* tsense[i] = global */
+        cycles[i]++;
+        cycles[i]++;
+        packet[0] = 0x01ull;
+        ret = hmcsim_build_memrequest( hmc,
+                                       0,
+                                       gaddr,
+                                       tag,
+                                       INC8,
+                                       link,
+                                       &(packet[0]),
+                                       &head,
+                                       &tail);
+        if( ret == 0 ){
+          packet[0] = head;
+          packet[1] = tail;
+          ret = hmcsim_send( hmc, &(packet[0]) );
+        }else{
+          printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
+        }
+
+        switch( ret ){
+        case 0:
+          /* success: wait for the return */
+          tsense[i]       = global;
+          status[i]       = TAG_INC_RECV;
+          wlocks[i].mlock  = 0;
+          wstatus[i]      = 0;
+          wtags[i]        = tag;
+          inc_tag( &tag );
+          inc_link(hmc, &link);
+          break;
+        case HMC_STALL:
+          /* stalled */
+          wstatus[i]  = HMC_STALL;
+          wtags[i]    = 0;
+          /* drop to read sense */
+          status[i]   = TAG_RS_SEND;
+          break;
+        case -1:
+        default:
+          printf( "FAILED : RD16 PACKET SEND FAILURE\n" );
+          goto complete_failure;
+          break;
+        }
+        break;
+
+      /* -- TAG_INC_RECV */
+      case TAG_INC_RECV:
+        /* if tsense[i] num_threads, flip the sense */
+        cycles[i]++;
+
+        switch( wlocks[i].mlock ){
+        case 0:
+          /* still waiting */
+          break;
+        case 1:
+          /* got the response */
+          status[i] = TAG_ULOCK_SEND;
+
+          wlocks[i].mlock  = 0;
+          wstatus[i]      = 0;
+          break;
+        }
+
+        break;
+
+      /* -- TAG_SPIN_SEND */
+      case TAG_SPIN_SEND:
+        /* build a read sense (RD16) request */
+        cycles[i]++;
+        ret = hmcsim_build_memrequest( hmc,
+                                       0,
+                                       saddr,
+                                       tag,
+                                       RD16,
+                                       link,
+                                       &(packet[0]),
+                                       &head,
+                                       &tail);
+        if( ret == 0 ){
+          packet[0] = head;
+          packet[1] = tail;
+          ret = hmcsim_send( hmc, &(packet[0]) );
+        }else{
+          printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
+        }
+
+        switch( ret ){
+        case 0:
+          /* success: wait for the return */
+          status[i]       = TAG_RS_RECV;
+          wlocks[i].mlock  = 0;
+          wstatus[i]      = 0;
+          wtags[i]        = tag;
+          inc_tag( &tag );
+          inc_link(hmc, &link);
+          break;
+        case HMC_STALL:
+          /* stalled */
+          wstatus[i]  = HMC_STALL;
+          wtags[i]    = 0;
+          /* drop to read sense */
+          status[i]   = TAG_RS_SEND;
+          break;
+        case -1:
+        default:
+          printf( "FAILED : RD16 PACKET SEND FAILURE\n" );
+          goto complete_failure;
+          break;
+        }
+
+        break;
+
+      /* -- TAG_SPIN_RECV */
+      case TAG_SPIN_RECV:
+        cycles[i]++;
+
+        switch( wlocks[i].mlock ){
+        case 0:
+          /* still waiting */
+          break;
+        case 1:
+          /* got the response */
+          if( orig[i] != sense ){
+            /* sense has changed */
+            status[i] = TAG_DONE;
+          }else{
+            status[i] = TAG_SPIN_SEND;
+          }
+          wlocks[i].mlock  = 0;
+          wstatus[i]      = 0;
+          break;
+        }
         break;
 
       /* -- TAG_LOCK_RECV */
@@ -377,7 +647,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
           break;
         case 1:
           /* i have the lock */
-          status[i]       = TAG_ULOCK_SEND;
+          status[i]       = TAG_INC_SEND;
           wlocks[i].mlock = 0;
           wtags[i]        = 0;
           //printf( "THREAD %d RECEIVED A RESPONSE: I HAVE THE LOCK\n", i );
@@ -405,7 +675,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
                                        0,
                                        addr,
                                        tag,
-                                       CMC71,    /* READFE */
+                                       CMC125,    /* LOCK */
                                        link,
                                        &(payload[0]),
                                        &head,
@@ -449,7 +719,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
 
       /* -- TAG_ULOCK_SEND */
       case TAG_ULOCK_SEND:
-        /* -- Send WriteXE */
+        /* -- Send HMC_UNLOCK */
         cycles[i]++;
 
         payload[0] = (uint64_t)(i);
@@ -457,7 +727,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
                                        0,
                                        addr,
                                        tag,
-                                       CMC77,    /* WriteXE */
+                                       CMC127,    /* HMC_UNLOCK */
                                        link,
                                        &(payload[0]),
                                        &head,
@@ -513,8 +783,15 @@ extern int execute_test(        struct hmcsim_t *hmc,
         case 2:
         default:
           /* i have the lock */
-          status[i]       = TAG_DONE;
-          done++;
+          if( tsense[i] == num_threads ){
+            /* flip the sense */
+            status[i] = TAG_WS_SEND;
+          }else{
+            /* spin on the sense */
+            status[i] = TAG_SPIN_SEND;
+          }
+          wlocks[i].mlock  = 0;
+          wstatus[i]      = 0;
           //printf( "THREAD %d RECEIVED A RESPONSE: UNLOCK SUCCESS\n", i );
           break;
         }
@@ -522,6 +799,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
         break;
       case TAG_DONE:
         /* thread is done, do nothing */
+        done++;
         break;
       default:
         /* error */
