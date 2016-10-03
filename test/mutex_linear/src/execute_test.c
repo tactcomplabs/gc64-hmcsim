@@ -582,7 +582,9 @@ extern int execute_test(        struct hmcsim_t *hmc,
         case 0:
           /* still waiting */
           break;
+        case 1:
         case 2:
+        default:
           /* got the response */
           status[i] = TAG_ULOCK_SEND;
 
