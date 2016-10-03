@@ -552,6 +552,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
           /* success: wait for the return */
           tsense[i]       = global;
           status[i]       = TAG_INC_RECV;
+          global++;
           wlocks[i].mlock  = 0;
           wstatus[i]      = 0;
           wtags[i]        = tag;
@@ -810,7 +811,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
         case 2:
         default:
           /* i have the lock */
-          if( tsense[i] == num_threads ){
+          if( (tsense[i]-1) == num_threads ){
             /* flip the sense */
             status[i] = TAG_WS_SEND;
           }else{
