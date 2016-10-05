@@ -435,6 +435,9 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
                 case CMC126:
                 case CMC127:
 
+#ifdef HMC_DEBUG
+                        printf( "HMCSIM_BUILD_MEMREQUEST : CMC PACKET TYPE = %d\n", type );
+#endif
                         /* check for an active cmc op */
                         if( hmcsim_query_cmc( hmc,
                                               type,
@@ -448,7 +451,9 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
                          * cmc op is active
                          * flits and cmd are initialized
                          */
-
+#ifdef HMC_DEBUG
+                        printf( "HMCSIM_BUILD_MEMREQUEST : CMC PACKET COMMAND = %d\n", cmd );
+#endif
                         break;
 		default:
 			return -1;
@@ -504,8 +509,8 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
         /* -- data valid bit : bit 21 */
         tmp |= ( (uint64_t)(0x1<<21) );
 
-	/* -- source link id : bits 26:24 */
-	//tmp |= ( (uint64_t)(link & 0x7) << 24 );
+	/* -- source source link id : bits 28:26 */
+	tmp |= ( (uint64_t)(link & 0x7) << 26 );
 
         /* -- error status bits : bits 28:22 */
         /* -- no errors are present */

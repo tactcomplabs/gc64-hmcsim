@@ -203,7 +203,7 @@ struct hmc_dram_t{
 
 struct hmc_bank_t{
 
-	struct hmc_dram_t *drams;	/*! HMC-SIM: HMC_BANK_T: DRAMS */
+	//struct hmc_dram_t *drams;	/*! HMC-SIM: HMC_BANK_T: DRAMS */
 
 	uint32_t id;			/*! HMC-SIM: HMC_BANK_T: BANK ID */
 					/* 16-BYTE BANK INTERLEAVE */	
@@ -320,6 +320,16 @@ struct hmcsim_t{
 
 	uint64_t clk;			/*! HMC-SIM: HMCSIM_T: CLOCK TICK */
 
+        int (*readmem)(struct hmcsim_t *,
+                       uint64_t,
+                       uint64_t *,
+                       uint32_t );
+
+        int (*writemem)(struct hmcsim_t *,
+                       uint64_t,
+                       uint64_t *,
+                       uint32_t );
+
 	struct hmc_dev_t	*__ptr_devs;
 	struct hmc_quad_t	*__ptr_quads;
 	struct hmc_vault_t	*__ptr_vaults;
@@ -332,6 +342,7 @@ struct hmcsim_t{
 	struct hmc_queue_t	*__ptr_vault_rqst;
 	struct hmc_queue_t	*__ptr_vault_rsp;
 	uint64_t 		*__ptr_stor;
+	uint64_t 		*__ptr_end;
 };
 
 

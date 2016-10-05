@@ -1,16 +1,16 @@
 #!/bin/bash
-#-- sample small test
+# - executes a test of a bcopy for a 4GB device [2GB bcopy]
 
 PHYSRAND=../physrand
 
-BANKS=8
-CAPACITY=2
+BANKS=16
+CAPACITY=4
 LINKS=4
 BSIZE=64
 QDEPTH=64
 XDEPTH=128
 VAULTS=16
-NRQSTS=10
+NRQSTS=50
 READ=50
 WRITE=50
 DRAMS=20

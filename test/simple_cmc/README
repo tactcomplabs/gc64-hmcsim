@@ -1,1 +1,4 @@
 SIMPLE_CMC HMCSIM-2.0 EXAMPLE
+-----------------------------
+tests the simple initialization
+of a cmc library

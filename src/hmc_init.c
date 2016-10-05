@@ -101,8 +101,6 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
 	 */
 	if( (capacity == 2) && ( (num_banks == 16) || (num_links==8) ) ){
 		return HMC_ERROR_PARAMS;
-	}else if( (capacity == 4) && ( (num_banks == 8) && (num_links==4) ) ){
-		return HMC_ERROR_PARAMS;
 	}else if( (capacity == 4) && ( (num_banks == 16) && (num_links==8) ) ){
 		return HMC_ERROR_PARAMS;
 	}else if( (capacity == 8) && ( (num_banks == 8 ) || (num_links==4) ) ){

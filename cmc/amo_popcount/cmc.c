@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include "hmc_sim.h"
 
-
 /* ----------------------------------------------------- GLOBALS */
 /* These globals define the CMC operation parameters, the request
    enum and the command code.  Modify these values for your
@@ -49,7 +48,7 @@ static uint32_t __rqst_len  = 1;
              : and tail flits.  If __rsp_len is 0, then the operation
              : is assumed to be posted.
 */
-static uint32_t __rsp_len   = 3;
+static uint32_t __rsp_len   = 2;
 
 /* __rsp_cmd : Contains the respective response command.  See hmc_response_t
              : enum in hmc_sim_types.h.  All normal commands are permissible.
@@ -103,7 +102,31 @@ extern int hmcsim_execute_cmc(  void *hmc,
                                 uint64_t *rqst_payload,
                                 uint64_t *rsp_payload ){
 
-  /* perform your operation */
+  /* hmc struct pointer */
+  struct hmcsim_t *l_hmc = (struct hmcsim_t *)(hmc);
+
+  /* data for the operation */
+  uint64_t data   = 0x00ull;
+
+  /* function pointer for read operation */
+  int (*readmem)( struct hmcsim_t *,
+                  uint64_t,
+                  uint64_t *,
+                  uint32_t ) = NULL;
+
+  /* init the function pointer */
+  readmem = l_hmc->readmem;
+
+  /* read the memory */
+  if( (*readmem)(l_hmc, addr, &data, 1 ) != 0 ){
+    /* error */
+    return -1;
+  }
+
+  /* perform the popcount
+   * write the response to the response payload
+   */
+  rsp_payload[1]  =  __builtin_popcountll( data );
 
   return 0;
 }
