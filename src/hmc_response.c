@@ -98,7 +98,7 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 	 * shift out cmd field
 	 *
 	 */
-	tmp8	= (uint8_t)( tmp64 & 0x3F );
+	tmp8	= (uint8_t)( tmp64 & 0x7F );
 
 	switch( tmp8 )
 	{
@@ -126,8 +126,9 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 			*type	= RSP_ERROR;
 			break;
 		default:
+                        /* ASSUME THE RESPONSE IS A CMC */
+			*type	= RSP_CMC;
 			printf( "response type failure\n" );
-			return -1;
 			break;
 	}
 
@@ -137,7 +138,7 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 	 * packet length field
 	 *
 	 */
-	tmp8	= (uint8_t)( (tmp64 & 0x780) >> 7);
+        tmp8    = (uint8_t)( (tmp64 >> 7) & 0x1F);
 	*length	= tmp8;
 	tmp8	= 0x00;
 
@@ -145,22 +146,23 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 	 * tag field
 	 *
 	 */
-	tmp16	= (uint16_t)( (tmp64 & 0xFF8000) >> 15);
+        tmp16   = (uint16_t)( (tmp64 >> 12) & 0x7FF);
 	*tag	= tmp16;
 	tmp16	= 0x0000;
 
 	/*
 	 * return tag field
-	 *
+	 * !DEPRECATED!
  	 */
-	tmp16	= (uint16_t)( (tmp64 & 0x1FF000000) >> 24);
-	*rtn_tag = tmp16;
+        *rtn_tag = *tag;
+	//tmp16	= (uint16_t)( (tmp64 & 0x1FF000000) >> 24);
+	//*rtn_tag = tmp16;
 
 	/*
 	 * source link field
 	 *
 	 */
-	tmp8	= (uint8_t)( (tmp64 & 0x38000000000) >> 39);
+        tmp8    = (uint8_t)( (tmp64 >> 39) & 0x1F );
 	*src_link = tmp8;
 
 	/*
@@ -187,7 +189,7 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 	 * frp
 	 *
  	 */
-	tmp8	= (uint8_t)( ( tmp64 & 0xFF00 ) >> 8 );
+        tmp8    = (uint8_t)( (tmp64 >> 9) & 0x1FF);
 	*frp	= tmp8;
 	tmp8 	= 0x00;
 
@@ -195,7 +197,7 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 	 * sequence number
 	 *
 	 */
-	tmp8	= (uint8_t)( ( tmp64 & 0x70000 ) >> 16 );
+        tmp8    = (uint8_t)( (tmp64 >> 18) & 0x7);
 	*seq	= tmp8;
 	tmp8 	= 0x00;
 
@@ -203,7 +205,7 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 	 * dinv
 	 *
 	 */
-	tmp8	= (uint8_t)( (tmp64 & 0x80000 ) >> 19 );
+        tmp8    = (uint8_t)( (tmp64 >> 21) & 0x1);
 	*dinv	= tmp8;
 	tmp8	= 0x00;
 
@@ -211,7 +213,7 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 	 * errstat
 	 *
 	 */
-	tmp8	= (uint8_t)( (tmp64 & 0x7F00000 ) >> 20 );
+        tmp8    = (uint8_t)( (tmp64 >> 22) & 0x7F);
 	*dinv	= tmp8;
 	tmp8	= 0x00;
 
@@ -219,7 +221,7 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 	 * rtc
 	 *
 	 */
-	tmp8	= (uint8_t)( (tmp64 & 0xF8000000 ) >> 27 );
+        tmp8    = (uint8_t)( (tmp64 >> 29) & 0x7 );
 	*rtc	= tmp8;
 	tmp8	= 0x00;
 

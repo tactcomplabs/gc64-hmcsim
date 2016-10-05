@@ -54,6 +54,8 @@ extern int	hmcsim_trace_header( struct hmcsim_t *hmc )
         /* -- todo; print the cmc info */
         hmcsim_cmc_trace_header(hmc);
 
+        fflush( hmc->tfile );
+
 	return 0;
 }
 

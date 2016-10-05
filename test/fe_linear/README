@@ -1,0 +1,14 @@
+HMCSIM TEST: FE_LINEAR
+-------------------------------------------
+Executes a test of a parallel spin-wait
+lock algorithm.  Requires the use
+of the following CMC libraries:
+- ReadEF
+- WriteXE
+
+These libraries can be found in the
+~/cmc/fullempty/ directory.
+They are built by default with "make"
+
+-------------------------------------------
+EOF

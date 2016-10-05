@@ -217,6 +217,9 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   /* ---- */
 
   /* attempt to load the library */
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "LOADING CMC LIBRARY" );
+#endif
   handle = dlopen( cmc_lib, RTLD_NOW );
 
   if( handle == NULL ){
@@ -275,7 +278,11 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
 
   /* done loading functions */
 
-  idx = hmcsim_cmc_cmdtoidx( cmd );
+  idx = hmcsim_cmc_rawtoidx( cmd );
+#ifdef HMC_DEBUG
+  printf( "HMCSIM_REGISTER_FUNCTIONS: Setting CMC command at IDX=%d to ACTIVE\n",
+          idx );
+#endif
 
   if( hmc->cmcs[idx].active == 1 ){
     /* previously activated, this is an error */
@@ -310,9 +317,18 @@ extern int  hmcsim_query_cmc( struct hmcsim_t *hmc,
 
   idx = hmcsim_cmc_cmdtoidx( type );
 
+#ifdef HMC_DEBUG
+  printf( "HMCSIM_QUERY_CMC: RQST_TYPE = %d; IDX = %d\n",
+       type, idx );
+#endif
+
   if( idx == HMC_MAX_CMC ){
     return -1;
   }else if( hmc->cmcs[idx].active == 0 ){
+#ifdef HMC_DEBUG
+    printf( "ERROR : HMCSIM_QUERY_CMC: CMC OP AT IDX=%d IS INACTIVE\n",
+            idx );
+#endif
     return -1;
   }
 
@@ -389,7 +405,34 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
   /* register all the response data */
   *rsp_len      = hmc->cmcs[idx].rsp_len;
   *rsp_cmd      = hmc->cmcs[idx].rsp_cmd;
-  *raw_rsp_cmd  = hmc->cmcs[idx].rsp_cmd_code;
+
+  if( *rsp_len > 0 ){
+    if( *rsp_cmd == RSP_CMC ){
+      *raw_rsp_cmd  = hmc->cmcs[idx].rsp_cmd_code;
+    }else{
+      /* encode the normal reponse */
+      switch( *rsp_cmd ){
+      case RD_RS:
+        *raw_rsp_cmd = 0x38;
+        break;
+      case WR_RS:
+        *raw_rsp_cmd = 0x39;
+        break;
+      case MD_RD_RS:
+        *raw_rsp_cmd = 0x3A;
+        break;
+      case MD_WR_RS:
+        *raw_rsp_cmd = 0x3B;
+        break;
+      case RSP_ERROR:
+      default:
+        *raw_rsp_cmd = 0x00;
+        break;
+      }
+    }
+  }else{
+    *raw_rsp_cmd = 0x00;
+  }
 
   /* trace it */
   /* -- get the name of the op */

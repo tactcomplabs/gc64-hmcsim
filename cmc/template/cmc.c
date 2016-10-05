@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include "hmc_sim.h"
 
-
 /* ----------------------------------------------------- GLOBALS */
 /* These globals define the CMC operation parameters, the request
    enum and the command code.  Modify these values for your

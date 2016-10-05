@@ -23,6 +23,11 @@ struct htog_count_t{
 	uint64_t *xbar_latency;
 	uint64_t *wr64;
 	uint64_t *rd64;
+	uint64_t *wr16;
+	uint64_t *rd16;
+        uint64_t *hlock;
+        uint64_t *hunlock;
+        uint64_t *inc8;
 };
 struct htog_t{
 	struct htog_count_t counts;
@@ -69,6 +74,31 @@ static int htog_free( struct htog_t *htog ) {
 	if( htog->counts.rd64 != NULL ){
 		free( htog->counts.rd64 );
 		htog->counts.rd64 = NULL;
+	}
+
+	if( htog->counts.wr16 != NULL ){
+		free( htog->counts.wr16 );
+		htog->counts.wr16 = NULL;
+	}
+
+	if( htog->counts.rd16 != NULL ){
+		free( htog->counts.rd16 );
+		htog->counts.rd16 = NULL;
+	}
+
+	if( htog->counts.hlock != NULL ){
+		free( htog->counts.hlock );
+		htog->counts.hlock = NULL;
+	}
+
+	if( htog->counts.hunlock != NULL ){
+		free( htog->counts.hunlock );
+		htog->counts.hunlock = NULL;
+	}
+
+	if( htog->counts.inc8 != NULL ){
+		free( htog->counts.inc8 );
+		htog->counts.inc8 = NULL;
 	}
 
 	return 0;
@@ -156,7 +186,76 @@ static int print_results( struct htog_t *htog ) {
 	fclose( ofile );
 	ofile = NULL;
 
+	/*
+	 *  wr16
+	 *
+	 */
+	ofile = fopen( "wr16.out", "w+" );
+	if( ofile == NULL ){
+		return -1;
+	}
+	for( i=0; i<htog->num_clocks; i++ ){
+		fprintf( ofile, "%"PRIu64 " %"PRIu64 "\n", i, htog->counts.wr16[i] );
+	}
+	fclose( ofile );
+	ofile = NULL;
 
+	/*
+	 *  rd16
+	 *
+	 */
+	ofile = fopen( "rd16.out", "w+" );
+	if( ofile == NULL ){
+		return -1;
+	}
+	for( i=0; i<htog->num_clocks; i++ ){
+		fprintf( ofile, "%"PRIu64 " %"PRIu64 "\n", i, htog->counts.rd16[i] );
+	}
+	fclose( ofile );
+	ofile = NULL;
+
+	/*
+	 *  hlock
+	 *
+	 */
+	ofile = fopen( "hlock.out", "w+" );
+	if( ofile == NULL ){
+		return -1;
+	}
+	for( i=0; i<htog->num_clocks; i++ ){
+		fprintf( ofile, "%"PRIu64 " %"PRIu64 "\n", i, htog->counts.hlock[i] );
+	}
+	fclose( ofile );
+	ofile = NULL;
+
+	/*
+	 *  hunlock
+	 *
+	 */
+	ofile = fopen( "hunlock.out", "w+" );
+	if( ofile == NULL ){
+		return -1;
+	}
+	for( i=0; i<htog->num_clocks; i++ ){
+		fprintf( ofile, "%"PRIu64 " %"PRIu64 "\n", i, htog->counts.hunlock[i] );
+	}
+	fclose( ofile );
+	ofile = NULL;
+
+
+	/*
+	 *  inc8
+	 *
+	 */
+	ofile = fopen( "inc8.out", "w+" );
+	if( ofile == NULL ){
+		return -1;
+	}
+	for( i=0; i<htog->num_clocks; i++ ){
+		fprintf( ofile, "%"PRIu64 " %"PRIu64 "\n", i, htog->counts.inc8[i] );
+	}
+	fclose( ofile );
+	ofile = NULL;
 
 	return 0;
 }
@@ -197,6 +296,31 @@ static int alloc_mem( struct htog_t *htog ) {
 		return -1;
 	}
 
+	htog->counts.wr16 = malloc( sizeof( uint64_t ) * htog->num_clocks );
+	if( htog->counts.wr16 == NULL ){
+		return -1;
+	}
+
+	htog->counts.rd16 = malloc( sizeof( uint64_t ) * htog->num_clocks );
+	if( htog->counts.rd16 == NULL ){
+		return -1;
+	}
+
+	htog->counts.hlock = malloc( sizeof( uint64_t ) * htog->num_clocks );
+	if( htog->counts.hlock == NULL ){
+		return -1;
+	}
+
+	htog->counts.hunlock = malloc( sizeof( uint64_t ) * htog->num_clocks );
+	if( htog->counts.hunlock == NULL ){
+		return -1;
+	}
+
+	htog->counts.inc8 = malloc( sizeof( uint64_t ) * htog->num_clocks );
+	if( htog->counts.inc8 == NULL ){
+		return -1;
+	}
+
 	/*
 	 * zero the arrays
 	 *
@@ -207,6 +331,11 @@ static int alloc_mem( struct htog_t *htog ) {
 		htog->counts.xbar_latency[i]	= 0x00ll;
 		htog->counts.wr64[i]		= 0x00ll;
 		htog->counts.rd64[i]		= 0x00ll;
+		htog->counts.wr16[i]		= 0x00ll;
+		htog->counts.rd16[i]		= 0x00ll;
+		htog->counts.hlock[i]		= 0x00ll;
+		htog->counts.hunlock[i]		= 0x00ll;
+		htog->counts.inc8[i]		= 0x00ll;
 	}
 
 	return 0;
@@ -402,6 +531,16 @@ static int parse( FILE *infile, struct htog_t *htog ){
 				htog->counts.wr64[tc]++;
 			}else if( strcmp( pch, "RD64" ) == 0 ){
 				htog->counts.rd64[tc]++;
+			}else if( strcmp( pch, "WR16" ) == 0 ){
+				htog->counts.wr16[tc]++;
+			}else if( strcmp( pch, "RD16" ) == 0 ){
+				htog->counts.rd16[tc]++;
+			}else if( strcmp( pch, "HMC_LOCK" ) == 0 ){
+				htog->counts.hlock[tc]++;
+			}else if( strcmp( pch, "HMC_UNLOCK" ) == 0 ){
+				htog->counts.hunlock[tc]++;
+			}else if( strcmp( pch, "INC8" ) == 0 ){
+				htog->counts.inc8[tc]++;
 			}else{
 				printf( "Found a bogus value : %s\n", pch );
 			}
@@ -507,6 +646,11 @@ static int init_structs( struct htog_t *htog ){
 	htog->counts.xbar_latency	= NULL;
 	htog->counts.wr64		= NULL;
 	htog->counts.rd64		= NULL;
+	htog->counts.wr16		= NULL;
+	htog->counts.rd16		= NULL;
+        htog->counts.hlock              = NULL;
+        htog->counts.hunlock            = NULL;
+        htog->counts.inc8               = NULL;
 
 	htog->num_clocks		= 0x00ll;
 	htog->fname			= NULL;

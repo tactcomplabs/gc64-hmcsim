@@ -41,16 +41,16 @@ extern int	hmcsim_util_decode_bank( struct hmcsim_t *hmc,
 extern int	hmcsim_decode_rsp_cmd( 	hmc_response_t rsp_cmd,
 					uint8_t *cmd );
 extern uint32_t hmcsim_cmc_cmdtoidx( hmc_rqst_t rqst );
-extern int hmcsim_process_cmc(  struct hmcsim_t *hmc,
+extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                                 uint32_t rawcmd,
                                 uint32_t dev,
                                 uint32_t quad,
                                 uint32_t vault,
                                 uint32_t bank,
-                                uint32_t addr,
+                                uint64_t addr,
                                 uint32_t length,
-                                uint32_t head,
-                                uint32_t tail,
+                                uint64_t head,
+                                uint64_t tail,
                                 uint64_t *rqst_payload,
                                 uint64_t *rsp_payload,
                                 uint32_t *rsp_len,
@@ -101,7 +101,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	uint32_t tag			= 0x00;
 	uint32_t bsize			= 0x00;
 	uint32_t bank			= 0x00;
-	uint64_t addr			= 0x00ll;
+	uint64_t addr			= 0x00ull;
 	int no_response			= 0x00;
         int use_cmc                     = 0x00;
 	hmc_response_t rsp_cmd		= RSP_ERROR;
@@ -1651,6 +1651,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                 case 125:
                 case 126:
                 case 127:
+#ifdef HMC_DEBUG
+                        printf( "HMCSIM_PROCESS_PACKET: PROCESSING CMC PACKET REQUEST\n" );
+#endif
                         /* CMC OPERATIONS */
                         use_cmc = 1;
 
@@ -1685,16 +1688,16 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                            -- to send a response
                         */
                         switch( rsp_cmd ){
-                          case MD_RD_RS:
-                          case MD_WR_RS:
-                          case RSP_NONE:
-                            /* no response packet */
-                            no_response = 1;
-                            break;
-                          default:
-                            /* response packet */
-                            no_response = 0;
-                            break;
+                        case MD_RD_RS:
+                        case MD_WR_RS:
+                        case RSP_NONE:
+                          /* no response packet */
+                          no_response = 1;
+                          break;
+                        default:
+                          /* response packet */
+                          no_response = 0;
+                          break;
                         }
 
                         break;
@@ -1710,12 +1713,12 @@ step4_vr:
 	if( no_response == 0 ){
 
 		/* -- build the response */
-		rsp_slid 	= ((tail>>24) & 0x07);
-		rsp_tag		= ((head>>15) & 0x1FF );
+		rsp_slid 	= ((tail>>26) & 0x07);
+		rsp_tag		= tag;
 		rsp_crc		= ((tail>>32) & 0xFFFFFFFF);
-		rsp_rtc		= ((tail>>27) & 0x3F);
-		rsp_seq		= ((tail>>16) & 0x07);
-		rsp_frp		= ((tail>>8) & 0xFF);
+		rsp_rtc		= ((tail>>29) & 0x7);
+		rsp_seq		= ((tail>>18) & 0x7);
+		rsp_frp		= ((tail>>9) & 0x1FF);
 		rsp_rrp		= (tail & 0xFF);
 
 		/* -- decode the response command : see hmc_response.c */
@@ -1724,22 +1727,26 @@ step4_vr:
 		  hmcsim_decode_rsp_cmd( rsp_cmd, &(tmp8) );
                 }
 
-		/* -- packet head */
-		rsp_head	|= (tmp8 & 0x3F);
-		rsp_head	|= (rsp_len<<8);
-		rsp_head	|= (rsp_len<<11);
-		rsp_head	|= (rsp_tag<<15);
+                /* -- packet head */
+		rsp_head	|= (tmp8 & 0x7F);
+		rsp_head	|= (rsp_len<<7);
+		rsp_head	|= (rsp_tag<<12);
 		rsp_head	|= (rsp_slid<<39);
 
 		/* -- packet tail */
 		rsp_tail	|= (rsp_rrp);
-		rsp_tail	|= (rsp_frp<<8);
-		rsp_tail	|= (rsp_seq<<16);
-		rsp_tail	|= (rsp_rtc<<27);
+		rsp_tail	|= (rsp_frp<<9);
+		rsp_tail	|= (rsp_seq<<18);
+		rsp_tail	|= (rsp_rtc<<29);
 		rsp_tail	|= (rsp_crc<<32);
 
 		packet[0] 		= rsp_head;
 		packet[((rsp_len*2)-1)]	= rsp_tail;
+
+                /* build the cmc data payload */
+                for( j=1; j<((rsp_len-1)*2); j++ ){
+                  packet[j] = rsp_payload[j];
+                }
 
 		/* -- register the response */
 		hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].valid = HMC_RQST_VALID;

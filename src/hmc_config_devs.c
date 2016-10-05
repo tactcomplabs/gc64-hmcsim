@@ -518,8 +518,10 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 					 * drams in each bank
 					 * 
 					 */
+#if 0
 					hmc->devs[i].quads[j].vaults[k].banks[x].drams = 
 									&(hmc->__ptr_drams[cur_dram]);	
+#endif
 
 					for( y=0; y<hmc->num_drams; y++ ){ 
 			
@@ -527,7 +529,9 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 						 * set the id
 						 *
 						 */
+#if 0
 						hmc->devs[i].quads[j].vaults[k].banks[x].drams[y].id = y;
+#endif
 					}
 
 					cur_dram += hmc->num_drams;

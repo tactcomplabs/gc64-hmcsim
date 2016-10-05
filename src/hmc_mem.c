@@ -14,6 +14,15 @@
 #include "hmc_sim.h"
 
 extern int hmcsim_free_cmc( struct hmcsim_t *hmc );
+extern int hmcsim_readmem( struct hmcsim_t *hmc,
+                            uint64_t addr,
+                            uint64_t *data,
+                            uint32_t len);
+extern int hmcsim_writemem( struct hmcsim_t *hmc,
+                            uint64_t addr,
+                            uint64_t *data,
+                            uint32_t len);
+
 
 /* ----------------------------------------------------- HMCSIM_FREE_MEMORY */
 /*
@@ -151,6 +160,7 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 		return -1;
 	}
 
+#if 0
 	hmc->__ptr_drams = malloc( sizeof( struct hmc_dram_t ) 
 					* hmc->num_devs * hmc->num_vaults * hmc->num_banks 
 					* hmc->num_drams );
@@ -160,7 +170,7 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 #endif
 		return -1;
 	}
-
+#endif
 	hmc->__ptr_links = malloc( sizeof( struct hmc_link_t ) * hmc->num_devs * hmc->num_links );
 	if( hmc->__ptr_links == NULL ){ 
 #ifdef HMC_DEBUG
@@ -177,14 +187,20 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 		return -1;
 	}
 
-#if 0
+#ifdef HMC_ALLOC_MEM
 	hmc->__ptr_stor = malloc( sizeof( uint64_t ) * hmc->num_devs * hmc->capacity * HMC_1GB );
 	if( hmc->__ptr_stor == NULL ){ 
 #ifdef HMC_DEBUG
                 HMCSIM_PRINT_TRACE( "FAILED TO ALLOCATE __ptr_stor" );
 #endif
+                printf( "DUMPING OUT; CAN'T ALLOC MEMORY\n" );
 		return -1;
 	}
+
+        hmc->__ptr_end  = (uint64_t *)( hmc->__ptr_stor
+                                        + (sizeof( uint64_t ) *
+                                           hmc->num_devs *
+                                           hmc->capacity * HMC_1GB) );
 #endif
 
 	hmc->__ptr_xbar_rqst = malloc( sizeof( struct hmc_queue_t ) * hmc->num_devs 
@@ -223,6 +239,9 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 #endif
 		return -1;
 	}
+
+        hmc->readmem  = &(hmcsim_readmem);
+        hmc->writemem = &(hmcsim_writemem);
 
 	return 0;
 }

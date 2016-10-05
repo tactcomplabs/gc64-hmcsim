@@ -18,11 +18,11 @@ extern "C" {
 
 /* -------------------------------------------- VERSION MACROS */
 #ifndef 	HMC_MAJOR_VERSION
-#define		HMC_MAJOR_VERSION	0
+#define		HMC_MAJOR_VERSION	2
 #endif
 
 #ifndef		HMC_MINOR_VERSION
-#define		HMC_MINOR_VERSION	1
+#define		HMC_MINOR_VERSION	0
 #endif
 
 /* -------------------------------------------- VENDOR ID DATA */
@@ -83,6 +83,7 @@ extern "C" {
 #define		HMC_RQST_VALID		1
 #define		HMC_RQST_CONFLICT	2
 #define		HMC_RQST_STALLED	3
+#define         HMC_RQST_NEW            4
 #define		HMC_RQST_ZOMBIE		13
 
 #define		HMC_1GB		1073741824
