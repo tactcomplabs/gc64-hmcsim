@@ -1,20 +1,20 @@
-/* 
+/*
  * _HMC_SIM_H_
- * 
+ *
  * HYBRID MEMORY CUBE SIMULATION LIBRARY
- * 
- * MAIN HEADER FILE 
- * 
+ *
+ * MAIN HEADER FILE
+ *
  */
 
 /*!	\file hmc_sim.h
 	\brief Hybrid Memory Cube Functional Simulation Library Header File
-	
+
 	The HMC_SIM library is a standard C library that provides functional
 	simulation support for an arbitrarily configured Hybrid Memory Cube
 	device.  This libraries enables users to experiment with various
-	HMC configurations in order to perform research in available bandwidth, 
-	memory addressing, connectivity and general simulation archictecture. 
+	HMC configurations in order to perform research in available bandwidth,
+	memory addressing, connectivity and general simulation archictecture.
 */
 
 
@@ -302,6 +302,10 @@ extern int	hmcsim_util_get_max_blocksize( struct hmcsim_t *hmc, uint32_t dev, ui
         \return 0 on success, nonzero otherwise 
 */
 extern int      hmcsim_load_cmc( struct hmcsim_t *hmc, char *cmc_lib );
+
+/* ----------------------------------- SIMPLIFIED INTERFACE API */
+/* The following API functions are only found in HMCSim version 3.0+ */
+
 
 #ifdef __cplusplus
 } /* extern C */
