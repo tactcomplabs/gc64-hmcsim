@@ -325,13 +325,6 @@ extern int	hmcsim_trace( struct hmcsim_t *hmc, char *str )
 				hmc->clk,
 				str );
 
-	/*
-	fprintf( hmc->tfile, "%s%ld%s%s\n", 	"HMCSIM_TRACE : ", 
-					hmc->clk, 
-					" : ", 
-					str );
-	*/
-
 	return 0;
 }
 
