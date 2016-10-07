@@ -1,9 +1,18 @@
+-------------------------------------------------------------------------------
 HMC-SIM TODO LIST
---------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+- add simplified api functions
+
+- add thermal and power modeling functions
+
+- better integration with SST
+
+- integration with SST statistics functions
 
 - revisit hmc register decoding
 
-- add "hmc_init_skew()" to init the sim using a defined config 
+- add "hmc_init_skew()" to init the sim using a defined config
 
 - decode bank to dram association
 
@@ -20,14 +29,6 @@ HMC-SIM TODO LIST
 
 -- finish hmc_reset_device
 
--- finish the packet processor
-  - make sure and pay attention to the SLID value in the tail
-    for response routing
-  - go back through the response routing and make sure this is true
-  - probably done; but make sure
-
-- add warm reset function for JTAG requests
-
 - add size to the build_memrequest for the payload
   -- maybe not, investigate
 
@@ -43,9 +44,18 @@ HMC-SIM TODO LIST
 - add cache analysis functions
 
 
---------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 Completed Items:
---------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- finish the packet processor
+  - DONE: make sure and pay attention to the SLID value in the tail
+    for response routing
+  - DONE: go back through the response routing and make sure this is true
+  - DONE: probably done; but make sure
+
+- add warm reset function for JTAG requests
+  -- DONE: JTAG pseudo-deprecated given lack of additional info in spec
+
 - util function to determine if device is attached to a host [eg root device]
   -- DONE
 

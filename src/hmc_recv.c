@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_RECV_C_
- * 
- * HYBRID MEMORY CUBE SIMULATION LIBRARY 
- * 
+ *
+ * HYBRID MEMORY CUBE SIMULATION LIBRARY
+ *
  * MEMORY RECV FUNCTIONS
- * 
+ *
  */
 
 
@@ -17,9 +17,9 @@
 extern int      hmcsim_util_zero_packet( struct hmc_queue_t *queue );
 
 /* ----------------------------------------------------- HMCSIM_RECV */
-/* 
+/*
  * HMCSIM_RECV
- * 
+ *
  */
 extern int	hmcsim_recv( struct hmcsim_t *hmc, uint32_t dev, uint32_t link, uint64_t *packet )
 {
@@ -29,13 +29,13 @@ extern int	hmcsim_recv( struct hmcsim_t *hmc, uint32_t dev, uint32_t link, uint6
 	uint32_t cur	= 0;
 	/* ---- */
 
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 		return -1;
 	}
 
 	if( dev > hmc->num_devs ){
 		return -1;
-	}		
+	}
 
 	if( link > hmc->num_links ) {
 		return -1;

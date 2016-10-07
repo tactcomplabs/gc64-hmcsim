@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_SIM_MACROS_H_
- * 
+ *
  * HYBRID MEMORY CUBE SIMULATION LIBRARY
- * 
- * MACROS HEADER FILE 
- * 
+ *
+ * MACROS HEADER FILE
+ *
  */
 
 #ifndef _HMC_SIM_MACROS_H_
