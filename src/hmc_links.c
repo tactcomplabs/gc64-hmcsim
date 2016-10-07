@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_LINKS_C_
- * 
- * HYBRID MEMORY CUBE SIMULATION LIBRARY 
- * 
+ *
+ * HYBRID MEMORY CUBE SIMULATION LIBRARY
+ *
  * HMC LINK CONFIGURATION FUNCTIONS
- * 
+ *
  */
 
 
@@ -16,11 +16,11 @@
 
 
 /* ----------------------------------------------------- HMCSIM_LINK_CONFIG */
-/* 
+/*
  * HMCSIM_LINK_CONFIG
- * 
+ *
  */
-extern int	hmcsim_link_config( 	struct hmcsim_t *hmc, 
+extern int	hmcsim_link_config( 	struct hmcsim_t *hmc,
 					uint32_t src_dev,
 					uint32_t dest_dev,
 					uint32_t src_link,
@@ -28,17 +28,17 @@ extern int	hmcsim_link_config( 	struct hmcsim_t *hmc,
 					hmc_link_def_t type )
 {
 	/* sanity check */
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 		return -1;
 	}
 
 	if( src_dev > (hmc->num_devs+1) ){
 		return -1;
-	}	
+	}
 
 	if( dest_dev >= hmc->num_devs ){
 		return -1;
-	}	
+	}
 	if( src_link >= hmc->num_links) {
 		return -1;
 	}
@@ -47,15 +47,15 @@ extern int	hmcsim_link_config( 	struct hmcsim_t *hmc,
 		return -1;
 	}
 
-	/* 
+	/*
 	 * ok, we're sane.. setup the links
-	 * 
+	 *
 	 */
 
-	if( type == HMC_LINK_HOST_DEV ){ 
+	if( type == HMC_LINK_HOST_DEV ){
 
-		/* 
-		 * host to device link 
+		/*
+		 * host to device link
 	 	 *
 		 */
 
@@ -65,25 +65,25 @@ extern int	hmcsim_link_config( 	struct hmcsim_t *hmc,
 		hmc->devs[ dest_dev ].links[ dest_link ].type 		= HMC_LINK_HOST_DEV;
 
 	}else{
-		/* 
-		 * device to device link 
+		/*
+		 * device to device link
 		 * dest && src must be different; no loops
 		 *
 		 */
-		
-		if( dest_dev == src_dev ){ 
+
+		if( dest_dev == src_dev ){
 			return -1;
 		}
 
-		/* 
-		 * config the src 
+		/*
+		 * config the src
 		 *
 		 */
 		hmc->devs[ src_dev ].links[ src_link ].src_cub		= src_dev;
 		hmc->devs[ src_dev ].links[ src_link ].dest_cub		= dest_dev;
 		hmc->devs[ src_dev ].links[ src_link ].type		= HMC_LINK_DEV_DEV;
 
-		/* 
+		/*
 		 * config the dest
 		 */
 		hmc->devs[ dest_dev ].links[ dest_link ].src_cub	= dest_dev;

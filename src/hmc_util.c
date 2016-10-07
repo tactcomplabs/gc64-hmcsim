@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_UTIL_C_
- * 
- * HYBRID MEMORY CUBE SIMULATION LIBRARY 
- * 
+ *
+ * HYBRID MEMORY CUBE SIMULATION LIBRARY
+ *
  * UTILITY FUNCTIONS
- * 
+ *
  */
 
 
@@ -16,7 +16,7 @@
 
 /* ----------------------------------------------------- HMCSIM_GET_CLOCK */
 extern uint64_t hmcsim_get_clock( struct hmcsim_t *hmc ){
-  if( hmc == NULL ){ 
+  if( hmc == NULL ){
     return 0x00ll;
   }
 
@@ -24,84 +24,82 @@ extern uint64_t hmcsim_get_clock( struct hmcsim_t *hmc ){
 }
 
 /* ----------------------------------------------------- HMCSIM_UTIL_IS_ROOT */
-/* 
- * HMCSIM_UTIL_IS_ROOT 
+/*
+ * HMCSIM_UTIL_IS_ROOT
  *
  */
-extern int hmcsim_util_is_root( struct hmcsim_t *hmc, 
+extern int hmcsim_util_is_root( struct hmcsim_t *hmc,
 				uint32_t dev )
 {
-	/* vars */
-	uint32_t	is_root = 0; 
-	uint32_t 	i	= 0;
-	/* ---- */
+  /* vars */
+  uint32_t	is_root = 0;
+  uint32_t 	i	= 0;
+  /* ---- */
 
-	/* 
-	 * walk the links and see if i am a root device 
-	 * root devices have a src_cub == num_devs+1
-	 * 
-	 */
-	for( i=0; i<hmc->num_links;i++ ){ 
+  /*
+   * walk the links and see if i am a root device
+   * root devices have a src_cub == num_devs+1
+   *
+   */
+  for( i=0; i<hmc->num_links;i++ ){
+    if( hmc->devs[dev].links[i].src_cub == (hmc->num_devs+1) ){
+      is_root = 1;
+    }
+  }
 
-		if( hmc->devs[dev].links[i].src_cub == (hmc->num_devs+1) ){
-			is_root = 1;
-		}
-
-	}
-
-	return is_root;
+  return is_root;
 }
 
 /* ----------------------------------------------------- HMCSIM_UTIL_DECODE_SLID */
-/* 
- * HMCSIM_UTIL_DECODE_SLID 
+/*
+ * HMCSIM_UTIL_DECODE_SLID
  *
  */
-extern int hmcsim_util_decode_slid(	struct hmcsim_t *hmc, 
-					struct hmc_queue_t *queue, 
-					uint32_t slot, 
+extern int hmcsim_util_decode_slid(	struct hmcsim_t *hmc,
+					struct hmc_queue_t *queue,
+					uint32_t slot,
 					uint32_t *slid )
 {
-	/* vars */
-	uint64_t header	= 0x00ll;
-	uint32_t tmp	= 0x00;
-	/* ---- */
+  /* vars */
+  uint64_t header = 0x00ll;
+  uint32_t tmp	  = 0x00;
+  /* ---- */
 
-	/* 
-	 * sanity check 
-	 * 
-	 */
-	if( hmc == NULL ){ 
-		return -1;
-	}
+  /*
+   * sanity check
+   *
+   */
+  if( hmc == NULL ){
+    return -1;
+  }
 
-	if( slid == NULL ){ 
-		return -1;
-	}
+  if( slid == NULL ){
+    return -1;
+  }
 
-	if( queue == NULL ){ 
-		return -1;
-	}
+  if( queue == NULL ){
+    return -1;
+  }
 
-	/* 
-	 * get the packet header
-	 * 
-	 */
-	header 	= queue[slot].packet[0];
+  /*
+   * get the packet header
+   *
+   */
+  header 	= queue[slot].packet[0];
 
-	/* 
-	 * get the slid value [41:39]
-	 * 
-	 */
-	tmp 	= (uint32_t)((header>>39) & 0x7);
+  /*
+   * get the slid value [41:39]
+   *
+   */
+  tmp 	= (uint32_t)((header>>39) & 0x7);
 
-	/* 
-	 * write it out 
-	 * 
-	 */
-	*slid 	= tmp;
+  /*
+   * write it out
+   *
+   */
+  *slid 	= tmp;
 
-	return 0;
+  return 0;
 }
 
 /* ----------------------------------------------------- HMCSIM_UTIL_DECODE_QUAD */
