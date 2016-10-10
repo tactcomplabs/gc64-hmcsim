@@ -60,6 +60,7 @@ extern "C" {
 #define		HMC_TRACE_CMD		0x0004
 #define		HMC_TRACE_STALL		0x0008
 #define		HMC_TRACE_LATENCY	0x0010
+#define         HMC_TRACE_POWER         0x0020
 
 /* -------------------------------------------- MACROS */
 #define		HMC_MAX_DEVS		8
