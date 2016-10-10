@@ -22,6 +22,37 @@ extern int	hmcsim_config_devices( struct hmcsim_t *sim );
 extern int	hmc_reset_device( struct hmcsim_t *hmc, uint32_t dev );
 
 
+/* ----------------------------------------------------- HMCSIM_INIT_POWER */
+static void hmcsim_init_power( struct hmcsim_t *hmc ){
+  if( hmc == NULL ){
+    return ;
+  }
+
+  /* -- local values */
+  hmc->power.link_phy           = 0.0;
+  hmc->power.link_local_route   = 0.0;
+  hmc->power.link_remote_route  = 0.0;
+  hmc->power.xbar_rqst_slot     = 0.0;
+  hmc->power.xbar_rsp_slot      = 0.0;
+  hmc->power.xbar_route_extern  = 0.0;
+  hmc->power.vault_rqst_slot    = 0.0;
+  hmc->power.vault_rsp_slot     = 0.0;
+  hmc->power.vault_ctrl         = 0.0;
+  hmc->power.row_access         = 0.0;
+
+  /* -- totals */
+  hmc->power.t_link_phy           = 0.0;
+  hmc->power.t_link_local_route   = 0.0;
+  hmc->power.t_link_remote_route  = 0.0;
+  hmc->power.t_xbar_rqst_slot     = 0.0;
+  hmc->power.t_xbar_rsp_slot      = 0.0;
+  hmc->power.t_xbar_route_extern  = 0.0;
+  hmc->power.t_vault_rqst_slot    = 0.0;
+  hmc->power.t_vault_rsp_slot     = 0.0;
+  hmc->power.t_vault_ctrl         = 0.0;
+  hmc->power.t_row_access         = 0.0;
+}
+
 /* ----------------------------------------------------- HMCSIM_INIT */
 /*
  * HMCSIM_INIT
@@ -191,6 +222,12 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
 
 		//hmc_reset_device( hmc, i );
 	}
+
+        /*
+         * init the power values
+         *
+         */
+        hmcsim_init_power( hmc );
 
 	return 0;
 }

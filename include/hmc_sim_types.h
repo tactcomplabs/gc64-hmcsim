@@ -294,6 +294,32 @@ struct hmc_cmc_t{
 
 };
 
+struct hmc_power_t{
+  /* -- local values */
+  float link_phy;           /*! HMC_POWER_T: POWER FOR EACH LINK PHY PER CLOCK */
+  float link_local_route;   /*! HMC_POWER_T: POWER FOR LOCAL LINK ROUTE TO QUAD */
+  float link_remote_route;  /*! HMC_POWER_T: POWER FOR REMOTE LINK ROUTE TO QUAD */
+  float xbar_rqst_slot;     /*! HMC_POWER_T: POWER FOR XBAR REQUEST SLOT */
+  float xbar_rsp_slot;      /*! HMC_POWER_T: POWER FOR XBAR RESPONSE SLOT */
+  float xbar_route_extern;  /*! HMC_POWER_T: POWER FOR ROUTED REQUEST TO EXTERNAL CUBE */
+  float vault_rqst_slot;    /*! HMC_POWER_T: POWER FOR VAULT REQUEST SLOT */
+  float vault_rsp_slot;     /*! HMC_POWER_T: POWER FOR VAULT RESPONSE SLOT */
+  float vault_ctrl;         /*! HMC_POWER_T: POWER FOR VAULT CONTROLLER PER ACTIVE CLOCK */
+  float row_access;         /*! HMC_POWER_T: POWER FOR ROW ACCESS */
+
+  /* -- totals */
+  float t_link_phy;           /*! HMC_POWER_T: TOTAL POWER FOR EACH LINK PHY PER CLOCK */
+  float t_link_local_route;   /*! HMC_POWER_T: TOTAL POWER FOR LOCAL LINK ROUTE TO QUAD */
+  float t_link_remote_route;  /*! HMC_POWER_T: TOTAL POWER FOR REMOTE LINK ROUTE TO QUAD */
+  float t_xbar_rqst_slot;     /*! HMC_POWER_T: TOTAL POWER FOR XBAR REQUEST SLOT */
+  float t_xbar_rsp_slot;      /*! HMC_POWER_T: TOTAL POWER FOR XBAR RESPONSE SLOT */
+  float t_xbar_route_extern;  /*! HMC_POWER_T: TOTAL POWER FOR ROUTED REQUEST TO EXTERNAL CUBE */
+  float t_vault_rqst_slot;    /*! HMC_POWER_T: TOTAL POWER FOR VAULT REQUEST SLOT */
+  float t_vault_rsp_slot;     /*! HMC_POWER_T: TOTAL POWER FOR VAULT RESPONSE SLOT */
+  float t_vault_ctrl;         /*! HMC_POWER_T: TOTAL POWER FOR VAULT CONTROLLER PER ACTIVE CLOCK */
+  float t_row_access;         /*! HMC_POWER_T: TOTAL POWER FOR ROW ACCESS */
+};
+
 struct hmcsim_t{
 
 	struct hmc_dev_t *devs;		/*! HMC-SIM: HMCSIM_T: DEVICE STRUCTURES */
@@ -320,6 +346,8 @@ struct hmcsim_t{
 
 	uint64_t clk;			/*! HMC-SIM: HMCSIM_T: CLOCK TICK */
 
+        struct hmc_power_t power;       /*! HMC-SIM: HMCSIM_T: POWER MEASUREMENT VALUES */
+
         int (*readmem)(struct hmcsim_t *,
                        uint64_t,
                        uint64_t *,
@@ -344,8 +372,6 @@ struct hmcsim_t{
 	uint64_t 		*__ptr_stor;
 	uint64_t 		*__ptr_end;
 };
-
-
 
 #ifdef __cplusplus
 } /* extern C */
