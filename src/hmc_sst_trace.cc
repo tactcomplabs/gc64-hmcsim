@@ -15,6 +15,19 @@ using namespace SST;
 /* ----------------------------------------------------- HMCSIM_SST_TRACE_INIT */
 extern "C" int hmcsim_sst_trace_init();
 int hmcsim_sst_trace_init(){
+  /* tell the SST sim not to end without this data */
+  registerAsPrimaryComponent();
+  primaryComponentDoNotEndSim();
+
+  /* register all the new components */
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_SST_TRACE_CLOSE */
+extern "C" int hmcsim_sst_trace_close();
+int hmcsim_sst_trace_close(){
+  primaryComponentOKToEndSim();
   return 0;
 }
 
@@ -93,6 +106,5 @@ int hmcsim_sst_trace_latency( struct hmcsim_t *hmc,
 }
 
 #endif /* SST_ENABLE_STAT */
-#endif /* _HMC_SST_TRACE_H_ */
 
 /* EOF */

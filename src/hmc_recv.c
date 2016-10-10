@@ -21,7 +21,10 @@ extern int      hmcsim_util_zero_packet( struct hmc_queue_t *queue );
  * HMCSIM_RECV
  *
  */
-extern int	hmcsim_recv( struct hmcsim_t *hmc, uint32_t dev, uint32_t link, uint64_t *packet )
+extern int	hmcsim_recv( struct hmcsim_t *hmc,
+                             uint32_t dev,
+                             uint32_t link,
+                             uint64_t *packet )
 {
 	/* vars */
 	uint32_t target	= hmc->xbar_depth+1;
@@ -45,38 +48,38 @@ extern int	hmcsim_recv( struct hmcsim_t *hmc, uint32_t dev, uint32_t link, uint6
 	HMCSIM_PRINT_TRACE( "CHECKING LINK FOR CONNECTIVITY" );
 	HMCSIM_PRINT_INT_TRACE( "DEV", (int)(dev) );
 	HMCSIM_PRINT_INT_TRACE( "LINK", (int)(link) );
-#endif	
+#endif
 
 	if( hmc->devs[dev].links[link].type != HMC_LINK_HOST_DEV ){
-		/* 
-	 	 * oops, I'm not connected to this link 
+		/*
+	 	 * oops, I'm not connected to this link
 		 *
 		 */
-		return -1;	
+		return -1;
 	}
 
-	/* 
-	 * ok, sanity check complete; 
+	/*
+	 * ok, sanity check complete;
 	 * go walk the response queues associated
 	 * with the target device+link combo
-	 * 
+	 *
 	 * If nothing is found, return a stall signal
-	 * 
-	 */	
+	 *
+	 */
 #ifdef HMC_DEBUG
 	HMCSIM_PRINT_TRACE( "CHECKING LINK FOR VALID RESPONSE" );
 #endif
 
 	cur = hmc->xbar_depth-1;
-	
-	for( i=0; i<hmc->xbar_depth; i++ ){ 
+
+	for( i=0; i<hmc->xbar_depth; i++ ){
 
 #ifdef HMC_DEBUG
 		HMCSIM_PRINT_INT_TRACE( "CHECKING XBAR RESPONSE QUEUE SLOT", (int)(cur) );
 
-		HMCSIM_PRINT_ADDR_TRACE( "xbar_rsp", 
+		HMCSIM_PRINT_ADDR_TRACE( "xbar_rsp",
 					(uint64_t)(hmc->devs[dev].xbar[link].xbar_rsp) );
-		HMCSIM_PRINT_ADDR_TRACE( "xbar_rsp[cur]", 
+		HMCSIM_PRINT_ADDR_TRACE( "xbar_rsp[cur]",
 					(uint64_t)&(hmc->devs[dev].xbar[link].xbar_rsp[cur]) );
 #endif
 
@@ -91,9 +94,9 @@ extern int	hmcsim_recv( struct hmcsim_t *hmc, uint32_t dev, uint32_t link, uint6
 	}
 
 	if( target ==  hmc->xbar_depth+1 ){
-		/* 
+		/*
 		 * no responses found
-		 * 
+		 *
 		 */
 		return HMC_STALL;
 	}
