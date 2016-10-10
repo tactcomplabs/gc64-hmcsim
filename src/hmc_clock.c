@@ -15,6 +15,7 @@
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
 extern int hmcsim_trace( struct hmcsim_t *hmc, char *str );
+extern int hmcsim_trace_power( struct hmcsim_t *hmc );
 extern int hmcsim_trace_stall( 	struct hmcsim_t *hmc,
 				uint32_t dev,
 				uint32_t quad,
@@ -1562,12 +1563,23 @@ extern int	hmcsim_clock( struct hmcsim_t *hmc )
 		return -1;
 	}
 
+        /*
+         * Stage 6: optionally print all the power tracing data
+         *
+         */
+#ifdef HMC_DEBUG
+	HMCSIM_PRINT_TRACE( "STAGE6: OUTPUT POWER TRACING DATA" );
+#endif
+        if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+          hmcsim_trace_power( hmc );
+        }
+
 	/*
-	 * Stage 6: update the clock value
+	 * Stage 7: update the clock value
 	 *
 	 */
 #ifdef HMC_DEBUG
-	HMCSIM_PRINT_TRACE( "STAGE6: UPDATE THE CLOCK" );
+	HMCSIM_PRINT_TRACE( "STAGE7: UPDATE THE CLOCK" );
 #endif
 	hmc->clk++;
 

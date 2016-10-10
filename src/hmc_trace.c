@@ -20,6 +20,46 @@ extern void hmcsim_cmc_trace_header( struct hmcsim_t *hmc );
 
 
 
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER */
+/*
+ * HMCSIM_TRACE_POWER
+ *
+ */
+extern int      hmcsim_trace_power( struct hmcsim_t *hmc ){
+  if( hmc == NULL ){
+    return -1;
+  }else if( hmc->tfile == NULL ){
+    return -1;
+  }
+
+  /*
+   * write out the individual trace values for power
+   *
+   */
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER_HEADER */
+static void     hmcsim_trace_power_header( struct hmcsim_t *hmc ){
+  if( hmc == NULL ){
+    return ;
+  }
+
+  fprintf( hmc->tfile, "%s%f\n", "LINK_PHY           = ", hmc->power.link_phy );
+  fprintf( hmc->tfile, "%s%f\n", "LINK_LOCAL_ROUTE   = ", hmc->power.link_local_route );
+  fprintf( hmc->tfile, "%s%f\n", "LINK_REMOTE_ROUTE  = ", hmc->power.link_remote_route );
+  fprintf( hmc->tfile, "%s%f\n", "XBAR_RQST_SLOT     = ", hmc->power.xbar_rqst_slot );
+  fprintf( hmc->tfile, "%s%f\n", "XBAR_RSP_SLOT      = ", hmc->power.xbar_rsp_slot );
+  fprintf( hmc->tfile, "%s%f\n", "XBAR_ROUTE_EXTERN  = ", hmc->power.xbar_route_extern );
+  fprintf( hmc->tfile, "%s%f\n", "VAULT_RQST_SLOT    = ", hmc->power.vault_rqst_slot );
+  fprintf( hmc->tfile, "%s%f\n", "VAULT_RSP_SLOT     = ", hmc->power.vault_rsp_slot );
+  fprintf( hmc->tfile, "%s%f\n", "VAULT_CTRL         = ", hmc->power.vault_ctrl );
+  fprintf( hmc->tfile, "%s%f\n", "ROW_ACCESS         = ", hmc->power.row_access );
+  fprintf( hmc->tfile, "%s\n", 	"#---------------------------------------------------------" );
+
+  return ;
+}
+
 /* ----------------------------------------------------- HMCSIM_TRACE_HEADER */
 /*
  * HMCSIM_TRACE_HEADER
@@ -51,7 +91,10 @@ extern int	hmcsim_trace_header( struct hmcsim_t *hmc )
 	fprintf( hmc->tfile, "%s%d\n",  "# HMC_XBAR_QUEUE_DEPTH  = ", hmc->xbar_depth );
 	fprintf( hmc->tfile, "%s\n", 	"#---------------------------------------------------------" );
 
-        /* -- todo; print the cmc info */
+        /* print the power info */
+        hmcsim_trace_power_header(hmc);
+
+        /* print the cmc info */
         hmcsim_cmc_trace_header(hmc);
 
         fflush( hmc->tfile );
