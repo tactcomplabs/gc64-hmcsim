@@ -14,6 +14,9 @@
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
+extern int      hmcsim_power_row_access( struct hmcsim_t *hmc,
+                                         uint64_t addr,
+                                         uint32_t mult );
 extern int	hmcsim_trace( struct hmcsim_t *hmc, char *str );
 extern int	hmcsim_trace_rqst( 	struct hmcsim_t *hmc,
 					char *rqst,
@@ -237,6 +240,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -258,6 +264,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -288,6 +297,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -318,6 +330,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -348,6 +363,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -378,6 +396,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -408,6 +429,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -438,6 +462,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -468,6 +495,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -490,6 +520,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = MD_WR_RS;
@@ -511,6 +544,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -532,6 +568,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -550,6 +589,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -571,6 +613,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -589,6 +634,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -616,6 +664,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -643,6 +694,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -670,6 +724,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -697,6 +754,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -724,6 +784,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -751,6 +814,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -778,6 +844,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -796,6 +865,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -814,6 +886,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -832,6 +907,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -850,6 +928,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -871,6 +952,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -901,6 +985,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -931,6 +1018,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -961,6 +1051,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -991,6 +1084,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1021,6 +1117,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1051,6 +1150,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1081,6 +1183,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1102,6 +1207,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = MD_RD_RS;
@@ -1196,6 +1304,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1217,6 +1328,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1238,6 +1352,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -1259,6 +1376,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
@@ -1277,6 +1397,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1298,6 +1421,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1319,6 +1445,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1340,6 +1469,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1361,6 +1493,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1382,6 +1517,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1403,6 +1541,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1424,6 +1565,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1445,6 +1589,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1466,6 +1613,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1487,6 +1637,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1508,6 +1661,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -1529,6 +1685,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
@@ -1550,6 +1709,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
@@ -1571,6 +1733,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;

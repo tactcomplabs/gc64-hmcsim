@@ -32,6 +32,19 @@ extern int hmcsim_power_clear( struct hmcsim_t *hmc ){
   return 0;
 }
 
+/* ----------------------------------------------------- HMCSIM_POWER_ROW_ACCESS */
+extern int hmcsim_power_row_access( struct hmcsim_t *hmc,
+                                    uint64_t addr,
+                                    uint32_t mult ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  hmc->power.t_row_access += (hmc->power.row_access*(uint64_t)(mult));
+
+  return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_POWER_XBAR_RSP_SLOT */
 extern int hmcsim_power_xbar_rsp_slot( struct hmcsim_t *hmc,
                                         uint32_t dev,
