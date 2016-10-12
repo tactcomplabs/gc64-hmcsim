@@ -14,6 +14,7 @@
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
+extern int hmcsim_power_vault_ctrl( struct hmcsim_t *hmc, uint32_t vault );
 extern int hmcsim_power_route_extern( struct hmcsim_t *hmc,
                                       uint32_t srcdev,
                                       uint32_t srclink,
@@ -963,7 +964,13 @@ static int hmcsim_clock_rw_ops( struct hmcsim_t *hmc )
 	uint32_t k	= 0;
 	uint32_t x	= 0;
 	uint32_t test	= 0x00000000;
+        uint32_t venable[4];
 	/* ---- */
+
+        /* reset the vault enable array */
+        for( i=0; i<4; i++ ){
+          venable[i] = 0;
+        }
 
 	for( i=0; i<hmc->num_devs; i++){
 		for( j=0; j<hmc->num_quads; j++ ){
@@ -1002,6 +1009,7 @@ static int hmcsim_clock_rw_ops( struct hmcsim_t *hmc )
 							 *
 							 */
 							hmcsim_process_rqst( hmc, i, j, k, x );
+                                                        venable[k] = 1;
 						}
 					}
 
@@ -1030,6 +1038,7 @@ static int hmcsim_clock_rw_ops( struct hmcsim_t *hmc )
 							 *
 							 */
 							hmcsim_process_rqst( hmc, i, j, k, x );
+                                                        venable[k] = 1;
 						}
 					}
 
@@ -1037,6 +1046,13 @@ static int hmcsim_clock_rw_ops( struct hmcsim_t *hmc )
 			}
 		}
 	}
+
+        /* record the control power enable for each active vault */
+        for( i=0; i<4; i++ ){
+          if( venable[i] == 1 ){
+            hmcsim_power_vault_ctrl( hmc, i );
+          }
+        }
 
 	return 0;
 }
