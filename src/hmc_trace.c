@@ -19,6 +19,273 @@
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
 extern void hmcsim_cmc_trace_header( struct hmcsim_t *hmc );
 
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER_VAULT_RSP_SLOT */
+extern int      hmcsim_trace_power_vault_rsp_slot( struct hmcsim_t *hmc,
+                                                   uint32_t dev,
+                                                   uint32_t quad,
+                                                   uint32_t vault,
+                                                   uint32_t slot ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : VAULT_RSP_SLOT_POWER : ",
+           hmc->clk,
+           " :",
+           dev,
+           ":",
+           quad,
+           ":",
+           vault,
+           ":",
+           slot,
+           ":",
+           hmc->power.vault_rsp_slot );
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER_VAULT_RQST_SLOT */
+extern int      hmcsim_trace_power_vault_rqst_slot( struct hmcsim_t *hmc,
+                                                    uint32_t dev,
+                                                    uint32_t quad,
+                                                    uint32_t vault,
+                                                    uint32_t slot ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : VAULT_RQST_SLOT_POWER : ",
+           hmc->clk,
+           " :",
+           dev,
+           ":",
+           quad,
+           ":",
+           vault,
+           ":",
+           slot,
+           ":",
+           hmc->power.vault_rqst_slot );
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER_ROW_ACCESS */
+extern int hmcsim_trace_power_row_access( struct hmcsim_t *hmc,
+                                          uint64_t addr,
+                                          uint32_t mult ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s0x016%"PRIx64"%s%f\n",
+           "HMCSIM_TRACE : ROW_ACCESS_POWER : ",
+           hmc->clk,
+           " :",
+           addr,
+           ":",
+           hmc->power.row_access * (float)(mult) );
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER_XBAR_RSP_SLOT */
+extern int hmcsim_trace_power_xbar_rsp_slot( struct hmcsim_t *hmc,
+                                             uint32_t dev,
+                                             uint32_t link,
+                                             uint32_t slot ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : XBAR_RSP_SLOT_POWER : ",
+           hmc->clk,
+           " :",
+           dev,
+           ":",
+           link,
+           ":",
+           slot,
+           ":",
+           hmc->power.xbar_rsp_slot);
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER_XBAR_RQST_SLOT */
+extern int hmcsim_trace_power_xbar_rqst_slot( struct hmcsim_t *hmc,
+                                              uint32_t dev,
+                                              uint32_t link,
+                                              uint32_t slot ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : XBAR_RQST_SLOT_POWER : ",
+           hmc->clk,
+           " :",
+           dev,
+           ":",
+           link,
+           ":",
+           slot,
+           ":",
+           hmc->power.xbar_rqst_slot);
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER_VAULT_CTRL */
+extern int hmcsim_trace_power_vault_ctrl( struct hmcsim_t *hmc,
+                                          uint32_t vault ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : VAULT_CTRL_POWER : ",
+           hmc->clk,
+           " :",
+           vault,
+           ":",
+           hmc->power.vault_ctrl);
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER_ROUTE_EXTERN */
+extern int hmcsim_trace_power_route_extern( struct hmcsim_t *hmc,
+                                            uint32_t srcdev,
+                                            uint32_t srclink,
+                                            uint32_t srcslot,
+                                            uint32_t destdev,
+                                            uint32_t destlink,
+                                            uint32_t destslot ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : XBAR_ROUTE_EXTERN : ",
+           hmc->clk,
+           " :",
+           srcdev,
+           ":",
+           srclink,
+           ":",
+           srcslot,
+           ":",
+           destdev,
+           ":",
+           destlink,
+           ":",
+           destslot,
+           ":",
+           hmc->power.xbar_rsp_slot);
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER_LOCAL_ROUTE */
+extern int hmcsim_trace_power_local_route( struct hmcsim_t *hmc,
+                                           uint32_t dev,
+                                           uint32_t link,
+                                           uint32_t slot,
+                                           uint32_t quad,
+                                           uint32_t vault ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : LINK_LOCAL_ROUTE_POWER : ",
+           hmc->clk,
+           " :",
+           dev,
+           ":",
+           link,
+           ":",
+           quad,
+           ":",
+           vault,
+           ":",
+           slot,
+           ":",
+           hmc->power.link_local_route);
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER_REMOTE_ROUTE */
+extern int hmcsim_trace_power_remote_route( struct hmcsim_t *hmc,
+                                            uint32_t dev,
+                                            uint32_t link,
+                                            uint32_t slot,
+                                            uint32_t quad,
+                                            uint32_t vault ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : LINK_REMOTE_ROUTE_POWER : ",
+           hmc->clk,
+           " :",
+           dev,
+           ":",
+           link,
+           ":",
+           quad,
+           ":",
+           vault,
+           ":",
+           slot,
+           ":",
+           hmc->power.link_remote_route);
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER_LINKS */
+extern int hmcsim_trace_power_links( struct hmcsim_t *hmc ){
+  uint32_t i = 0;
+  uint32_t j = 0;
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  for( j=0; j<hmc->num_devs; j++ ){
+
+    for( i=0; i<hmc->num_links; i++ ){
+      fprintf( hmc->tfile,
+             "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+             "HMCSIM_TRACE : LINK_PHY_POWER : ",
+             hmc->clk,
+             " :",
+             j,/*dev*/
+             ":",
+             i,/*link*/
+             ":",
+             hmc->power.link_phy );
+    }
+  }
+
+  return 0;
+}
 
 
 /* ----------------------------------------------------- HMCSIM_TRACE_POWER */
