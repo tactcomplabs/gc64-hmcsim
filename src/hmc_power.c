@@ -32,6 +32,38 @@ extern int hmcsim_power_clear( struct hmcsim_t *hmc ){
   return 0;
 }
 
+/* ----------------------------------------------------- HMCSIM_POWER_LOCAL_ROUTE */
+extern int hmcsim_power_local_route( struct hmcsim_t *hmc,
+                                 uint32_t dev,
+                                 uint32_t link,
+                                 uint32_t slot,
+                                 uint32_t quad,
+                                 uint32_t vault ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  hmc->power.t_link_local_route += hmc->power.link_local_route;
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_POWER_REMOTE_ROUTE */
+extern int hmcsim_power_remote_route( struct hmcsim_t *hmc,
+                                 uint32_t dev,
+                                 uint32_t link,
+                                 uint32_t slot,
+                                 uint32_t quad,
+                                 uint32_t vault ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  hmc->power.t_link_remote_route += hmc->power.link_remote_route;
+
+  return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_POWER_LINKS */
 extern int hmcsim_power_links( struct hmcsim_t *hmc ){
 

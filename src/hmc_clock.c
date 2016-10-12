@@ -15,6 +15,18 @@
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
 extern int hmcsim_power_links( struct hmcsim_t *hmc );
+extern int hmcsim_power_local_route( struct hmcsim_t *hmc,
+				 uint32_t dev,
+				 uint32_t link,
+				 uint32_t slot,
+				 uint32_t quad,
+				 uint32_t vault );
+extern int hmcsim_power_remote_route( struct hmcsim_t *hmc,
+				 uint32_t dev,
+				 uint32_t link,
+				 uint32_t slot,
+				 uint32_t quad,
+				 uint32_t vault );
 extern int hmcsim_trace( struct hmcsim_t *hmc, char *str );
 extern int hmcsim_trace_power( struct hmcsim_t *hmc );
 extern int hmcsim_trace_stall( 	struct hmcsim_t *hmc,
@@ -395,7 +407,25 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 									t_quad,
 									t_vault );
 					}
-				}
+					if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){ 
+					  hmcsim_power_remote_route( hmc,
+					                        dev,
+					                        link,
+					                        i,
+					                        t_quad,
+					                        t_vault );
+                                        }
+				}else{
+                                  /* local route */
+				  if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+			            hmcsim_power_local_route( hmc,
+					                      dev,
+					                      link,
+					                      i,
+					                      t_quad,
+					                      t_vault );
+                                  }
+                                }
 
 				/*
 				 * 9a: Search the vault queue for valid slot
