@@ -29,16 +29,16 @@ static void hmcsim_init_power( struct hmcsim_t *hmc ){
   }
 
   /* -- local values */
-  hmc->power.link_phy           = 0.0;
-  hmc->power.link_local_route   = 0.0;
-  hmc->power.link_remote_route  = 0.0;
-  hmc->power.xbar_rqst_slot     = 0.0;
-  hmc->power.xbar_rsp_slot      = 0.0;
-  hmc->power.xbar_route_extern  = 0.0;
-  hmc->power.vault_rqst_slot    = 0.0;
-  hmc->power.vault_rsp_slot     = 0.0;
-  hmc->power.vault_ctrl         = 0.0;
-  hmc->power.row_access         = 0.0;
+  hmc->power.link_phy           = 0.1;
+  hmc->power.link_local_route   = 0.1;
+  hmc->power.link_remote_route  = 0.1;
+  hmc->power.xbar_rqst_slot     = 0.1;
+  hmc->power.xbar_rsp_slot      = 0.1;
+  hmc->power.xbar_route_extern  = 0.1;
+  hmc->power.vault_rqst_slot    = 0.1;
+  hmc->power.vault_rsp_slot     = 0.1;
+  hmc->power.vault_ctrl         = 0.1;
+  hmc->power.row_access         = 0.1;
 
   /* -- totals */
   hmc->power.t_link_phy           = 0.0;
