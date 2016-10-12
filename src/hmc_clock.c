@@ -14,6 +14,7 @@
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
+extern int hmcsim_power_links( struct hmcsim_t *hmc );
 extern int hmcsim_trace( struct hmcsim_t *hmc, char *str );
 extern int hmcsim_trace_power( struct hmcsim_t *hmc );
 extern int hmcsim_trace_stall( 	struct hmcsim_t *hmc,
@@ -1571,6 +1572,7 @@ extern int	hmcsim_clock( struct hmcsim_t *hmc )
 	HMCSIM_PRINT_TRACE( "STAGE6: OUTPUT POWER TRACING DATA" );
 #endif
         if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+          hmcsim_power_links( hmc );
           hmcsim_trace_power( hmc );
         }
 
