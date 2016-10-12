@@ -1,6 +1,6 @@
 #!/bin/bash
 
-STREAM=../stream
+STREAM=../stream_power
 
 
 BANKS=16

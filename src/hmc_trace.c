@@ -45,16 +45,16 @@ static void     hmcsim_trace_power_header( struct hmcsim_t *hmc ){
     return ;
   }
 
-  fprintf( hmc->tfile, "%s%f\n", "LINK_PHY           = ", hmc->power.link_phy );
-  fprintf( hmc->tfile, "%s%f\n", "LINK_LOCAL_ROUTE   = ", hmc->power.link_local_route );
-  fprintf( hmc->tfile, "%s%f\n", "LINK_REMOTE_ROUTE  = ", hmc->power.link_remote_route );
-  fprintf( hmc->tfile, "%s%f\n", "XBAR_RQST_SLOT     = ", hmc->power.xbar_rqst_slot );
-  fprintf( hmc->tfile, "%s%f\n", "XBAR_RSP_SLOT      = ", hmc->power.xbar_rsp_slot );
-  fprintf( hmc->tfile, "%s%f\n", "XBAR_ROUTE_EXTERN  = ", hmc->power.xbar_route_extern );
-  fprintf( hmc->tfile, "%s%f\n", "VAULT_RQST_SLOT    = ", hmc->power.vault_rqst_slot );
-  fprintf( hmc->tfile, "%s%f\n", "VAULT_RSP_SLOT     = ", hmc->power.vault_rsp_slot );
-  fprintf( hmc->tfile, "%s%f\n", "VAULT_CTRL         = ", hmc->power.vault_ctrl );
-  fprintf( hmc->tfile, "%s%f\n", "ROW_ACCESS         = ", hmc->power.row_access );
+  fprintf( hmc->tfile, "%s%f\n", "# LINK_PHY           = ", hmc->power.link_phy );
+  fprintf( hmc->tfile, "%s%f\n", "# LINK_LOCAL_ROUTE   = ", hmc->power.link_local_route );
+  fprintf( hmc->tfile, "%s%f\n", "# LINK_REMOTE_ROUTE  = ", hmc->power.link_remote_route );
+  fprintf( hmc->tfile, "%s%f\n", "# XBAR_RQST_SLOT     = ", hmc->power.xbar_rqst_slot );
+  fprintf( hmc->tfile, "%s%f\n", "# XBAR_RSP_SLOT      = ", hmc->power.xbar_rsp_slot );
+  fprintf( hmc->tfile, "%s%f\n", "# XBAR_ROUTE_EXTERN  = ", hmc->power.xbar_route_extern );
+  fprintf( hmc->tfile, "%s%f\n", "# VAULT_RQST_SLOT    = ", hmc->power.vault_rqst_slot );
+  fprintf( hmc->tfile, "%s%f\n", "# VAULT_RSP_SLOT     = ", hmc->power.vault_rsp_slot );
+  fprintf( hmc->tfile, "%s%f\n", "# VAULT_CTRL         = ", hmc->power.vault_ctrl );
+  fprintf( hmc->tfile, "%s%f\n", "# ROW_ACCESS         = ", hmc->power.row_access );
   fprintf( hmc->tfile, "%s\n", 	"#---------------------------------------------------------" );
 
   return ;

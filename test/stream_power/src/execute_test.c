@@ -126,6 +126,7 @@ extern int execute_test(        struct hmcsim_t *hmc,
 				HMC_TRACE_STALL|
 				HMC_TRACE_LATENCY|
                                 HMC_TRACE_POWER) );
+        hmcsim_trace_header( hmc );
 
 	printf( "SUCCESS : INITIALIZED TRACE HANDLERS\n" );
 
