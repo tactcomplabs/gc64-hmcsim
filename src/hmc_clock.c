@@ -14,6 +14,13 @@
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
+extern int hmcsim_power_route_extern( struct hmcsim_t *hmc,
+                                      uint32_t srcdev,
+                                      uint32_t srclink,
+                                      uint32_t srcslot,
+                                      uint32_t destdev,
+                                      uint32_t destlink,
+                                      uint32_t destslot );
 extern int hmcsim_power_links( struct hmcsim_t *hmc );
 extern int hmcsim_power_local_route( struct hmcsim_t *hmc,
 				 uint32_t dev,
@@ -592,6 +599,16 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 							hmc->devs[cub].xbar[t_link].xbar_rqst[t_slot].packet[j] = 
 							hmc->devs[dev].xbar[link].xbar_rqst[i].packet[j];
 						}
+
+                                                if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                                                  hmcsim_power_route_extern( hmc,
+                                                                             cub,
+                                                                             t_link,
+                                                                             t_slot,
+                                                                             dev,
+                                                                             link,
+                                                                             i );
+                                                }
 
 						/*
 						 * signal success
