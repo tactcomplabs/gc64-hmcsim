@@ -1153,6 +1153,12 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 							 * transfer the data
 							 *
 							 */
+                                                        if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                                                          hmcsim_power_xbar_rsp_slot( hmc,
+                                                                                      i,
+                                                                                      r_link,
+                                                                                      r_slot );
+                                                        }
 							hmc->devs[i].xbar[r_link].xbar_rsp[r_slot].valid = 
 									HMC_RQST_VALID;
 							for( y=0; y<HMC_MAX_UQ_PACKET; y++){ 
