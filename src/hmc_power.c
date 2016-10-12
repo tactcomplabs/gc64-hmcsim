@@ -32,6 +32,18 @@ extern int hmcsim_power_clear( struct hmcsim_t *hmc ){
   return 0;
 }
 
+/* ----------------------------------------------------- HMCSIM_POWER_VAULT_CTRL */
+extern int hmcsim_power_vault_ctrl( struct hmcsim_t *hmc,
+                                    uint32_t vault ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  hmc->power.t_vault_ctrl += hmc->power.vault_ctrl;
+
+  return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_POWER_ROUTE_EXTERN */
 extern int hmcsim_power_route_extern( struct hmcsim_t *hmc,
                                       uint32_t srcdev,
