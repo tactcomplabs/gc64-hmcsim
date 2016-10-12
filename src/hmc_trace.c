@@ -76,8 +76,10 @@ extern int	hmcsim_trace_header( struct hmcsim_t *hmc )
 	 * as a large comment block
 	 *
 	 */
+        int major = HMC_MAJOR_VERSION;
+        int minor = HMC_MINOR_VERSION;
 	fprintf( hmc->tfile, "%s\n", 	"#---------------------------------------------------------" );
-	fprintf( hmc->tfile, "%s\n", 	"# HMC-SIM VERSION : HMC_MAJOR_VERSION.HMC_MINOR_VERSION" ); 
+	fprintf( hmc->tfile, "%s%d%s%d\n", 	"# HMC-SIM VERSION : ",major,".",minor ); 
 	fprintf( hmc->tfile, "%s\n", 	"# DATE: " );
 	fprintf( hmc->tfile, "%s\n", 	"#---------------------------------------------------------" );
 	fprintf( hmc->tfile, "%s%d\n",	"# HMC_NUM_DEVICES       = ", hmc->num_devs );

@@ -18,7 +18,7 @@ extern "C" {
 
 /* -------------------------------------------- VERSION MACROS */
 #ifndef 	HMC_MAJOR_VERSION
-#define		HMC_MAJOR_VERSION	2
+#define		HMC_MAJOR_VERSION	3
 #endif
 
 #ifndef		HMC_MINOR_VERSION
