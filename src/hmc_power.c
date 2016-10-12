@@ -32,6 +32,36 @@ extern int hmcsim_power_clear( struct hmcsim_t *hmc ){
   return 0;
 }
 
+/* ----------------------------------------------------- HMCSIM_POWER_VAULT_RSP_SLOT */
+extern int      hmcsim_power_vault_rsp_slot( struct hmcsim_t *hmc,
+                                              uint32_t dev,
+                                              uint32_t quad,
+                                              uint32_t vault,
+                                              uint32_t slot ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  hmc->power.t_vault_rsp_slot += hmc->power.vault_rsp_slot;
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_POWER_VAULT_RQST_SLOT */
+extern int      hmcsim_power_vault_rqst_slot( struct hmcsim_t *hmc,
+                                              uint32_t dev,
+                                              uint32_t quad,
+                                              uint32_t vault,
+                                              uint32_t slot ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  hmc->power.t_vault_rqst_slot += hmc->power.vault_rqst_slot;
+
+  return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_POWER_ROW_ACCESS */
 extern int hmcsim_power_row_access( struct hmcsim_t *hmc,
                                     uint64_t addr,

@@ -14,6 +14,16 @@
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
+extern int      hmcsim_power_vault_rsp_slot( struct hmcsim_t *hmc,
+                                              uint32_t dev,
+                                              uint32_t quad,
+                                              uint32_t vault,
+                                              uint32_t slot );
+extern int      hmcsim_power_vault_rqst_slot( struct hmcsim_t *hmc,
+                                              uint32_t dev,
+                                              uint32_t quad,
+                                              uint32_t vault,
+                                              uint32_t slot );
 extern int      hmcsim_power_row_access( struct hmcsim_t *hmc,
                                          uint64_t addr,
                                          uint32_t mult );
@@ -133,6 +143,10 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	if( hmc == NULL ){
 		return -1;
 	}
+
+        if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+          hmcsim_power_vault_rqst_slot( hmc, dev, quad, vault, slot );
+        }
 
 	/*
 	 * Step 1: get the request
@@ -1918,6 +1932,10 @@ step4_vr:
 		for( j=0; j<rsp_len; j++ ){
 			hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].packet[j] = packet[j];
 		}
+                if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                  hmcsim_power_vault_rsp_slot( hmc, dev, quad, vault, t_slot );
+                }
+
 
 	}/* else, no response required, probably flow control */
 
