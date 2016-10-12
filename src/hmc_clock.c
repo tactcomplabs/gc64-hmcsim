@@ -14,6 +14,14 @@
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
+extern int hmcsim_power_xbar_rsp_slot( struct hmcsim_t *hmc,
+                                        uint32_t dev,
+                                        uint32_t link,
+                                        uint32_t slot );
+extern int hmcsim_power_xbar_rqst_slot( struct hmcsim_t *hmc,
+                                        uint32_t dev,
+                                        uint32_t link,
+                                        uint32_t slot );
 extern int hmcsim_power_vault_ctrl( struct hmcsim_t *hmc, uint32_t vault );
 extern int hmcsim_power_route_extern( struct hmcsim_t *hmc,
                                       uint32_t srcdev,
@@ -189,6 +197,10 @@ static int hmcsim_clock_process_rsp_queue( 	struct hmcsim_t *hmc,
 	 		 * process me
 			 *
 			 */
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_xbar_rsp_slot( hmc, dev, link, i );
+                        }
+
 
 			/*
 			 * Stage 1: get the corresponding cub device
@@ -321,6 +333,9 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 			 * process me
 			 *
 			 */
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_xbar_rqst_slot( hmc, dev, link, i );
+                        }
 
 #ifdef HMC_DEBUG
 			HMCSIM_PRINT_INT_TRACE( "PROCESSING REQUEST QUEUE FOR SLOT", (int)(i) );

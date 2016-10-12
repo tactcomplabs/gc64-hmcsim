@@ -32,6 +32,34 @@ extern int hmcsim_power_clear( struct hmcsim_t *hmc ){
   return 0;
 }
 
+/* ----------------------------------------------------- HMCSIM_POWER_XBAR_RSP_SLOT */
+extern int hmcsim_power_xbar_rsp_slot( struct hmcsim_t *hmc,
+                                        uint32_t dev,
+                                        uint32_t link,
+                                        uint32_t slot ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  hmc->power.t_xbar_rsp_slot += hmc->power.xbar_rsp_slot;
+
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_POWER_XBAR_RQST_SLOT */
+extern int hmcsim_power_xbar_rqst_slot( struct hmcsim_t *hmc,
+                                        uint32_t dev,
+                                        uint32_t link,
+                                        uint32_t slot ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  hmc->power.t_xbar_rqst_slot += hmc->power.xbar_rqst_slot;
+
+  return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_POWER_VAULT_CTRL */
 extern int hmcsim_power_vault_ctrl( struct hmcsim_t *hmc,
                                     uint32_t vault ){
