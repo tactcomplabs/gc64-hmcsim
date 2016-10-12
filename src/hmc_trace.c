@@ -12,6 +12,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "hmc_sim.h"
 
 
@@ -67,20 +68,30 @@ static void     hmcsim_trace_power_header( struct hmcsim_t *hmc ){
  */
 extern int	hmcsim_trace_header( struct hmcsim_t *hmc )
 {
+        int major = HMC_MAJOR_VERSION;
+        int minor = HMC_MINOR_VERSION;
+        char text[100];
+        time_t now = time(NULL);
+        struct tm *t = localtime(&now);
+
 	if( hmc->tfile == NULL ){
 		return -1;
 	}
+
+        /*
+         * get the date+time combo
+         *
+         */
+        strftime(text, sizeof(text)-1, "%d/%m/%Y %H:%M", t );
 
 	/*
 	 * write all the necessary sim data to the trace file
 	 * as a large comment block
 	 *
 	 */
-        int major = HMC_MAJOR_VERSION;
-        int minor = HMC_MINOR_VERSION;
 	fprintf( hmc->tfile, "%s\n", 	"#---------------------------------------------------------" );
 	fprintf( hmc->tfile, "%s%d%s%d\n", 	"# HMC-SIM VERSION : ",major,".",minor ); 
-	fprintf( hmc->tfile, "%s\n", 	"# DATE: " );
+	fprintf( hmc->tfile, "%s%s\n", 	"# DATE: ", text );
 	fprintf( hmc->tfile, "%s\n", 	"#---------------------------------------------------------" );
 	fprintf( hmc->tfile, "%s%d\n",	"# HMC_NUM_DEVICES       = ", hmc->num_devs );
 	fprintf( hmc->tfile, "%s%d\n",  "# HMC_NUM_LINKS         = ", hmc->num_links );
