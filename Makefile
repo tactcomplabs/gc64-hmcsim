@@ -51,7 +51,11 @@ testclean:
 distclean: clean testclean doclean toolsclean cmcclean
 install: $(TARGET) cmc 
 	@echo " Installing HMC-Sim...";
-	@echo " Building Directory Structure..."; mkdir -p $(PREFIX)/{include,bin,lib,cmc}
+	@echo " Building Directory Structure...";
+	mkdir -p $(PREFIX)/include
+	mkdir -p $(PREFIX)/bin
+	mkdir -p $(PREFIX)/lib
+	mkdir -p $(PREFIX)/cmc
 	@echo " Installing libhmcsim.a..."; install ./libhmcsim.a $(PREFIX)/lib/
 	@echo " Installing headers..."; install ./include/*.h $(PREFIX)/include/
 	@echo " Installing CMC libs...";
