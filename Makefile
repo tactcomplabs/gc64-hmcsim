@@ -29,7 +29,7 @@ DEPS := $(OBJECTS:.o=.deps)
 all: $(TARGET) $(SHTARGET)
 
 $(SHTARGET): $(SHOBJECTS)
-	@echo " Linking Shared Lib..."; $(CC) -shared -o $(SHTARGET) $(SHOBJECTS)
+	@echo " Linking Shared Lib..."; $(CC) -shared -o $(SHTARGET) $(SHOBJECTS) -ldl
 	@echo " Building CMC Libs..."; make -C ./cmc/
 
 $(TARGET): $(OBJECTS)
@@ -38,11 +38,11 @@ $(TARGET): $(OBJECTS)
 
 $(SHBUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(SHBUILDDIR)
-	@echo " CC $<"; $(CC) $(CFLAGS) -MD -MF $(@:.o=.deps) -c -fpic -o $@ $<
+	@echo " CC $<"; $(CC) $(CFLAGS) -MD -MF $(@:.o=.deps) -c -fpic -o $@ $< -ldl
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(BUILDDIR)
-	@echo " CC $<"; $(CC) $(CFLAGS) -MD -MF $(@:.o=.deps) -c -o $@ $<
+	@echo " CC $<"; $(CC) $(CFLAGS) -MD -MF $(@:.o=.deps) -c -o $@ $< -ldl
 
 docs:
 	@echo " Building Docs..."; $(DOXYGEN) ./doxygen/hmc_sim.cfg
