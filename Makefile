@@ -1,4 +1,4 @@
-#
+
 # HMCSIM TOP-LEVEL MAKEFILE
 # GOBLIN-CORE 64
 #
@@ -29,7 +29,7 @@ DEPS := $(OBJECTS:.o=.deps)
 all: $(TARGET) $(SHTARGET)
 
 $(SHTARGET): $(SHOBJECTS)
-	@echo " Linking Shared Lib..."; $(CC) -shared -o $(SHTARGET) $(SHOBJECTS) -ldl
+	@echo " Linking Shared Lib..."; $(CC) -shared -o $(SHTARGET) $(SHOBJECTS)
 	@echo " Building CMC Libs..."; make -C ./cmc/
 
 $(TARGET): $(OBJECTS)
@@ -75,6 +75,8 @@ install: $(TARGET) $(SHTARGET) cmc
 	@echo " Installing headers..."; install ./include/*.h $(PREFIX)/include/
 	@echo " Installing CMC libs...";
 	set -e; for a in $(shell find $(CMCDIR) -type f -name *.so); do install $$a $(PREFIX)/cmc/; done
+	ln -s $(PREFIX)/lib/libhmcsim.a $(PREFIX)/libhmcsim.a
+	ln -s $(PREFIX)/lib/libhmcsim.so $(PREFIX)/libhmcsim.so
 
 -include $(DEPS)
 
