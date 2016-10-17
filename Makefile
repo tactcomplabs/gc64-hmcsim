@@ -29,7 +29,7 @@ DEPS := $(OBJECTS:.o=.deps)
 all: $(TARGET) $(SHTARGET)
 
 $(SHTARGET): $(SHOBJECTS)
-	@echo " Linking Shared Lib..."; $(CC) -shared -o $(SHTARGET) $(SHOBJECTS)
+	@echo " Linking Shared Lib..."; $(CC) -shared -o $(SHTARGET) $(SHOBJECTS) -ldl
 	@echo " Building CMC Libs..."; make -C ./cmc/
 
 $(TARGET): $(OBJECTS)
