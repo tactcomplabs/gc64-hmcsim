@@ -75,8 +75,8 @@ install: $(TARGET) $(SHTARGET) cmc
 	@echo " Installing headers..."; install ./include/*.h $(PREFIX)/include/
 	@echo " Installing CMC libs...";
 	set -e; for a in $(shell find $(CMCDIR) -type f -name *.so); do install $$a $(PREFIX)/cmc/; done
-	ln -s $(PREFIX)/lib/libhmcsim.a $(PREFIX)/libhmcsim.a
-	ln -s $(PREFIX)/lib/libhmcsim.so $(PREFIX)/libhmcsim.so
+	ln -fs $(PREFIX)/lib/libhmcsim.a $(PREFIX)/libhmcsim.a
+	ln -fs $(PREFIX)/lib/libhmcsim.so $(PREFIX)/libhmcsim.so
 
 -include $(DEPS)
 
