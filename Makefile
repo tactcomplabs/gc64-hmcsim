@@ -8,6 +8,7 @@ include Makefile.inc
 PKGS := ...
 LIBNAME := hmcsim
 SRCDIR := src
+CMCDIR := cmc
 BUILDDIR := build
 LIBS :=
 TARGET := lib$(LIBNAME).a
@@ -48,6 +49,13 @@ toolsclean:
 testclean:
 	@echo " Cleaning Tests..."; make -C ./test/ clean
 distclean: clean testclean doclean toolsclean cmcclean
+install: $(TARGET) cmc 
+	@echo " Installing HMC-Sim...";
+	@echo " Building Directory Structure..."; mkdir -p $(PREFIX)/{include,bin,lib,cmc}
+	@echo " Installing libhmcsim.a..."; install ./libhmcsim.a $(PREFIX)/lib/
+	@echo " Installing headers..."; install ./include/*.h $(PREFIX)/include/
+	@echo " Installing CMC libs...";
+	set -e; for a in $(shell find $(CMCDIR) -type f -name *.so); do install $$a $(PREFIX)/cmc/; done
 
 -include $(DEPS)
 
