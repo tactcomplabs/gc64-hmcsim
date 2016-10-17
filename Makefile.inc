@@ -87,4 +87,8 @@ AR_OPTS=rcs
 #-- DOXYGEN BINARY
 DOXYGEN=`which doxygen`
 
+#-- PREFIX
+#-- INSTALLATION PREFIX
+PREFIX=/opt/hmcsim
+
 #-- EOF
