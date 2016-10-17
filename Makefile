@@ -10,21 +10,35 @@ LIBNAME := hmcsim
 SRCDIR := src
 CMCDIR := cmc
 BUILDDIR := build
+SHBUILDDIR := shbuild
 LIBS :=
 TARGET := lib$(LIBNAME).a
+SHTARGET := lib$(LIBNAME).so
 LDFLAGS :=
 ARFLAGS := rcs
+SHLIB := -shared
 
 .PHONY : test tools cmc
 
 SRCEXT = c
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
+SHOBJECTS := $(patsubst $(SRCDIR)/%,$(SHBUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 DEPS := $(OBJECTS:.o=.deps)
 
-$(TARGET): $(OBJECTS)
-	@echo " Linking..."; $(AR) $(AR_OPTS) $(TARGET) $(OBJECTS)
+all: $(TARGET) $(SHTARGET)
+
+$(SHTARGET): $(SHOBJECTS)
+	@echo " Linking Shared Lib..."; $(CC) -shared -o $(SHTARGET) $(SHOBJECTS)
 	@echo " Building CMC Libs..."; make -C ./cmc/
+
+$(TARGET): $(OBJECTS)
+	@echo " Linking Static Lib..."; $(AR) $(AR_OPTS) $(TARGET) $(OBJECTS)
+	@echo " Building CMC Libs..."; make -C ./cmc/
+
+$(SHBUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
+	@mkdir -p $(SHBUILDDIR)
+	@echo " CC $<"; $(CC) $(CFLAGS) -MD -MF $(@:.o=.deps) -c -fpic -o $@ $<
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(BUILDDIR)
@@ -36,7 +50,7 @@ doclean:
 	@echo " Cleaning Docs..."; $(RM) -Rf ./doxygen/{html,latex,man,rtf,xml}
 clean: doclean
 	@echo " Cleaning..."; $(RM) -r $(BUILDDIR) $(TARGET)
-test: $(TARGET)
+test: $(TARGET) $(SHTARGET)
 	@echo " Building Tests..."; make -C ./test/
 cmc:
 	@echo " Building CMC Libs..."; make -C ./cmc/
@@ -49,7 +63,7 @@ toolsclean:
 testclean:
 	@echo " Cleaning Tests..."; make -C ./test/ clean
 distclean: clean testclean doclean toolsclean cmcclean
-install: $(TARGET) cmc 
+install: $(TARGET) $(SHTARGET) cmc 
 	@echo " Installing HMC-Sim...";
 	@echo " Building Directory Structure...";
 	mkdir -p $(PREFIX)/include
@@ -57,6 +71,7 @@ install: $(TARGET) cmc
 	mkdir -p $(PREFIX)/lib
 	mkdir -p $(PREFIX)/cmc
 	@echo " Installing libhmcsim.a..."; install ./libhmcsim.a $(PREFIX)/lib/
+	@echo " Installing libhmcsim.so..."; install ./libhmcsim.so $(PREFIX)/lib/
 	@echo " Installing headers..."; install ./include/*.h $(PREFIX)/include/
 	@echo " Installing CMC libs...";
 	set -e; for a in $(shell find $(CMCDIR) -type f -name *.so); do install $$a $(PREFIX)/cmc/; done
