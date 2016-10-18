@@ -1065,7 +1065,9 @@ static int hmcsim_clock_rw_ops( struct hmcsim_t *hmc )
         /* record the control power enable for each active vault */
         for( i=0; i<4; i++ ){
           if( venable[i] == 1 ){
-            hmcsim_power_vault_ctrl( hmc, i );
+            if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+              hmcsim_power_vault_ctrl( hmc, i );
+            }
           }
         }
 
