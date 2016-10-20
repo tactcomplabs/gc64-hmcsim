@@ -55,11 +55,11 @@ comp_memory.addParams({
       "backend.capacity_per_device" : "4",
       "backend.xbar_depth" : "128",
       "backend.max_req_size" : "128"
-      #"backend.trace-banks" : "1",
-      #"backend.trace-queue" : "1",
-      #"backend.trace-cmds" : "1",
-      #"backend.trace-latency" : "1",
-      #"backend.trace-stalls" : "1"
+      "backend.trace-banks" : "1",
+      "backend.trace-queue" : "1",
+      "backend.trace-cmds" : "1",
+      "backend.trace-latency" : "1",
+      "backend.trace-stalls" : "1"
 })
 
 
