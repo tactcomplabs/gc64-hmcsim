@@ -54,7 +54,7 @@ comp_memory.addParams({
       "backend.dram_count" : "20",
       "backend.capacity_per_device" : "4",
       "backend.xbar_depth" : "128",
-      "backend.max_req_size" : "128"
+      "backend.max_req_size" : "128",
       "backend.trace-banks" : "1",
       "backend.trace-queue" : "1",
       "backend.trace-cmds" : "1",
