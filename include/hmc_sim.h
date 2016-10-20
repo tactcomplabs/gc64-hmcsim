@@ -303,6 +303,10 @@ extern int	hmcsim_util_get_max_blocksize( struct hmcsim_t *hmc, uint32_t dev, ui
 */
 extern int      hmcsim_load_cmc( struct hmcsim_t *hmc, char *cmc_lib );
 
+/* ----------------------------------------------------------------- */
+/* The following API functions are only found in HMCSim version 3.0+ */
+/* ----------------------------------------------------------------- */
+
 /*!     \fn int hmcsim_power_clear( struct hmcsim_t *hmc )
  *      \brief Clears the internal total power counters
  *      \param *hmc is a pointer to a valid and initialized hmc structure. Must not be null.
@@ -310,8 +314,15 @@ extern int      hmcsim_load_cmc( struct hmcsim_t *hmc, char *cmc_lib );
  */
 extern int    hmcsim_power_clear( struct hmcsim_t *hmc );
 
+/*!     \fn int hmcsim_read_config( struct hmcsim_t *hmc )
+ *      \brief Reads the target configuration file and initializes the HMC structure
+ *      \param *hmc is a pointer to a valid and initialized hmc structure. Must not be null.
+ *      \param *config is a pointer to a valid file name containing the config data
+ *      \return 0 on success, nonzero otherwise
+ */
+extern int    hmcsim_read_config( struct hmcsim_t *hmc, char *config );
+
 /* ----------------------------------- SIMPLIFIED INTERFACE API */
-/* The following API functions are only found in HMCSim version 3.0+ */
 
 
 #ifdef __cplusplus
