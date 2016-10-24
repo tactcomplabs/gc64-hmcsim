@@ -268,6 +268,8 @@ struct hmc_cmc_t{
         hmc_response_t rsp_cmd;         /*! HMC-SIM: HMC_CMC_T: RESPONSE COMMAND */
         uint8_t rsp_cmd_code;           /*! HMC-SIM: HMC_CMC_T: RESPONSE COMMAND CODE */
 
+        int track_power;                /*! HMC-SIM: HMC_CMC_T: DOES THIS CMC OP TRACK POWER? */
+
         uint32_t active;                /*! HMC-SIM: HMC_CMC_T: SIGNALS THAT THE COMMAND IS ACTIVE */
         void *handle;                   /*! HMC-SIM: HMC_CMC_T: DLSYM HANDLE */
 
@@ -279,7 +281,7 @@ struct hmc_cmc_t{
                             hmc_response_t *,
                             uint8_t *);
 
-        int (*cmc_execute)(void *,  /* hmc */
+        int (*cmc_execute)(void *,      /* hmc */
                            uint32_t,    /* dev */
                            uint32_t,    /* quad */
                            uint32_t,    /* vault */
@@ -291,7 +293,8 @@ struct hmc_cmc_t{
                            uint64_t *,  /* rqst_payload */
                            uint64_t *); /* rsp_payload */
         void (*cmc_str)(char *);
-
+        void (*cmc_power)(uint32_t *,   /* row_ops */
+                          float *);     /* transient power */
 };
 
 struct hmc_power_t{
