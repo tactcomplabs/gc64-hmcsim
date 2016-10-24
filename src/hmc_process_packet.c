@@ -68,7 +68,9 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                                 uint64_t *rsp_payload,
                                 uint32_t *rsp_len,
                                 hmc_response_t *rsp_cmd,
-                                uint8_t *raw_rsp_cmd );
+                                uint8_t *raw_rsp_cmd,
+                                uint32_t *row_ops,
+                                float *tpower );
 
 
 
@@ -119,6 +121,8 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
         int use_cmc                     = 0x00;
 	hmc_response_t rsp_cmd		= RSP_ERROR;
 	uint8_t tmp8			= 0x0;
+        uint32_t row_ops                = 0x00;
+        float tpower                    = 0.;
 	/* ---- */
 
 
@@ -1857,9 +1861,16 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                                                 &(rsp_payload[0]),
                                                 &rsp_len,
                                                 &rsp_cmd,
-                                                &tmp8)!=0){
+                                                &tmp8,
+                                                &row_ops,
+                                                &tpower)!=0){
                           /* error occurred */
                           return HMC_ERROR;
+                        }
+
+                        /* power measurement */
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, row_ops );
                         }
 
                         /* -- operation was successful */

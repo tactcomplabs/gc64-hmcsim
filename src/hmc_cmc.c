@@ -214,6 +214,7 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
                      uint64_t *,
                      uint64_t *) = NULL;
   void (*cmc_str)(char *) = NULL;
+  void (*cmc_power)(uint32_t *,float *) = NULL;
   /* ---- */
 
   /* attempt to load the library */
@@ -276,6 +277,9 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
     return -1;
   }
 
+  /* -- hmcsim_cmc_power */
+  cmc_power = (void (*)(uint32_t *,float *))dlsym(handle,"hmcsim_cmc_power");
+
   /* done loading functions */
 
   idx = hmcsim_cmc_rawtoidx( cmd );
@@ -291,9 +295,16 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   }
 
   /* write the necessary references into the structure */
+  if( cmc_power != NULL ){
+    hmc->cmcs[idx].cmc_power    = cmc_power;
+    hmc->cmcs[idx].track_power  = 1;
+  }else{
+    hmc->cmcs[idx].cmc_power    = NULL;
+    hmc->cmcs[idx].track_power  = 0;
+  }
   hmc->cmcs[idx].type         = rqst;
   hmc->cmcs[idx].cmd          = cmd;
-  hmc->cmcs[idx].rqst_len      = rqst_len;
+  hmc->cmcs[idx].rqst_len     = rqst_len;
   hmc->cmcs[idx].rsp_len      = rsp_len;
   hmc->cmcs[idx].rsp_cmd      = rsp_cmd;
 
@@ -353,7 +364,9 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                                 uint64_t *rsp_payload,
                                 uint32_t *rsp_len,
                                 hmc_response_t *rsp_cmd,
-                                uint8_t *raw_rsp_cmd ){
+                                uint8_t *raw_rsp_cmd,
+                                uint32_t *row_ops,
+                                float *tpower ){
 
   /* vars */
   uint32_t idx  = 0;
@@ -371,6 +384,7 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                      uint64_t *,
                      uint64_t *) = NULL;
   void (*cmc_str)(char *);
+  void (*cmc_power)(uint32_t *,float *) = NULL;
   /* ---- */
 
   /* resolve the index of the cmc in the lookup table */
@@ -381,6 +395,11 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
     return -1;
   }else if( hmc->cmcs[idx].active == 0 ){
     /* command not active */
+    return -1;
+  }
+
+  /* -- new power measurement items */
+  if( (row_ops == NULL) || (tpower == NULL) ){
     return -1;
   }
 
@@ -448,6 +467,15 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                      bank,
                      addr,
                      length );
+
+  /* -- get the power */
+  if( hmc->cmcs[idx].track_power == 1 ){
+    cmc_power = hmc->cmcs[idx].cmc_power;
+    (*cmc_power)(row_ops,tpower);
+  }else{
+    *row_ops = 1;
+    *tpower  = 0.;
+  }
 
   return 0;
 }
