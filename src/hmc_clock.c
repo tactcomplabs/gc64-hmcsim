@@ -954,9 +954,12 @@ static int hmcsim_clock_analysis_phase( struct hmcsim_t *hmc )
 	 * 1) Bank Conflict Analysis
 	 *
 	 */
+#if 0
+        // temporarily removing for performance
 	if( hmcsim_clock_bank_conflicts( hmc ) != 0 ){
 		return -1;
 	}
+#endif
 
 	/*
 	 * 2) Cache Detection Analysis
