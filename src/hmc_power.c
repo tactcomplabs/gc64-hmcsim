@@ -158,6 +158,21 @@ extern int hmcsim_power_xbar_rqst_slot( struct hmcsim_t *hmc,
   return 0;
 }
 
+/* ----------------------------------------------------- HMCSIM_POWER_VAULT_CTRL_TRANSIENT */
+extern int hmcsim_power_vault_ctrl_transient( struct hmcsim_t *hmc,
+                                              uint32_t vault,
+                                              float p ){
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  hmc->power.t_vault_ctrl += p;
+
+  hmcsim_trace_power_vault_ctrl( hmc, vault );
+
+  return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_POWER_VAULT_CTRL */
 extern int hmcsim_power_vault_ctrl( struct hmcsim_t *hmc,
                                     uint32_t vault ){
