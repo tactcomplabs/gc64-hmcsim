@@ -322,6 +322,38 @@ extern int    hmcsim_power_clear( struct hmcsim_t *hmc );
  */
 extern int    hmcsim_read_config( struct hmcsim_t *hmc, char *config );
 
+/*!     \fn int hmcsim_power_config( struct hmcsim_t *hmc, float link_phy,
+ *                                   float link_local_route, float link_remote_route,
+ *                                   float xbar_rqst_slot, float xbar_rsp_slot,
+ *                                   float xbar_route_extern, float vault_rqst_slot,
+ *                                   float vault_rsp_slot, float vault_ctrl,
+ *                                   float row_access )
+ *      \brief Initializes the power configuration values for the target simulation context
+ *      \param *hmc is a pointer to a valid and initialized hmc structure. Must not be null.
+ *      \param link_phy refers to the link physical layer power
+ *      \param link_local_route refers to the power to route to a local vault
+ *      \param link_remote_route refers to the power to route to a remote vault
+ *      \param xbar_rqst_slot refers to the power to hold a valid packet in an xbar request slot
+ *      \param xbar_rsp_slot refers to the power to hold a valid packet in an xbar response slot
+ *      \param xbar_route_extern refers to the power to route to an external link (route request)
+ *      \param vault_rqst_slot refers to the power to hold a valid packet in a vault request slot
+ *      \param vault_rsp_slot refers to the power to hold a valid packet in a vault response slot
+ *      \param vault_ctrl refers to the power of the vault controller operation
+ *      \param row_access refers to the power for a single row access (activate+precharge+fetch+sense)
+ *      \return 0 on success, nonzero otherwise
+ */
+extern int hmcsim_power_config( struct hmcsim_t *hmc,
+                                float link_phy,
+                                float link_local_route,
+                                float link_remote_route,
+                                float xbar_rqst_slot,
+                                float xbar_rsp_slot,
+                                float xbar_route_extern,
+                                float vault_rqst_slot,
+                                float vault_rsp_slot,
+                                float vault_ctrl,
+                                float row_access );
+
 /* ----------------------------------- SIMPLIFIED INTERFACE API */
 
 
