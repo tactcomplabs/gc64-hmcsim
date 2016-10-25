@@ -27,6 +27,9 @@ extern int      hmcsim_power_vault_rqst_slot( struct hmcsim_t *hmc,
 extern int      hmcsim_power_row_access( struct hmcsim_t *hmc,
                                          uint64_t addr,
                                          uint32_t mult );
+extern int hmcsim_power_vault_ctrl_transient( struct hmcsim_t *hmc,
+                                              uint32_t vault,
+                                              float p );
 extern int	hmcsim_trace( struct hmcsim_t *hmc, char *str );
 extern int	hmcsim_trace_rqst( 	struct hmcsim_t *hmc,
 					char *rqst,
@@ -1871,6 +1874,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                         /* power measurement */
                         if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
                           hmcsim_power_row_access( hmc, addr, row_ops );
+                          hmcsim_power_vault_ctrl_transient( hmc, vault, tpower );
                         }
 
                         /* -- operation was successful */
