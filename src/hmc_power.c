@@ -258,4 +258,33 @@ extern int hmcsim_power_links( struct hmcsim_t *hmc ){
   return 0;
 }
 
+/* ----------------------------------------------------- HMCSIM_POWER_CONFIG */
+extern int hmcsim_power_config( struct hmcsim_t *hmc,
+                                float link_phy,
+                                float link_local_route,
+                                float link_remote_route,
+                                float xbar_rqst_slot,
+                                float xbar_rsp_slot,
+                                float xbar_route_extern,
+                                float vault_rqst_slot,
+                                float vault_rsp_slot,
+                                float vault_ctrl,
+                                float row_access ){
+  if( hmc == NULL ){
+    return -1;
+  }
+  hmc->power.link_phy = link_phy;
+  hmc->power.link_local_route = link_local_route;
+  hmc->power.link_remote_route = link_remote_route;
+  hmc->power.xbar_rqst_slot = xbar_rqst_slot;
+  hmc->power.xbar_rsp_slot = xbar_rsp_slot;
+  hmc->power.xbar_route_extern = xbar_route_extern;
+  hmc->power.vault_rqst_slot = vault_rqst_slot;
+  hmc->power.vault_rsp_slot = vault_rsp_slot;
+  hmc->power.vault_ctrl = vault_ctrl;
+  hmc->power.row_access = row_access;
+  return 0;
+}
+
+
 /* EOF */
