@@ -8,7 +8,7 @@ include Makefile.inc
 PKGS := ...
 LIBNAME := hmcsim
 SRCDIR := src
-CMCDIR := cmc
+CMCDIR := ./cmc
 BUILDDIR := build
 SHBUILDDIR := shbuild
 LIBS :=
@@ -74,7 +74,21 @@ install: $(TARGET) $(SHTARGET) cmc
 	@echo " Installing libhmcsim.so..."; install ./libhmcsim.so $(PREFIX)/lib/
 	@echo " Installing headers..."; install ./include/*.h $(PREFIX)/include/
 	@echo " Installing CMC libs...";
-	set -e; for a in $(shell find $(CMCDIR) -type f -name *.so); do install $$a $(PREFIX)/cmc/; done
+	install cmc/amo_popcount/libamopopcount.so $(PREFIX)/cmc/
+	install cmc/fullempty/ClrXX/libclrxx.so $(PREFIX)/cmc/
+	install cmc/fullempty/IncFF/libincff.so $(PREFIX)/cmc/
+	install cmc/fullempty/ReadEF/libreadef.so $(PREFIX)/cmc/
+	install cmc/fullempty/ReadFE/libreadfe.so $(PREFIX)/cmc/
+	install cmc/fullempty/ReadFF/libreadff.so $(PREFIX)/cmc/
+	install cmc/fullempty/ReadXX/libreadxx.so $(PREFIX)/cmc/
+	install cmc/fullempty/WriteEF/libwriteef.so $(PREFIX)/cmc/
+	install cmc/fullempty/WriteFF/libwriteff.so $(PREFIX)/cmc/
+	install cmc/fullempty/WriteXE/libwritexe.so $(PREFIX)/cmc/
+	install cmc/fullempty/WriteXF/libwritexf.so $(PREFIX)/cmc/
+	install cmc/mutex/hmc_lock/libhmc_lock.so $(PREFIX)/cmc/
+	install cmc/mutex/hmc_trylock/libhmc_trylock.so $(PREFIX)/cmc/
+	install cmc/mutex/hmc_unlock/libhmc_unlock.so $(PREFIX)/cmc/
+	install cmc/template/libcmctemplate.so $(PREFIX)/cmc/
 	ln -fs $(PREFIX)/lib/libhmcsim.a $(PREFIX)/libhmcsim.a
 	ln -fs $(PREFIX)/lib/libhmcsim.so $(PREFIX)/libhmcsim.so
 
