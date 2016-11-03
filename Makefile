@@ -49,7 +49,7 @@ docs:
 doclean:
 	@echo " Cleaning Docs..."; $(RM) -Rf ./doxygen/{html,latex,man,rtf,xml}
 clean: doclean
-	@echo " Cleaning..."; $(RM) -r $(BUILDDIR) $(TARGET)
+	@echo " Cleaning..."; $(RM) -r $(BUILDDIR) $(SHBUILDDIR) $(TARGET) $(SHTARGET)
 test: $(TARGET) $(SHTARGET)
 	@echo " Building Tests..."; make -C ./test/
 cmc:
