@@ -145,6 +145,8 @@ extern "C" {
 #define		HMC_REG_FEAT_IDX	0x000018
 #define		HMC_REG_RVID_IDX	0x000019
 
+#define         HMC_MILLIWATT_TO_BTU    0.003414f
+
 /* -------------------------------------------- TRACE MACROS */
 #define HMCSIM_PRINT_TRACE( s )		( fprintf( stdout, "HCMSIM_TRACE %s:%d : %s\n", __FUNCTION__, __LINE__, s ) )
 #define HMCSIM_PRINT_ADDR_TRACE( s, a )	( fprintf( stdout, "HCMSIM_TRACE %s:%d : %s : 0x%016llx\n", __FUNCTION__, __LINE__, s, a ) )
