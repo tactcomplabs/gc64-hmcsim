@@ -44,6 +44,21 @@ extern int      hmcsim_trace_power_vault_rsp_slot( struct hmcsim_t *hmc,
            ":",
            hmc->power.vault_rsp_slot );
 
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : ",
+           hmc->clk,
+           " : VAULT_RSP_SLOT_BTU : ",
+           dev,
+           ":",
+           quad,
+           ":",
+           vault,
+           ":",
+           slot,
+           ":",
+           hmc->power.vault_rsp_slot * HMC_MILLIWATT_TO_BTU );
+
   return 0;
 }
 
@@ -72,6 +87,21 @@ extern int      hmcsim_trace_power_vault_rqst_slot( struct hmcsim_t *hmc,
            ":",
            hmc->power.vault_rqst_slot );
 
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : ",
+           hmc->clk,
+           " : VAULT_RQST_SLOT_BTU : ",
+           dev,
+           ":",
+           quad,
+           ":",
+           vault,
+           ":",
+           slot,
+           ":",
+           hmc->power.vault_rqst_slot * HMC_MILLIWATT_TO_BTU );
+
   return 0;
 }
 
@@ -91,6 +121,15 @@ extern int hmcsim_trace_power_row_access( struct hmcsim_t *hmc,
            addr,
            ":",
            hmc->power.row_access * (float)(mult) );
+
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s0x016%"PRIx64"%s%f\n",
+           "HMCSIM_TRACE : ",
+           hmc->clk,
+           " : ROW_ACCESS_BTU : ",
+           addr,
+           ":",
+           hmc->power.row_access * (float)(mult) * HMC_MILLIWATT_TO_BTU );
 
   return 0;
 }
@@ -117,6 +156,19 @@ extern int hmcsim_trace_power_xbar_rsp_slot( struct hmcsim_t *hmc,
            ":",
            hmc->power.xbar_rsp_slot);
 
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : ",
+           hmc->clk,
+           " : XBAR_RSP_SLOT_BTU : ",
+           dev,
+           ":",
+           link,
+           ":",
+           slot,
+           ":",
+           hmc->power.xbar_rsp_slot * HMC_MILLIWATT_TO_BTU );
+
   return 0;
 }
 
@@ -142,6 +194,19 @@ extern int hmcsim_trace_power_xbar_rqst_slot( struct hmcsim_t *hmc,
            ":",
            hmc->power.xbar_rqst_slot);
 
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : ",
+           hmc->clk,
+           " : XBAR_RQST_SLOT_BTU : ",
+           dev,
+           ":",
+           link,
+           ":",
+           slot,
+           ":",
+           hmc->power.xbar_rqst_slot * HMC_MILLIWATT_TO_BTU );
+
   return 0;
 }
 
@@ -160,6 +225,15 @@ extern int hmcsim_trace_power_vault_ctrl( struct hmcsim_t *hmc,
            vault,
            ":",
            hmc->power.vault_ctrl);
+
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : ",
+           hmc->clk,
+           " : VAULT_CTRL_BTU : ",
+           vault,
+           ":",
+           hmc->power.vault_ctrl * HMC_MILLIWATT_TO_BTU );
 
   return 0;
 }
@@ -180,7 +254,7 @@ extern int hmcsim_trace_power_route_extern( struct hmcsim_t *hmc,
            "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
            "HMCSIM_TRACE : ",
            hmc->clk,
-           " : XBAR_ROUTE_EXTERN : ",
+           " : XBAR_ROUTE_EXTERN_POWER : ",
            srcdev,
            ":",
            srclink,
@@ -194,6 +268,25 @@ extern int hmcsim_trace_power_route_extern( struct hmcsim_t *hmc,
            destslot,
            ":",
            hmc->power.xbar_rsp_slot);
+
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : ",
+           hmc->clk,
+           " : XBAR_ROUTE_EXTERN_BTU : ",
+           srcdev,
+           ":",
+           srclink,
+           ":",
+           srcslot,
+           ":",
+           destdev,
+           ":",
+           destlink,
+           ":",
+           destslot,
+           ":",
+           hmc->power.xbar_rsp_slot * HMC_MILLIWATT_TO_BTU );
 
   return 0;
 }
@@ -226,6 +319,23 @@ extern int hmcsim_trace_power_local_route( struct hmcsim_t *hmc,
            ":",
            hmc->power.link_local_route);
 
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : ",
+           hmc->clk,
+           " : LINK_LOCAL_ROUTE_BTU : ",
+           dev,
+           ":",
+           link,
+           ":",
+           quad,
+           ":",
+           vault,
+           ":",
+           slot,
+           ":",
+           hmc->power.link_local_route * HMC_MILLIWATT_TO_BTU );
+
   return 0;
 }
 
@@ -257,6 +367,23 @@ extern int hmcsim_trace_power_remote_route( struct hmcsim_t *hmc,
            ":",
            hmc->power.link_remote_route);
 
+  fprintf( hmc->tfile,
+           "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+           "HMCSIM_TRACE : ",
+           hmc->clk,
+           " : LINK_REMOTE_ROUTE_BTU : ",
+           dev,
+           ":",
+           link,
+           ":",
+           quad,
+           ":",
+           vault,
+           ":",
+           slot,
+           ":",
+           hmc->power.link_remote_route * HMC_MILLIWATT_TO_BTU );
+
   return 0;
 }
 
@@ -281,6 +408,16 @@ extern int hmcsim_trace_power_links( struct hmcsim_t *hmc ){
              i,/*link*/
              ":",
              hmc->power.link_phy );
+      fprintf( hmc->tfile,
+             "%s%"PRIu64"%s%"PRIu32"%s%"PRIu32"%s%f\n",
+             "HMCSIM_TRACE : ",
+             hmc->clk,
+             " : LINK_PHY_BTU : ",
+             j,/*dev*/
+             ":",
+             i,/*link*/
+             ":",
+             hmc->power.link_phy * HMC_MILLIWATT_TO_BTU );
     }
   }
 
@@ -354,6 +491,60 @@ extern int      hmcsim_trace_power( struct hmcsim_t *hmc ){
                          hmc->clk,
                          " : T_ROW_ACCESS_POWER : ",
                          hmc->power.t_row_access);
+
+    /* write out the thermal totals */
+    fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
+                         "HMCSIM_TRACE : ",
+                         hmc->clk,
+                         " : T_LINK_PHY_BTU : ",
+                         hmc->power.t_link_phy * HMC_MILLIWATT_TO_BTU );
+    fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
+                         "HMCSIM_TRACE : ",
+                         hmc->clk,
+                         " : T_LINK_LOCAL_ROUTE_BTU : ",
+                         hmc->power.t_link_local_route * HMC_MILLIWATT_TO_BTU );
+    fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
+                         "HMCSIM_TRACE : ",
+                         hmc->clk,
+                         " : T_LINK_REMOTE_ROUTE_BTU : ",
+                         hmc->power.t_link_remote_route * HMC_MILLIWATT_TO_BTU );
+    fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
+                         "HMCSIM_TRACE : ",
+                         hmc->clk,
+                         " : T_XBAR_RQST_SLOT_BTU : ",
+                         hmc->power.t_xbar_rqst_slot* HMC_MILLIWATT_TO_BTU );
+    fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
+                         "HMCSIM_TRACE : ",
+                         hmc->clk,
+                         " : T_XBAR_RSP_SLOT_BTU : ",
+                         hmc->power.t_xbar_rsp_slot* HMC_MILLIWATT_TO_BTU );
+    fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
+                         "HMCSIM_TRACE : ",
+                         hmc->clk,
+                         " : T_XBAR_ROUTE_EXTERN : ",
+                         hmc->power.t_xbar_route_extern* HMC_MILLIWATT_TO_BTU );
+    fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
+                         "HMCSIM_TRACE : ",
+                         hmc->clk,
+                         " : T_VAULT_RQST_SLOT_BTU : ",
+                         hmc->power.t_vault_rqst_slot* HMC_MILLIWATT_TO_BTU );
+    fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
+                         "HMCSIM_TRACE : ",
+                         hmc->clk,
+                         " : T_VAULT_RSP_SLOT_BTU : ",
+                         hmc->power.t_vault_rsp_slot* HMC_MILLIWATT_TO_BTU );
+    fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
+                         "HMCSIM_TRACE : ",
+                         hmc->clk,
+                         " : T_VAULT_CTRL_BTU : ",
+                         hmc->power.t_vault_ctrl* HMC_MILLIWATT_TO_BTU );
+    fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
+                         "HMCSIM_TRACE : ",
+                         hmc->clk,
+                         " : T_ROW_ACCESS_BTU : ",
+                         hmc->power.t_row_access* HMC_MILLIWATT_TO_BTU );
+
+
   return 0;
 }
 
