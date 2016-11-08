@@ -469,7 +469,7 @@ extern int      hmcsim_trace_power( struct hmcsim_t *hmc ){
     fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
                          "HMCSIM_TRACE : ",
                          hmc->clk,
-                         " : T_XBAR_ROUTE_EXTERN : ",
+                         " : T_XBAR_ROUTE_EXTERN_POWER : ",
                          hmc->power.t_xbar_route_extern);
     fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
                          "HMCSIM_TRACE : ",
@@ -521,7 +521,7 @@ extern int      hmcsim_trace_power( struct hmcsim_t *hmc ){
     fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
                          "HMCSIM_TRACE : ",
                          hmc->clk,
-                         " : T_XBAR_ROUTE_EXTERN : ",
+                         " : T_XBAR_ROUTE_EXTERN_BTU : ",
                          hmc->power.t_xbar_route_extern* HMC_MILLIWATT_TO_BTU );
     fprintf( hmc->tfile, "%s%"PRIu64"%s%f\n",
                          "HMCSIM_TRACE : ",
