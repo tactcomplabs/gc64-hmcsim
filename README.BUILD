@@ -42,5 +42,8 @@ typing "make".  If additional modifications
 to the build environment need to be made,
 modify the Makfile.inc script.
 
+For additional Makefile.inc variants, see
+the 'configs' directory.
+
 -------------------------------------------------
 EOF
