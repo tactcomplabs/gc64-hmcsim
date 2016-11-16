@@ -19,6 +19,10 @@ HMC-SIM TODO LIST
 
 - add cache analysis functions
 
+- faster packet processing
+
+- faster bank conflict detection
+
 -------------------------------------------------------------------------------
 Completed Items:
 -------------------------------------------------------------------------------
