@@ -18,7 +18,7 @@ LDFLAGS :=
 ARFLAGS := rcs
 SHLIB := -shared
 
-.PHONY : test tools cmc
+.PHONY : test tools cmc viz
 
 SRCEXT = c
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
@@ -52,18 +52,22 @@ clean: doclean
 	@echo " Cleaning..."; $(RM) -r $(BUILDDIR) $(SHBUILDDIR) $(TARGET) $(SHTARGET)
 test: $(TARGET) $(SHTARGET)
 	@echo " Building Tests..."; make -C ./test/
+viz:
+	@echo " Building Viz Tools..."; make -C ./viz/
 cmc:
 	@echo " Building CMC Libs..."; make -C ./cmc/
 tools:
 	@echo " Building Tools..."; make -C ./tools/
 cmcclean:
 	@echo " Cleaning CMC..."; make -C ./cmc/ clean
+vizclean:
+	@echo " Cleaning Viz..."; make -C ./viz/ clean
 toolsclean:
 	@echo " Cleaning Tools..."; make -C ./tools/ clean
 testclean:
 	@echo " Cleaning Tests..."; make -C ./test/ clean
-distclean: clean testclean doclean toolsclean cmcclean
-install: $(TARGET) $(SHTARGET) cmc 
+distclean: clean testclean doclean toolsclean cmcclean vizclean
+install: $(TARGET) $(SHTARGET) cmc
 	@echo " Installing HMC-Sim...";
 	@echo " Building Directory Structure...";
 	mkdir -p $(PREFIX)/include
