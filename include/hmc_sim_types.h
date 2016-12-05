@@ -203,10 +203,13 @@ struct hmc_dram_t{
 
 struct hmc_bank_t{
 
-	//struct hmc_dram_t *drams;	/*! HMC-SIM: HMC_BANK_T: DRAMS */
+	//struct hmc_dram_t *drams;	    /*! HMC-SIM: HMC_BANK_T: DRAMS */
 
-	uint32_t id;			/*! HMC-SIM: HMC_BANK_T: BANK ID */
-					/* 16-BYTE BANK INTERLEAVE */	
+	uint32_t id;			    /*! HMC-SIM: HMC_BANK_T: BANK ID */
+					    /* 16-BYTE BANK INTERLEAVE */
+        uint32_t delay;                     /*! HMC-SIM: HMC_BANK_T: CYCLES UNTIL BANK IS AVAILABLE */
+        uint32_t valid;                     /*! HMC-SIM: HMC_BANK_T: RESPONSE PACKET IS VALID */
+        uint64_t packet[HMC_MAX_UQ_PACKET]; /*! HMC-SIM: HMC_BANK_T: RESPONSE PACKET */
 };
 
 struct hmc_queue_t{
@@ -341,6 +344,8 @@ struct hmcsim_t{
 
 	uint32_t queue_depth;		/*! HMC-SIM: HMCSIM_T: VAULT QUEUE DEPTH */
 	uint32_t xbar_depth;		/*! HMC-SIM: HMCSIM_T: VAULT QUEUE DEPTH */
+        
+        uint32_t dramlatency;           /*! HMC-sIM: HMCSIM_T: DRAM ACCESS LATENCY IN CYCLES */
 
 	FILE *tfile;			/*! HMC-SIM: HMCSIM_T: TRACE FILE HANDLER */
 	uint32_t tracelevel;		/*! HMC-SIM: HMCSIM_T: TRACE LEVEL */

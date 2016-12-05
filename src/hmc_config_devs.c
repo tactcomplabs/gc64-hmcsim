@@ -509,12 +509,13 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 				for( x=0; x<hmc->num_banks; x++ ){ 
 
 					/* 
-					 * set the id 
+					 * set the id and initial delay 
 					 *
 					 */
 					hmc->devs[i].quads[j].vaults[k].banks[x].id	= x;
-
-					/* 
+                                        hmc->devs[i].quads[j].vaults[k].banks[x].delay  = 0;
+					
+                                        /* 
 					 * drams in each bank
 					 * 
 					 */

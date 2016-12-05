@@ -794,6 +794,66 @@ static int hmcsim_clock_root_xbar( struct hmcsim_t *hmc )
  * HMCSIM_CLOCK_BANK_CONFLICTS
  *
  */
+static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
+{
+        /* vars */
+        uint32_t dev = 0;
+        uint32_t quad = 0;
+        uint32_t vault = 0;
+        uint32_t bank = 0;
+        uint32_t i = 0;
+        uint32_t t_slot = hmc->queue_depth+1;
+
+        /* Iterate through all banks and decrement delay timestamp if needed */
+        for (dev = 0; dev < hmc->num_devs; dev++) {
+            for (quad = 0; quad < hmc->num_quads; quad++) {
+                for (vault = 0; vault < 4; vault++) {
+                    for (bank = 0; bank < hmc->num_banks; bank++) {
+                        
+                        if (hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay > 0) {
+                            hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay--;
+                            
+                            /* If bank becomes available and a response is waiting, forward it */
+                            if (hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay == 0 &&
+                                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid == HMC_RQST_VALID) {
+                                
+                                t_slot = hmc->queue_depth+1;
+                                for (i = 0; i < hmc->queue_depth; i++) {
+                                    if (hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid == HMC_RQST_INVALID) {
+                                        t_slot = i;
+                                        break;
+                                    }
+                                }
+
+                                /* Found slot, send response */
+                                if (t_slot != hmc->queue_depth+1) {
+                                    hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].valid = HMC_RQST_VALID;
+
+                                    for (i = 0; i < HMC_MAX_UQ_PACKET; i++) {
+                                        hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].packet[i] = hmc->devs[dev].quads[quad].vaults[vault].banks[bank].packet[i];
+                                        hmc->devs[dev].quads[quad].vaults[vault].banks[bank].packet[i] = 0x00ll;
+                                    }
+                                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_INVALID;
+
+                                } else { /* Did not find free slot, delay for another cycle */
+                                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay++;
+                                }
+                            }
+                        }
+
+                    } // bank
+                } // vault
+            } // quad
+        } // dev
+
+        return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_CLOCK_BANK_CONFLICTS */
+/*
+ * HMCSIM_CLOCK_BANK_CONFLICTS
+ *
+ */
 static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 {
 	/* vars */
@@ -940,6 +1000,11 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
  */
 static int hmcsim_clock_analysis_phase( struct hmcsim_t *hmc )
 {
+
+        /* Update bank delays */
+        if (hmcsim_clock_bank_update(hmc) != 0) {
+            return -1;
+        }
 	/*
 	 * This is where we put all the inner-clock
 	 * analysis phases.  The current phases
