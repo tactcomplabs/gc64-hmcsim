@@ -126,6 +126,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	uint8_t tmp8			= 0x0;
         uint32_t row_ops                = 0x00;
         float tpower                    = 0.;
+        uint32_t op_latency             = 0;
 	/* ---- */
 
 
@@ -192,6 +193,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 	/* -- get the bank */
 	hmcsim_util_decode_bank( hmc, dev, bsize, addr, &bank );
+        
+        /* Return stall if the bank is not available */
+        if (hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay != 0) {
+            queue->valid = HMC_RQST_STALLED;
+            return HMC_STALL;
+        }
 
 	/*
  	 * Step 3: find a response slot
@@ -268,6 +275,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
 
@@ -292,9 +302,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 10:
 			/* WR48 */
@@ -325,9 +338,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 11:
 			/* WR64 */
@@ -358,9 +374,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 12:
 			/* WR80 */
@@ -391,9 +410,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 13:
 			/* WR96 */
@@ -424,9 +446,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 14:
 			/* WR112 */
@@ -457,9 +482,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 15:
 			/* WR128 */
@@ -490,9 +518,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
                 case 79:
 			/* WR256 */
@@ -523,9 +554,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 
 		case 16:
@@ -548,9 +582,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = MD_WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 17:
 			/* BWR */
@@ -572,9 +609,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
                         /* set the response length in flits */
                         rsp_len = 1;
-
+                        
 			break;
 		case 18:
 			/* TWOADD8 */
@@ -596,6 +636,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
+			/* set the response length in FLITS */
+			rsp_len = 1;
+                        
 			break;
 		case 19:
 			/* ADD16 */
@@ -617,9 +663,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 24:
 			/* P_WR16 */
@@ -641,6 +690,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
                         no_response = 1;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			break;
 		case 25:
 			/* P_WR32 */
@@ -661,6 +713,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
                         no_response = 1;
+                        
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 26:
@@ -692,6 +747,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
                         no_response = 1;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			break;
 		case 27:
 			/* P_WR64 */
@@ -721,6 +779,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 28:
@@ -752,6 +813,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
                         no_response = 1;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			break;
 		case 29:
 			/* P_WR96 */
@@ -781,6 +845,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 30:
@@ -812,6 +879,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
                         no_response = 1;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			break;
 		case 31:
 			/* P_WR128 */
@@ -841,6 +911,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
                 case 95:
@@ -872,6 +945,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
                         no_response = 1;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			break;
 		case 33:
 			/* P_BWR */
@@ -892,6 +968,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 34:
@@ -914,6 +993,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
                         no_response = 1;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			break;
 		case 35:
 			/* P2ADD16 */
@@ -934,6 +1016,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 48:
@@ -956,9 +1041,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 2;
-
+                        
 			break;
 		case 49:
 			/* RD32 */
@@ -980,9 +1068,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 3;
-
+                        
 			break;
 		case 50:
 			/* RD48 */
@@ -1013,9 +1104,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 4;
-
+                        
 			break;
 		case 51:
 			/* RD64 */
@@ -1046,9 +1140,12 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 5;
-
+                        
 			break;
 		case 52:
 			/* RD80 */
@@ -1078,6 +1175,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 6;
@@ -1112,6 +1212,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 7;
 
@@ -1144,6 +1247,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 8;
@@ -1178,6 +1284,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 9;
 
@@ -1211,6 +1320,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 17;
 
@@ -1234,6 +1346,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
 			rsp_cmd = MD_RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1332,6 +1447,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 2;
 
@@ -1355,6 +1473,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1380,6 +1501,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
 
@@ -1404,6 +1528,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
                         no_response = 1;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
                         break;
                 case 64:
                         /* XOR16 */
@@ -1424,6 +1551,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1449,6 +1579,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 2;
 
@@ -1472,6 +1605,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1497,6 +1633,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 2;
 
@@ -1520,6 +1659,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1545,6 +1687,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 2;
 
@@ -1568,6 +1713,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1593,6 +1741,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 2;
 
@@ -1616,6 +1767,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1641,6 +1795,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 2;
 
@@ -1664,6 +1821,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1689,6 +1849,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
 
@@ -1712,6 +1875,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
+                        
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
@@ -1737,6 +1903,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 2;
 
@@ -1760,6 +1929,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1943,17 +2115,31 @@ step4_vr:
                 }
 
 		/* -- register the response */
-		hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].valid = HMC_RQST_VALID;
-		for( j=0; j<rsp_len; j++ ){
+		if (op_latency != 0) { /* Delay, stall the response for op_latency cycles */
+                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_VALID;
+                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = op_latency;
+
+                    /* Record the response packet to be sent after the delay */
+                    for (j=0; j<rsp_len; j++) {
+                        hmc->devs[dev].quads[quad].vaults[vault].banks[bank].packet[j] = packet[j];
+                    }
+
+                } else { /* No delay, forward response immediately */
+                    hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].valid = HMC_RQST_VALID;
+		    for( j=0; j<rsp_len; j++ ){
 			hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].packet[j] = packet[j];
-		}
-                if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
-                  hmcsim_power_vault_rsp_slot( hmc, dev, quad, vault, t_slot );
+		    }
+                    if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                        hmcsim_power_vault_rsp_slot( hmc, dev, quad, vault, t_slot );
+                    }
                 }
 
 
-	}/* else, no response required, probably flow control */
-
+	} else { /* else, no response required, probably flow control */
+            /* Stall the bank for op_latency cycles in the case where no response is generated */
+            hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_INVALID; 
+            hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = op_latency;        
+        }
 	/*
 	 * Step 5: invalidate the request queue slot
 	 *

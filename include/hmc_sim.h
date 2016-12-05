@@ -354,6 +354,15 @@ extern int hmcsim_power_config( struct hmcsim_t *hmc,
                                 float vault_ctrl,
                                 float row_access );
 
+/*!     \fn int hmcsim_init_dram_latency( struct hmcsim_t *hmc, uint32_t latency )
+ *      \brief Initializes the DRAM latency parameter, default is 2 cycles
+ *      \param *hmc is a pointer to a valid and initialized hmc structure. Must not be null.
+ *      \param latency is the number of cycles of latency for a dram row access
+ *      \return 0 on success, nonzero otherwise
+ */
+extern int hmcsim_init_dram_latency( struct hmcsim_t *hmc,
+                                     uint32_t latency );
+
 /* ----------------------------------- SIMPLIFIED INTERFACE API */
 
 

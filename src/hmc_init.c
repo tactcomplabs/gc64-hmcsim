@@ -53,6 +53,20 @@ static void hmcsim_init_power( struct hmcsim_t *hmc ){
   hmc->power.t_row_access         = 0.0;
 }
 
+/* ----------------------------------------------------- HMCSIM_INIT_DRAM_LATENCY */
+/*
+ * HMCSIM_INIT_DRAM_LATENCY
+ *
+ */
+extern int hmcsim_init_dram_latency( struct hmcsim_t *hmc,
+                                     uint32_t latency ){
+  if( hmc == NULL ){
+    return -1;
+  }
+  hmc->dramlatency = latency;
+  return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_INIT */
 /*
  * HMCSIM_INIT
@@ -158,6 +172,7 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
         hmc->num_cmc    = 0x00;
 	hmc->queue_depth= queue_depth;
 	hmc->xbar_depth	= xbar_depth;
+	hmc->dramlatency = HMC_DEF_DRAM_LATENCY;  // default dram latency
 
 	hmc->clk	= 0x00ll;
 

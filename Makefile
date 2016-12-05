@@ -66,7 +66,7 @@ toolsclean:
 	@echo " Cleaning Tools..."; make -C ./tools/ clean
 testclean:
 	@echo " Cleaning Tests..."; make -C ./test/ clean
-distclean: clean testclean doclean toolsclean cmcclean vizclean
+distclean: clean testclean doclean toolsclean cmcclean
 install: $(TARGET) $(SHTARGET) cmc
 	@echo " Installing HMC-Sim...";
 	@echo " Building Directory Structure...";
