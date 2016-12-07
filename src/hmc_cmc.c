@@ -404,6 +404,10 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
   }
 
   /* command is active, process it */
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "PROCESSING CMC PACKET" );
+  printf( "CMC RAWCMD:IDX = %d:%d\n", rawcmd,idx );
+#endif
   cmc_execute = hmc->cmcs[idx].cmc_execute;
   rtn = (*cmc_execute)( (void *)(hmc),
                         dev,
@@ -420,6 +424,10 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
   if( rtn == -1 ){
     return HMC_ERROR;
   }
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "DONE PROCESSING CMC PACKET" );
+  HMCSIM_PRINT_TRACE( "REGISTERING RESPONSES IF NECESSARY" );
+#endif
 
   /* register all the response data */
   *rsp_len      = hmc->cmcs[idx].rsp_len;
@@ -454,6 +462,9 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
   }
 
   /* trace it */
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "DUMPING TRACE DATA FOR CMC COMMAND" );
+#endif
   /* -- get the name of the op */
   cmc_str = hmc->cmcs[idx].cmc_str;
   (*cmc_str)(&(op_name[0]));
@@ -468,6 +479,9 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                      addr,
                      length );
 
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "DUMPING POWER/THERMAL DATA FOR CMC COMMAND" );
+#endif
   /* -- get the power */
   if( hmc->cmcs[idx].track_power == 1 ){
     cmc_power = hmc->cmcs[idx].cmc_power;
@@ -477,6 +491,9 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
     *tpower  = 0.;
   }
 
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "CMC PROCESSING COMPLETE" );
+#endif
   return 0;
 }
 

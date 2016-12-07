@@ -193,7 +193,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 	/* -- get the bank */
 	hmcsim_util_decode_bank( hmc, dev, bsize, addr, &bank );
-        
+
         /* Return stall if the bank is not available */
         if (hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay != 0) {
             queue->valid = HMC_RQST_STALLED;
@@ -2053,6 +2053,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                         /* -- decode the response and see if we need
                            -- to send a response
                         */
+                        op_latency = hmc->dramlatency*row_ops;
                         switch( rsp_cmd ){
                         case MD_RD_RS:
                         case MD_WR_RS:
@@ -2077,7 +2078,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
  	 */
 step4_vr:
 	if( no_response == 0 ){
-
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "HANDLING PACKET RESPONSE");
+#endif
 		/* -- build the response */
 		rsp_slid 	= ((tail>>26) & 0x07);
 		rsp_tag		= tag;
@@ -2115,7 +2118,14 @@ step4_vr:
                 }
 
 		/* -- register the response */
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "HANDLING OPERATION BANK LATENCY");
+  printf( "DEV:QUAD:VAULT:BANK = %d:%d:%d:%d\n", dev,quad,vault,bank );
+#endif
 		if (op_latency != 0) { /* Delay, stall the response for op_latency cycles */
+#ifdef HMC_DEBUG
+  printf( "STALLING BANK %d %d CYCLES\n", bank, op_latency );
+#endif
                     hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_VALID;
                     hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = op_latency;
 
@@ -2125,6 +2135,9 @@ step4_vr:
                     }
 
                 } else { /* No delay, forward response immediately */
+#ifdef HMC_DEBUG
+  printf( "STALLING BANK %d %d CYCLES\n", bank, op_latency );
+#endif
                     hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].valid = HMC_RQST_VALID;
 		    for( j=0; j<rsp_len; j++ ){
 			hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].packet[j] = packet[j];
@@ -2146,6 +2159,9 @@ step4_vr:
  	 */
 	hmcsim_util_zero_packet( queue );
 
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "COMPLETED PACKET PROCESSING" );
+#endif
 	return 0;
 }
 

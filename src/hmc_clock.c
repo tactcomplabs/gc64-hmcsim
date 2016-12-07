@@ -807,16 +807,17 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
         /* Iterate through all banks and decrement delay timestamp if needed */
         for (dev = 0; dev < hmc->num_devs; dev++) {
             for (quad = 0; quad < hmc->num_quads; quad++) {
-                for (vault = 0; vault < 4; vault++) {
+                //for (vault = 0; vault < 4; vault++) {
+                for (vault = 0; vault < 8; vault++) {
                     for (bank = 0; bank < hmc->num_banks; bank++) {
-                        
+
                         if (hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay > 0) {
                             hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay--;
-                            
+
                             /* If bank becomes available and a response is waiting, forward it */
-                            if (hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay == 0 &&
-                                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid == HMC_RQST_VALID) {
-                                
+                            if ((hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay == 0) &&
+                                   ( hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid == HMC_RQST_VALID)) {
+
                                 t_slot = hmc->queue_depth+1;
                                 for (i = 0; i < hmc->queue_depth; i++) {
                                     if (hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid == HMC_RQST_INVALID) {
@@ -836,7 +837,7 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
                                     hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_INVALID;
 
                                 } else { /* Did not find free slot, delay for another cycle */
-                                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay++;
+                                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = 1;
                                 }
                             }
                         }
@@ -882,7 +883,8 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 	 */
 	for( i=0; i<hmc->num_devs; i++){
 		for( j=0; j<hmc->num_quads; j++ ){
-			for( k=0; k<4; k++ ){
+			//for( k=0; k<4; k++ ){
+			for( k=0; k<8; k++ ){
 				for( x=0; x<hmc->queue_depth; x++ ){
 
 					/*
@@ -917,7 +919,8 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
  	 */
 	for( i=0; i<hmc->num_devs; i++){
 		for( j=0; j<hmc->num_quads; j++ ){
-			for( k=0; k<4; k++ ){
+			//for( k=0; k<4; k++ ){
+			for( k=0; k<8; k++ ){
 
 				na = 0;
 
@@ -1047,18 +1050,19 @@ static int hmcsim_clock_rw_ops( struct hmcsim_t *hmc )
 	uint32_t k	= 0;
 	uint32_t x	= 0;
 	uint32_t test	= 0x00000000;
-        uint32_t venable[4];
+        uint32_t venable[8];
 	/* ---- */
 
         /* reset the vault enable array */
-        for( i=0; i<4; i++ ){
+        for( i=0; i<8; i++ ){
           venable[i] = 0;
         }
 
 	for( i=0; i<hmc->num_devs; i++){
 		for( j=0; j<hmc->num_quads; j++ ){
 			//for( k=0; j<hmc->num_vaults; k++ ){
-			for( k=0; k<4; k++ ){
+			//for( k=0; k<4; k++ ){
+			for( k=0; k<8; k++ ){
 
 				/*
 				 * process the first
@@ -1139,6 +1143,9 @@ static int hmcsim_clock_rw_ops( struct hmcsim_t *hmc )
           }
         }
 
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "COMPLETED PROCESSING RW_OP" );
+#endif
 	return 0;
 }
 
@@ -1160,7 +1167,9 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 	uint32_t r_slot		= hmc->xbar_depth+1;
 	struct hmc_queue_t *lq	= NULL;
 	/* ---- */
-
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE("STARTING HMCSIM_CLOCK_REG_RESPONSES");
+#endif
 
 	/*
 	 * Walk all the vault response queues
@@ -1171,7 +1180,8 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 	for( i=0; i<hmc->num_devs; i++){
 		for( j=0; j<hmc->num_quads; j++ ){
 			//for( k=0; k<hmc->num_vaults; k++ ){
-			for( k=0; k<4; k++ ){
+			//for( k=0; k<4; k++ ){
+			for( k=0; k<8; k++ ){
 
 				lq = hmc->devs[i].quads[j].vaults[k].rsp_queue;
 
@@ -1184,7 +1194,7 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 					 *
 					 */
 					if( lq[x].valid != HMC_RQST_INVALID ){
-						
+
 						/*
 						 * determine which link response
 						 * queue we're supposed to route
@@ -1202,6 +1212,7 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 						 *
 						 */
 						cur = hmc->xbar_depth-1;
+                                                r_slot = hmc->xbar_depth+1;
 						for( y=0; y<hmc->xbar_depth; y++ ){	
 							if( hmc->devs[i].xbar[r_link].xbar_rsp[cur].valid == 
 									HMC_RQST_INVALID ){
@@ -1592,7 +1603,8 @@ static int hmcsim_clock_queue_reorg( struct hmcsim_t *hmc )
 		for( j=0; j<hmc->num_quads; j++ )
 		{
 			//for( k=0; k<hmc->num_vaults; k++ )
-			for( k=0; k<4; k++ )
+			//for( k=0; k<4; k++ )
+			for( k=0; k<8; k++ )
 			{
 				/*
 				 * reorder:
