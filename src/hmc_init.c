@@ -129,7 +129,7 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
 		return HMC_ERROR_PARAMS;
 	}else if( (num_links != 4) && (num_links != 8) ){
 		return HMC_ERROR_PARAMS;
-	}else if( (num_vaults/num_links) != 4 ){
+	}else if( (num_vaults/num_links) != 8 ){
 		/* always maintain 4 vaults per quad, or link */
 		return HMC_ERROR_PARAMS;
 	}else if( (capacity%2) != 0 ){

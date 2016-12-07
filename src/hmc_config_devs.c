@@ -476,7 +476,8 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 			hmc->devs[i].quads[j].vaults	= &(hmc->__ptr_vaults[cur_vault]);
 
 			//for( k=0; k<hmc->num_vaults; k++ ){ 
-			for( k=0; k<4; k++ ){ 
+			//for( k=0; k<4; k++ ){ 
+			for( k=0; k<8; k++ ){ 
 
 				/* 
 				 * set the id 
@@ -546,7 +547,8 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 
 			//cur_queue += hmc->queue_depth;	
 			//cur_vault += hmc->num_vaults;
-			cur_vault += 4;
+			//cur_vault += 4;
+			cur_vault += 8;
 
 		}
 
