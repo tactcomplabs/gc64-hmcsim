@@ -477,7 +477,6 @@ extern int execute_test(        struct hmcsim_t *hmc,
           packet[2] = 0x00ll;
           packet[3] = tail;
           ret = hmcsim_send( hmc, &(packet[0]) );
-          printf( "sent unlock command from thread %d\n", i );
         }else{
           printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
         }

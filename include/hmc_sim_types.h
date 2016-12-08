@@ -343,8 +343,8 @@ struct hmcsim_t{
         uint32_t num_cmc;               /*! HMC-SIM: HMCSIM_T: NUMBER OF REGISTERED CMC OPERATIONS */
 
 	uint32_t queue_depth;		/*! HMC-SIM: HMCSIM_T: VAULT QUEUE DEPTH */
-	uint32_t xbar_depth;		/*! HMC-SIM: HMCSIM_T: VAULT QUEUE DEPTH */
-        
+	uint32_t xbar_depth;		/*! HMC-SIM: HMCSIM_T: CROSSBAR QUEUE DEPTH */
+
         uint32_t dramlatency;           /*! HMC-sIM: HMCSIM_T: DRAM ACCESS LATENCY IN CYCLES */
 
 	FILE *tfile;			/*! HMC-SIM: HMCSIM_T: TRACE FILE HANDLER */
