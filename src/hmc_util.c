@@ -600,11 +600,11 @@ extern int hmcsim_util_zero_packet( struct hmc_queue_t *queue  )
 	uint64_t i	= 0;
 	/* ---- */
 
-	/* 
-	 * sanity check 
-	 * 
+	/*
+	 * sanity check
+	 *
  	 */
-	if( queue == NULL ){ 
+	if( queue == NULL ){
 		return -1;
 	}
 
