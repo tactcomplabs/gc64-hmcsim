@@ -195,8 +195,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	hmcsim_util_decode_bank( hmc, dev, bsize, addr, &bank );
 
         /* Return stall if the bank is not available */
-        if (hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay != 0) {
+        if (hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay > 0) {
             queue->valid = HMC_RQST_STALLED;
+	    if( (hmc->tracelevel & HMC_TRACE_STALL) > 0 ){
+              hmcsim_trace_stall( hmc,
+			          dev,
+				  quad,
+				  vault,
+				  0,
+				  0,
+				  0,
+				  slot,
+				  1 );
+	    }
             return HMC_STALL;
         }
 
@@ -208,7 +219,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 	/* -- find a response slot */
 	cur = hmc->queue_depth-1;
+        t_slot = hmc->queue_depth+1;
 
+	for( j=0; j<hmc->queue_depth; j++){
+          if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[j].valid == HMC_RQST_INVALID ){
+            t_slot = j;
+            break;
+          }
+        }
+#if 0
 	for( j=0; j<hmc->queue_depth; j++){
 
 		if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[cur].valid == HMC_RQST_INVALID ){
@@ -217,6 +236,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 		cur--;
 	}
+#endif
 
 	if( t_slot == hmc->queue_depth+1 ){
 

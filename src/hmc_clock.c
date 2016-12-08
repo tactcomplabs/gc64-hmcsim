@@ -128,7 +128,9 @@ static int hmcsim_clock_print_xbar_stats( struct hmcsim_t *hmc,
 
 /* ----------------------------------------------------- HMCSIM_CLOCK_PRINT_VAULT_STATS */
 static int hmcsim_clock_print_vault_stats( struct hmcsim_t *hmc,
-					struct hmc_queue_t *queue )
+                                           uint32_t vault,
+					   struct hmc_queue_t *queue,
+                                           uint32_t type  )
 {
   /* vars */
   int nvalid	= 0;
@@ -150,8 +152,15 @@ static int hmcsim_clock_print_vault_stats( struct hmcsim_t *hmc,
     }
   }
 
-  printf( "VAULT:nvalid:ninvalid:nconflict:nstalled = %d:%d:%d:%d\n",
-          nvalid, ninvalid, nconflict, nstalled );
+  if( type == 0 ){
+    /* request */
+    printf( "RQST_VAULT:nvalid:ninvalid:nconflict:nstalled = %d:%d:%d:%d:%d\n",
+            vault,nvalid, ninvalid, nconflict, nstalled );
+  }else{
+    /* response */
+    printf( "RSP_VAULT:nvalid:ninvalid:nconflict:nstalled = %d:%d:%d:%d:%d\n",
+            vault,nvalid, ninvalid, nconflict, nstalled );
+  }
 
   return 0;
 }
@@ -218,6 +227,7 @@ static int hmcsim_clock_process_rsp_queue( 	struct hmcsim_t *hmc,
 			 *
 			 */
 			cur = hmc->xbar_depth-1;
+                        t_slot = hmc->xbar_depth+1;
 			for( j=0; j<hmc->xbar_depth; j++ ){
 				if( queue[cur].valid == HMC_RQST_INVALID ){
 
@@ -277,10 +287,10 @@ static int hmcsim_clock_process_rsp_queue( 	struct hmcsim_t *hmc,
 								i,
 								4 );
 				}
-			}
+			} /* end if+else */
 
-		}
-	}
+		} /* end if */
+	} /* i<hmc->xbar_depth */
 
 	return 0;
 }
@@ -379,7 +389,8 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 			 * Stage 6: Get the link
 			 *
 			 */
-			plink = (uint8_t)( (tail & 0x7000000) >> 24 );
+			//plink = (uint8_t)( (tail & 0x7000000) >> 24 );
+                        plink = (uint8_t)( (tail>>26) & 0x7 );
 
 			if( cub == (uint8_t)(dev) ){
 #ifdef HMC_DEBUG
@@ -455,16 +466,23 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 				 *     Search bottom-up
 				 *
 				 */
+#if 0
 				t_slot = hmc->queue_depth+1;
+                                for( j=0; j<hmc->queue_depth; j++ ){
+                                  if( hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[j].valid
+                                      == HMC_RQST_INVALID ){
+                                    t_slot = j;
+                                    break;
+                                  }
+                                }
+#endif
 				cur    = hmc->queue_depth-1;
-
+                                t_slot = hmc->queue_depth+1;
 				for( j=0; j<hmc->queue_depth; j++ ){
-
-					if( hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[cur].valid == HMC_RQST_INVALID ){
-						t_slot = cur;
-					}
-
-					cur--;
+			          if( hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[cur].valid == HMC_RQST_INVALID ){
+				    t_slot = cur;
+				  }
+				  cur--;
 				}
 
 				if( t_slot == hmc->queue_depth+1 ){
@@ -556,9 +574,7 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 					 */
 					t_slot = hmc->xbar_depth+1;
 					cur    = hmc->xbar_depth-1;
-
 					for( j=0; j<hmc->xbar_depth; j++ ){
-	
 						/*
 						 * walk the queue from the bottom
 						 * up
@@ -803,11 +819,11 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
         uint32_t bank = 0;
         uint32_t i = 0;
         uint32_t t_slot = hmc->queue_depth+1;
+        uint32_t cur = hmc->queue_depth-1;
 
         /* Iterate through all banks and decrement delay timestamp if needed */
         for (dev = 0; dev < hmc->num_devs; dev++) {
             for (quad = 0; quad < hmc->num_quads; quad++) {
-                //for (vault = 0; vault < 4; vault++) {
                 for (vault = 0; vault < 8; vault++) {
                     for (bank = 0; bank < hmc->num_banks; bank++) {
 
@@ -817,13 +833,23 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
                             /* If bank becomes available and a response is waiting, forward it */
                             if ((hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay == 0) &&
                                    ( hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid == HMC_RQST_VALID)) {
-
+#if 0
                                 t_slot = hmc->queue_depth+1;
                                 for (i = 0; i < hmc->queue_depth; i++) {
                                     if (hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid == HMC_RQST_INVALID) {
                                         t_slot = i;
                                         break;
                                     }
+                                }
+#endif
+                                t_slot = hmc->queue_depth+1;
+                                cur = hmc->queue_depth-1;
+                                for (i = 0; i < hmc->queue_depth; i++) {
+                                    if (hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[cur].valid == HMC_RQST_INVALID) {
+                                        t_slot = cur;
+                                        break;
+                                    }
+                                    cur--;
                                 }
 
                                 /* Found slot, send response */
@@ -835,6 +861,7 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
                                         hmc->devs[dev].quads[quad].vaults[vault].banks[bank].packet[i] = 0x00ll;
                                     }
                                     hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_INVALID;
+                                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = 0;
 
                                 } else { /* Did not find free slot, delay for another cycle */
                                     hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = 1;
@@ -855,6 +882,7 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
  * HMCSIM_CLOCK_BANK_CONFLICTS
  *
  */
+#if 0
 static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 {
 	/* vars */
@@ -995,6 +1023,7 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 
 	return 0;
 }
+#endif
 
 /* ----------------------------------------------------- HMCSIM_CLOCK_ANALYSIS_PHASE */
 /*
@@ -1059,11 +1088,23 @@ static int hmcsim_clock_rw_ops( struct hmcsim_t *hmc )
         }
 
 	for( i=0; i<hmc->num_devs; i++){
-		for( j=0; j<hmc->num_quads; j++ ){
-			//for( k=0; j<hmc->num_vaults; k++ ){
-			//for( k=0; k<4; k++ ){
-			for( k=0; k<8; k++ ){
+	  for( j=0; j<hmc->num_quads; j++ ){
+	    for( k=0; k<8; k++ ){
+	      for( x=0; x<hmc->queue_depth; x++ ){
+	        test = 0x00000000;
+		test = hmc->devs[i].quads[j].vaults[k].rqst_queue[x].valid;
 
+	        if( (test > 0 ) && (test != 2) ){
+                  /*
+                   * valid and no conflict
+                   * process the request
+                   *
+                   */
+                   hmcsim_process_rqst( hmc, i, j, k, x );
+                   venable[k] = 1;
+                }/* end if */
+               } /* end x<hmc->queue_depth */
+#if 0
 				/*
 				 * process the first
 				 * min( HMC_NUM_BANKS, queue_depth )
@@ -1130,12 +1171,13 @@ static int hmcsim_clock_rw_ops( struct hmcsim_t *hmc )
 					}
 
 				}
-			}
+#endif
+			}/* end k<8 vaults */
 		}
 	}
 
         /* record the control power enable for each active vault */
-        for( i=0; i<4; i++ ){
+        for( i=0; i<8; i++ ){
           if( venable[i] == 1 ){
             if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
               hmcsim_power_vault_ctrl( hmc, i );
@@ -1179,8 +1221,6 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
  	 */
 	for( i=0; i<hmc->num_devs; i++){
 		for( j=0; j<hmc->num_quads; j++ ){
-			//for( k=0; k<hmc->num_vaults; k++ ){
-			//for( k=0; k<4; k++ ){
 			for( k=0; k<8; k++ ){
 
 				lq = hmc->devs[i].quads[j].vaults[k].rsp_queue;
@@ -1221,6 +1261,16 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 							}
 							cur--;
 						}
+#if 0
+                                                r_slot = hmc->xbar_depth+1;
+                                                for( y=0; y<hmc->xbar_depth; y++ ){
+                                                  if( hmc->devs[i].xbar[r_link].xbar_rsp[y].valid
+                                                      == HMC_RQST_INVALID ){
+                                                    r_slot = i;
+                                                    break;
+                                                  }
+                                                }
+#endif
 
 						/*
 						 * if we found a good slot, insert it
@@ -1285,12 +1335,14 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 				}
 
 #ifdef HMC_DEBUG
-				hmcsim_clock_print_vault_stats( hmc, hmc->devs[i].quads[j].vaults[k].rqst_queue );
-				hmcsim_clock_print_vault_stats( hmc, hmc->devs[i].quads[j].vaults[k].rsp_queue );
+				hmcsim_clock_print_vault_stats( hmc, k,
+                                                                hmc->devs[i].quads[j].vaults[k].rqst_queue, 0 );
+				hmcsim_clock_print_vault_stats( hmc, k,
+                                                                hmc->devs[i].quads[j].vaults[k].rsp_queue, 1 );
 #endif
-			}
-		}
-	}
+			} /* vaults */
+		} /* quads */
+	} /* devs */
 
 	return 0;
 }
@@ -1482,7 +1534,7 @@ static int hmcsim_clock_reorg_vault_rqst( 	struct hmcsim_t *hmc,
 						hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[i].packet[j];	
 
 					hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[i].packet[j] =0x00ll;	
-					
+
 				}
 
 				hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[slot].valid = 1;	
@@ -1602,8 +1654,6 @@ static int hmcsim_clock_queue_reorg( struct hmcsim_t *hmc )
 	{
 		for( j=0; j<hmc->num_quads; j++ )
 		{
-			//for( k=0; k<hmc->num_vaults; k++ )
-			//for( k=0; k<4; k++ )
 			for( k=0; k<8; k++ )
 			{
 				/*
