@@ -218,25 +218,22 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
  	 */
 
 	/* -- find a response slot */
-	cur = hmc->queue_depth-1;
-        t_slot = hmc->queue_depth+1;
-
+#if 0
 	for( j=0; j<hmc->queue_depth; j++){
           if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[j].valid == HMC_RQST_INVALID ){
             t_slot = j;
             break;
           }
         }
-#if 0
-	for( j=0; j<hmc->queue_depth; j++){
-
-		if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[cur].valid == HMC_RQST_INVALID ){
-			t_slot = cur;
-		}
-
-		cur--;
-	}
 #endif
+	cur = hmc->queue_depth-1;
+        t_slot = hmc->queue_depth+1;
+	for( j=0; j<hmc->queue_depth; j++){
+	  if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[cur].valid == HMC_RQST_INVALID ){
+	    t_slot = cur;
+	  }
+          cur--;
+	}
 
 	if( t_slot == hmc->queue_depth+1 ){
 
@@ -2074,6 +2071,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                            -- to send a response
                         */
                         op_latency = hmc->dramlatency*row_ops;
+
                         switch( rsp_cmd ){
                         case MD_RD_RS:
                         case MD_WR_RS:

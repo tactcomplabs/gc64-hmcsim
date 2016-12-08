@@ -832,7 +832,8 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
 
                             /* If bank becomes available and a response is waiting, forward it */
                             if ((hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay == 0) &&
-                                   ( hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid == HMC_RQST_VALID)) {
+                                   ( hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid != HMC_RQST_INVALID)) {
+                                   //( hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid == HMC_RQST_VALID)) {
 #if 0
                                 t_slot = hmc->queue_depth+1;
                                 for (i = 0; i < hmc->queue_depth; i++) {
