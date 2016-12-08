@@ -363,7 +363,7 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 			 * Step 2: Get the CUB.
 			 *
 			 */
-			cub = (uint8_t)((header>>61) & 0x3F );
+			cub = (uint8_t)((header>>61) & 0x7 );
 
 			/* Step 3: If it is equal to `dev`
 			 *         then we have a local request.
@@ -375,7 +375,7 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 			 * Stage 4: Get the packet length
 			 *
 			 */
-			len = (uint32_t)( (header & 0x780) >> 7);
+			len = (uint32_t)( (header >> 7) & 0x3F );
 			len *= 2;
 
 			/*
