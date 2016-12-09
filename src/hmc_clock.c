@@ -832,6 +832,7 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
 
                         if (hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay > 0) {
                             hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay--;
+                            //printf( "quad:vault:bank %d:%d:%d has a latency\n", quad, vault, bank );
 
                             /* If bank becomes available and a response is waiting, forward it */
                             if ((hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay == 0) &&
