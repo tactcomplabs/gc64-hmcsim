@@ -871,6 +871,7 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
                                     hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay=1;
                                 }/* end else */
                             }/* end if delay==0 */
+                            /* we don't need an else case here, this was probably a flow control packet */
                         }
 
                     } // bank
@@ -1253,6 +1254,8 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 									     x,
 									     &r_link );
 
+                                                /* TODO: if link is not local, register latency */
+
 						/*
 						 * determine if the response
 						 * xbar queue has an empty slot
@@ -1595,14 +1598,14 @@ static int hmcsim_clock_reorg_vault_rsp( 	struct hmcsim_t *hmc,
 				for( j=0; j<HMC_MAX_UQ_PACKET; j++ ){
 
 					hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[slot].packet[j] = 
-						hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].packet[j];	
+						hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].packet[j];
 
-					hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].packet[j] =0x00ll;	
-					
+					hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].packet[j] =0x00ll;
+
 				}
 
-				hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[slot].valid = 1;	
-				hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid    = 0;	
+				hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[slot].valid = 1;
+				hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid    = 0;
 			}
 		} /* else, slot not valid.. move along */
 	}
