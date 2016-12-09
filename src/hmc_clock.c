@@ -361,7 +361,8 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 			 */
 			header	= hmc->devs[dev].xbar[link].xbar_rqst[i].packet[0];
 
-			addr	= ((header >> 24) & 0x3FFFFFFFF);
+			//addr	= ((header >> 24) & 0x3FFFFFFFF);
+			addr	= ((header >> 24) & 0x1FFFFFFFF);
 
 			/*
 			 * Step 2: Get the CUB.
