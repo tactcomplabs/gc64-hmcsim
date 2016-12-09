@@ -76,6 +76,10 @@ extern int hmcsim_util_decode_slid( 	struct hmcsim_t *hmc,
 					struct hmc_queue_t *queue,
 					uint32_t slot,
 					uint32_t *slid );
+extern int hmcsim_util_decode_rsp_slid( struct hmcsim_t *hmc,
+					struct hmc_queue_t *queue,
+					uint32_t slot,
+					uint32_t *slid );
 extern int hmcsim_util_decode_vault( 	struct hmcsim_t *hmc,
 					uint32_t dev,
 					uint32_t bsize,
@@ -1244,10 +1248,10 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 						 * use the SLID value
 						 *
 						 */
-						hmcsim_util_decode_slid( hmc,
-									lq,
-									x,
-									&r_link );
+						hmcsim_util_decode_rsp_slid( hmc,
+									     lq,
+									     x,
+									     &r_link );
 
 						/*
 						 * determine if the response
