@@ -93,7 +93,7 @@ extern int hmcsim_util_decode_slid(	struct hmcsim_t *hmc,
    * get the length of the packet
    *
    */
-  len = (uint64_t)((header>>7) & 0x3F);
+  len = (uint64_t)((header>>7) & 0x1F);
 
   /*
    * get the tail placement
@@ -106,7 +106,6 @@ extern int hmcsim_util_decode_slid(	struct hmcsim_t *hmc,
    *
    */
   tmp   = (uint32_t)((queue[slot].packet[tail]>>26) & 0x7);
-  //tmp 	= (uint32_t)((header>>39) & 0x7);
 
   /*
    * write it out
@@ -565,11 +564,15 @@ extern int hmcsim_util_decode_bank( 	struct hmcsim_t *hmc,
 					break;
 				case 64:
 					/* [14:11] */
-					tmp = (uint32_t)((addr>>12) & 0xF);
+					tmp = (uint32_t)((addr>>11) & 0xF);
 					break;
 				case 128:
 					/* [15:12] */
 					tmp = (uint32_t)((addr>>12) & 0xF);
+					break;
+				case 256:
+					/* [15:12] */
+					tmp = (uint32_t)((addr>>13) & 0xF);
 					break;
 				default:
 					break;
