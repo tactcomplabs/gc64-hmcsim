@@ -5,7 +5,7 @@ ulimit -s unlimited
 MUTEX=../fe_tree
 RUNDIR=`pwd`
 
-BANKS=16
+BANKS=8
 CAPACITY=4
 LINKS=4
 BSIZE=64
