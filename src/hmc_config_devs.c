@@ -514,6 +514,7 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 					 */
 					hmc->devs[i].quads[j].vaults[k].banks[x].id	= x;
                                         hmc->devs[i].quads[j].vaults[k].banks[x].delay  = 0;
+                                        hmc->devs[i].quads[j].vaults[k].banks[x].valid  = HMC_RQST_INVALID;
 
                                         /*
 					 * drams in each bank
