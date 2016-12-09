@@ -162,7 +162,7 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 	 * source link field
 	 *
 	 */
-        tmp8    = (uint8_t)( (tmp64 >> 39) & 0x1F );
+        tmp8    = (uint8_t)( (tmp64 >> 39) & 0x7 );
 	*src_link = tmp8;
 
 	/*
