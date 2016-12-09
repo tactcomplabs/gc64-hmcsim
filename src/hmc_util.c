@@ -50,6 +50,54 @@ extern int hmcsim_util_is_root( struct hmcsim_t *hmc,
   return is_root;
 }
 
+/* ----------------------------------------------------- HMCSIM_UTIL_DECODE_RSP_SLID */
+/*
+ * HMCSIM_UTIL_DECODE_RSP_SLID
+ *
+ */
+extern int hmcsim_util_decode_rsp_slid(	struct hmcsim_t *hmc,
+					struct hmc_queue_t *queue,
+					uint32_t slot,
+					uint32_t *slid )
+{
+  /* vars */
+  uint64_t header = 0x00ull;
+  uint32_t tmp	  = 0x00;
+  /* ---- */
+
+  /*
+   * sanity check
+   *
+   */
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  if( slid == NULL ){
+    return -1;
+  }
+
+  if( queue == NULL ){
+    return -1;
+  }
+
+  /*
+   * get the packet header
+   *
+   */
+  header 	= queue[slot].packet[0];
+
+  tmp = (uint32_t)((header>>39)&0x7);
+
+  /*
+   * write it out
+   *
+   */
+  *slid 	= tmp;
+
+  return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_UTIL_DECODE_SLID */
 /*
  * HMCSIM_UTIL_DECODE_SLID
