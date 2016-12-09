@@ -126,14 +126,15 @@ extern int	hmcsim_send( struct hmcsim_t *hmc, uint64_t *packet )
 	 *       if we ever support proper ordering
 	 * 	 constraints on the devices
 	 * 
-	 */	
+	 */
 
 	cur = hmc->xbar_depth-1;
-	for( i=0; i<hmc->xbar_depth; i++ ){ 
-		if( hmc->devs[cub].xbar[link].xbar_rqst[cur].valid == HMC_RQST_INVALID ){
-			target = cur;
-		} 
-		cur--;
+	for( i=0; i<hmc->xbar_depth; i++ ){
+          if( hmc->devs[cub].xbar[link].xbar_rqst[cur].valid
+              == HMC_RQST_INVALID ){
+            target = cur;
+          }
+	  cur--;
 	}
 
 #ifdef HMC_DEBUG
@@ -142,11 +143,11 @@ extern int	hmcsim_send( struct hmcsim_t *hmc, uint64_t *packet )
 	
 
 	if( target == (hmc->xbar_depth+1) ) {
-		/* 
-		 * stall the request
-		 * 
-		 */
-		return HMC_STALL;	
+          /*
+           * stall the request
+           *
+           */
+          return HMC_STALL;
 	}
 
 	/* else, push the packet into the designate queue slot */
@@ -155,10 +156,10 @@ extern int	hmcsim_send( struct hmcsim_t *hmc, uint64_t *packet )
 	hmcsim_util_zero_packet( queue );
 
 	/* set the packet to valid */
-	queue->valid = HMC_RQST_VALID;	
-	
-	for( i=0; i<t_len; i++ ) { 
-		queue->packet[i] = packet[i];
+	queue->valid = HMC_RQST_VALID;
+
+	for( i=0; i<t_len; i++ ) {
+          queue->packet[i] = packet[i];
 	}
 
 #ifdef HMC_DEBUG

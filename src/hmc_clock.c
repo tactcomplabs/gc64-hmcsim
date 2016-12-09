@@ -361,7 +361,6 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 			 */
 			header	= hmc->devs[dev].xbar[link].xbar_rqst[i].packet[0];
 
-			//addr	= ((header >> 24) & 0x3FFFFFFFF);
 			addr	= ((header >> 24) & 0x1FFFFFFFF);
 
 			/*
@@ -463,7 +462,7 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 					                      t_quad,
 					                      t_vault );
                                   }
-                                }
+                                }/* end tracing route latency */
 
 				/*
 				 * 9a: Search the vault queue for valid slot
@@ -483,7 +482,8 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 				cur    = hmc->queue_depth-1;
                                 t_slot = hmc->queue_depth+1;
 				for( j=0; j<hmc->queue_depth; j++ ){
-			          if( hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[cur].valid == HMC_RQST_INVALID ){
+			          if( hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[cur].valid
+                                      == HMC_RQST_INVALID ){
 				    t_slot = cur;
 				  }
 				  cur--;
@@ -830,7 +830,6 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
             for (quad = 0; quad < hmc->num_quads; quad++) {
                 for (vault = 0; vault < 8; vault++) {
                     for (bank = 0; bank < hmc->num_banks; bank++) {
-
                         if (hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay > 0) {
                             hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay--;
                             //printf( "quad:vault:bank %d:%d:%d has a latency\n", quad, vault, bank );
