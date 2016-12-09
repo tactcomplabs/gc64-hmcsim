@@ -186,7 +186,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	tag	= (uint32_t)((head >> 12) & 0x7FF);
 
 	/* -- addr = [57:24] */
-	addr	= ((head >> 24) & 0x3FFFFFFFF );
+	addr	= ((head >> 24) & 0x1FFFFFFFF );
 
 	/* -- block size */
 	hmcsim_util_get_max_blocksize( hmc, dev, &bsize );
@@ -226,19 +226,21 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
           }
         }
 #endif
-	cur = hmc->queue_depth-1;
-        t_slot = hmc->queue_depth+1;
-	for( j=0; j<hmc->queue_depth; j++){
-	  if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[cur].valid == HMC_RQST_INVALID ){
-	    t_slot = cur;
+        /* if our dram latency is set to zero, the logic should bypass
+         * the bank delay, go ahead and find a response slot
+         */
+        if( hmc->dramlatency == 0 ){
+	  cur = hmc->queue_depth-1;
+          t_slot = hmc->queue_depth+1;
+	  for( j=0; j<hmc->queue_depth; j++){
+	    if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[cur].valid == HMC_RQST_INVALID ){
+	      t_slot = cur;
+	    }
+            cur--;
 	  }
-          cur--;
-	}
 
-	if( t_slot == hmc->queue_depth+1 ){
-
+	  if( t_slot == hmc->queue_depth+1 ){
 		/* STALL */
-
 		queue->valid = HMC_RQST_STALLED;
 
 		/*
@@ -258,7 +260,8 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 		}
 
 		return HMC_STALL;
-	}
+	  }
+        }/* end hmc->dramlatency */
 
        /* zero the temp payloads */
        for( i=0; i<16; i++ ){
@@ -2148,7 +2151,8 @@ step4_vr:
                     hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = op_latency;
 
                     /* Record the response packet to be sent after the delay */
-                    for (j=0; j<rsp_len; j++) {
+                    //for (j=0; j<rsp_len; j++) {
+                    for (j=0; j<HMC_MAX_UQ_PACKET; j++) {
                         hmc->devs[dev].quads[quad].vaults[vault].banks[bank].packet[j] = packet[j];
                     }
 
@@ -2157,7 +2161,8 @@ step4_vr:
   printf( "STALLING BANK %d %d CYCLES\n", bank, op_latency );
 #endif
                     hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].valid = HMC_RQST_VALID;
-		    for( j=0; j<rsp_len; j++ ){
+		    //for( j=0; j<rsp_len; j++ ){
+		    for( j=0; j<HMC_MAX_UQ_PACKET; j++ ){
 			hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].packet[j] = packet[j];
 		    }
                     if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
