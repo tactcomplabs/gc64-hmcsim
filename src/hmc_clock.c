@@ -299,6 +299,386 @@ static int hmcsim_clock_process_rsp_queue( 	struct hmcsim_t *hmc,
 	return 0;
 }
 
+/* ----------------------------------------------------- HMCSIM_CLOCK_PROCESS_RQST_QUEUE_NEW */
+/*
+ * HMCSIM_CLOCK_PROCESS_RQST_QUEUE_NEW
+ *
+ */
+static int hmcsim_clock_process_rqst_queue_new( struct hmcsim_t *hmc,
+						uint32_t dev,
+						uint32_t link,
+                                                uint32_t i )
+{
+	/* vars */
+	uint32_t j	= 0;
+	uint32_t cur	= 0;
+	uint32_t found	= 0;
+	uint32_t success= 0;
+	uint32_t len	= 0;
+	uint32_t t_link	= 0;
+	uint32_t t_slot	= 0;
+	uint32_t t_quad = 0;
+	uint32_t bsize	= 0;
+	uint32_t t_vault= hmc->queue_depth+1;
+	uint8_t	cub	= 0;
+	uint8_t plink	= 0;
+	uint64_t header	= 0x00ll;
+	uint64_t tail	= 0x00ll;
+	uint64_t addr	= 0x00ll;
+	/* ---- */
+
+	/*
+	 * get the block size
+	 *
+	 */
+	hmcsim_util_get_max_blocksize( hmc, dev, &bsize );
+
+	/*
+	 * walk the queue and process all the valid
+	 * slots
+	 *
+	 */
+
+	//for( i=0; i<hmc->xbar_depth; i++ ){
+
+		if( hmc->devs[dev].xbar[link].xbar_rqst[i].valid != HMC_RQST_INVALID ){ 
+
+			/*
+			 * process me
+			 *
+			 */
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_xbar_rqst_slot( hmc, dev, link, i );
+                        }
+
+#ifdef HMC_DEBUG
+			HMCSIM_PRINT_INT_TRACE( "PROCESSING REQUEST QUEUE FOR SLOT", (int)(i) );
+#endif
+
+			/*
+			 * Step 1: Get the header
+			 *
+			 */
+			header	= hmc->devs[dev].xbar[link].xbar_rqst[i].packet[0];
+
+			addr	= ((header >> 24) & 0x1FFFFFFFF);
+
+			/*
+			 * Step 2: Get the CUB.
+			 *
+			 */
+			cub = (uint8_t)((header>>61) & 0x7 );
+
+			/* Step 3: If it is equal to `dev`
+			 *         then we have a local request.
+			 * 	   Otherwise, its a request to forward to
+			 * 	   an adjacent device.
+			 */
+
+			/*
+			 * Stage 4: Get the packet length
+			 *
+			 */
+			len = (uint32_t)( (header >> 7) & 0x1F );
+			len *= 2;
+
+			/*
+			 * Stage 5: Get the packet tail
+			 *
+			 */
+			tail = hmc->devs[dev].xbar[link].xbar_rqst[i].packet[len-1];
+
+
+			/*
+			 * Stage 6: Get the link
+			 *
+			 */
+                        plink = (uint8_t)( (tail>>26) & 0x7 );
+
+			if( cub == (uint8_t)(dev) ){
+#ifdef HMC_DEBUG
+				HMCSIM_PRINT_INT_TRACE( "LOCAL DEVICE REQUEST AT SLOT", (int)(i) );
+#endif
+				/*
+				 * local request
+				 *
+				 */
+
+				/*
+				 * 7a: Retrieve the vault id
+				 *
+				 */
+				hmcsim_util_decode_vault( hmc,
+							dev,
+							bsize,
+							addr,
+							&t_vault );
+
+				/*
+				 * 8a: Retrieve the quad id
+				 *
+				 */
+				hmcsim_util_decode_quad( hmc,
+							dev,
+							bsize,
+							addr,
+							&t_quad );
+
+
+				/*
+				 * if quad is not directly attached
+				 * to my link, print a trace message
+				 * indicating higher latency
+				 */
+				if( link != t_quad ){
+					/*
+					 * higher latency
+					 *
+					 */
+
+					if( (hmc->tracelevel & HMC_TRACE_LATENCY) > 0 ){ 
+						hmcsim_trace_latency( hmc,
+									dev,
+									link,
+									i,
+									t_quad,
+									t_vault );
+					}
+					if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){ 
+					  hmcsim_power_remote_route( hmc,
+					                        dev,
+					                        link,
+					                        i,
+					                        t_quad,
+					                        t_vault );
+                                        }
+				}else{
+                                  /* local route */
+				  if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+			            hmcsim_power_local_route( hmc,
+					                      dev,
+					                      link,
+					                      i,
+					                      t_quad,
+					                      t_vault );
+                                  }
+                                }/* end tracing route latency */
+
+				/*
+				 * 9a: Search the vault queue for valid slot
+				 *     Search bottom-up
+				 *
+				 */
+#if 0
+				t_slot = hmc->queue_depth+1;
+                                for( j=0; j<hmc->queue_depth; j++ ){
+                                  if( hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[j].valid
+                                      == HMC_RQST_INVALID ){
+                                    t_slot = j;
+                                    break;
+                                  }
+                                }
+#endif
+				cur    = hmc->queue_depth-1;
+                                t_slot = hmc->queue_depth+1;
+				for( j=0; j<hmc->queue_depth; j++ ){
+			          if( hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[cur].valid
+                                      == HMC_RQST_INVALID ){
+				    t_slot = cur;
+				  }
+				  cur--;
+				}
+
+				if( t_slot == hmc->queue_depth+1 ){
+
+
+#ifdef HMC_DEBUG
+					HMCSIM_PRINT_INT_TRACE( "STALLED REQUEST AT SLOT", (int)(i) );
+#endif
+
+					/* STALL */
+					hmc->devs[dev].xbar[link].xbar_rqst[i].valid = HMC_RQST_STALLED;
+
+					/*
+					 * print a stall trace
+					 *
+					 */
+					if ((hmc->tracelevel & HMC_TRACE_STALL) >0 ) {
+						hmcsim_trace_stall(	hmc,
+									dev,
+									t_quad,
+									t_vault,
+									0,
+									0,
+									0,
+									i,
+									0 );
+					}
+
+					success = 0;
+				}else {
+
+#ifdef HMC_DEBUG
+					HMCSIM_PRINT_INT_TRACE( "TRANSFERRING PACKET FROM SLOT", (int)(i) );
+					HMCSIM_PRINT_INT_TRACE( "TRANSFERRING PACKET TO SLOT", (int)(t_slot) );
+#endif
+					/*
+					 * push it into the designated queue slot
+					 *
+					 */
+					hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[t_slot].valid = HMC_RQST_VALID;
+					for( j=0; j<HMC_MAX_UQ_PACKET; j++ ){
+						hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[t_slot].packet[j] = 
+							hmc->devs[dev].xbar[link].xbar_rqst[i].packet[j];
+					}
+
+					success = 1;
+
+				}
+
+			}else{
+
+#ifdef HMC_DEBUG
+				HMCSIM_PRINT_INT_TRACE( "REMOTE DEVICE REQUEST AT SLOT", (int)(i) );
+#endif
+				/*
+				 * forward request to remote device
+				 *
+				 */
+
+				/*
+				 * Stage 7b: Decide whether cub is accessible
+				 *
+				 */
+				found = 0;
+
+				while( (found != 1) && (j<hmc->num_links) ){
+
+					if( hmc->devs[dev].links[j].dest_cub == cub ){ 
+						found = 1;
+						t_link = j;
+					}
+
+					j++;
+				}
+
+				if( found == 0 ){
+					/*
+					 * oh snap! can't route to that CUB
+					 * Mark it as a zombie request
+					 * Future: return an error packet
+					 *
+					 */
+					hmc->devs[dev].xbar[link].xbar_rqst[i].valid = HMC_RQST_ZOMBIE;
+				}else{
+					/*
+					 * 8b: routing is good, look for an empty slot
+					 * in the target xbar link queue
+					 *
+					 */
+					t_slot = hmc->xbar_depth+1;
+					cur    = hmc->xbar_depth-1;
+					for( j=0; j<hmc->xbar_depth; j++ ){
+						/*
+						 * walk the queue from the bottom
+						 * up
+						 */
+						if( hmc->devs[cub].xbar[t_link].xbar_rqst[cur].valid == 
+							HMC_RQST_INVALID ) {
+							t_slot = cur;
+						}
+						cur--;
+					}
+
+					/*
+				 	 * 9b: If available, insert into remote xbar slot 
+					 *
+					 */
+					if( t_slot == hmc->xbar_depth+1 ){
+						/*
+						 * STALL!
+						 *
+						 */
+						hmc->devs[dev].xbar[link].xbar_rqst[i].valid = HMC_RQST_STALLED;
+						/*
+					 	 * print a stall trace
+					 	 *
+					 	 */
+						if ((hmc->tracelevel & HMC_TRACE_STALL) >0 ) {
+							hmcsim_trace_stall(	hmc, 
+										dev, 
+										0,
+										0, 
+										dev, 
+										cub,
+										link,
+										i, 
+										3 ); 
+						}
+		
+						success = 0;
+					}else {
+						/*
+						 * put the new link in the link field
+						 *
+						 */
+						 hmc->devs[dev].xbar[link].xbar_rqst[i].packet[len-1] |= 
+										((uint64_t)(plink)<<24);
+
+						/*
+						 * transfer the packet to the target slot
+						 *
+						 */
+						hmc->devs[cub].xbar[t_link].xbar_rqst[t_slot].valid = 
+							HMC_RQST_VALID;
+						for( j=0; j<HMC_MAX_UQ_PACKET; j++ ){ 
+							hmc->devs[cub].xbar[t_link].xbar_rqst[t_slot].packet[j] = 
+							hmc->devs[dev].xbar[link].xbar_rqst[i].packet[j];
+						}
+
+                                                if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                                                  hmcsim_power_route_extern( hmc,
+                                                                             cub,
+                                                                             t_link,
+                                                                             t_slot,
+                                                                             dev,
+                                                                             link,
+                                                                             i );
+                                                }
+
+						/*
+						 * signal success
+						 *
+						 */
+						success = 1;
+					}
+				}
+			}
+
+			if( success == 1 ){
+
+				/*
+				 * clear the packet
+				 *
+				 */
+#ifdef HMC_DEBUG
+				HMCSIM_PRINT_TRACE( "ZEROING PACKET" );
+#endif
+				hmcsim_util_zero_packet( &(hmc->devs[dev].xbar[link].xbar_rqst[i]) );
+			}
+
+		}
+
+		success = 0;
+	//}
+
+#ifdef HMC_DEBUG
+	hmcsim_clock_print_xbar_stats( hmc, hmc->devs[dev].xbar[link].xbar_rqst );
+	HMCSIM_PRINT_TRACE( "FINISHED PROCESSING REQUEST QUEUE" );
+#endif
+
+	return 0;
+}
 /* ----------------------------------------------------- HMCSIM_CLOCK_PROCESS_RQST_QUEUE */
 /*
  * HMCSIM_CLOCK_PROCESS_RQST_QUEUE
@@ -750,6 +1130,7 @@ static int hmcsim_clock_root_xbar( struct hmcsim_t *hmc )
 	/* vars */
 	uint32_t i	= 0;
 	uint32_t j	= 0;
+	uint32_t k	= 0;
 	uint32_t host_l	= 0;
 	/* ---- */
 
@@ -786,6 +1167,12 @@ static int hmcsim_clock_root_xbar( struct hmcsim_t *hmc )
 			 * incoming packets
 			 *
 			 */
+                          for( k=0; k<hmc->xbar_depth; k++ ){
+                        for( j=0; j<hmc->num_links; j++ ){
+			    hmcsim_clock_process_rqst_queue_new( hmc, i, j, k );
+                          }
+                        }
+#if 0
 			for( j=0; j<hmc->num_links; j++ ){
 
 				hmcsim_clock_process_rqst_queue( hmc, i, j );
@@ -797,6 +1184,7 @@ static int hmcsim_clock_root_xbar( struct hmcsim_t *hmc )
 				 *
 				 */
 			}
+#endif
 		}
 
 		/*
