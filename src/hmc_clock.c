@@ -1370,18 +1370,27 @@ static int hmcsim_clock_reorg_xbar_rqst( struct hmcsim_t *hmc, uint32_t dev, uin
 		 * if the slot is valid, look upstream in the queue
 		 *
 		 */
-		if( hmc->devs[dev].xbar[link].xbar_rqst[i].valid == HMC_RQST_VALID ){
+		//if( hmc->devs[dev].xbar[link].xbar_rqst[i].valid == HMC_RQST_VALID ){
+		if( hmc->devs[dev].xbar[link].xbar_rqst[i].valid != HMC_RQST_INVALID ){
 
 			/*
 			 * find the lowest appropriate slot
 			 *
 			 */
 			slot = i;
-			for( j=(i-1); j>0; j-- ){
+                        for( j=0; j<i; j++ ){
+                          if( hmc->devs[dev].xbar[link].xbar_rqst[j].valid == HMC_RQST_INVALID ){
+                            slot = j;
+                            break;
+                          }
+                        }
+#if 0
+			for( j=(i-1); j>=0; j-- ){
 				if( hmc->devs[dev].xbar[link].xbar_rqst[j].valid == HMC_RQST_INVALID ){
 					slot = j;
 				}
 			}
+#endif
 
 			/*
 		 	 * check to see if a new slot was found
@@ -1435,19 +1444,28 @@ static int hmcsim_clock_reorg_xbar_rsp( struct hmcsim_t *hmc, uint32_t dev, uint
 		 * if the slot is valid, look upstream in the queue
 		 *
 		 */
-		if( hmc->devs[dev].xbar[link].xbar_rsp[i].valid == HMC_RQST_VALID ){
+		//if( hmc->devs[dev].xbar[link].xbar_rsp[i].valid == HMC_RQST_VALID ){
+		if( hmc->devs[dev].xbar[link].xbar_rsp[i].valid != HMC_RQST_INVALID ){
 
 			/*
 			 * find the lowest appropriate slot
 			 *
 			 */
 			slot = i;
-			for( j=(i-1); j>0; j-- ){
+                        for( j=0; j<i; j++ ){
+                          if( hmc->devs[dev].xbar[link].xbar_rsp[j].valid == HMC_RQST_INVALID ){
+                            slot = j;
+                            break;
+                          }
+                        }
+#if 0
+			for( j=(i-1); j>=0; j-- ){
 				if( hmc->devs[dev].xbar[link].xbar_rsp[j].valid == HMC_RQST_INVALID ){
 					slot = j;
 				}
 
 			}
+#endif
 
 			/*
 		 	 * check to see if a new slot was found
@@ -1504,18 +1522,27 @@ static int hmcsim_clock_reorg_vault_rqst( 	struct hmcsim_t *hmc,
 		 * if the slot is valid, look upstream in the queue
 		 *
 		 */
-		if( hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[i].valid == HMC_RQST_VALID ){
+		//if( hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[i].valid == HMC_RQST_VALID ){
+		if( hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[i].valid != HMC_RQST_INVALID ){
 
 			/*
 			 * find the lowest appropriate slot
 			 *
 			 */
 			slot = i;
+                        for( j=0; j<i; j++ ){
+                          if( hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[j].valid == HMC_RQST_INVALID ){
+                            slot = j;
+                            break;
+                          }
+                        }
+#if 0
 			for( j=(i-1); j>0; j-- ){
 				if( hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[j].valid == HMC_RQST_INVALID ){
 					slot = j;
 				}
 			}
+#endif
 
 			/*
 		 	 * check to see if a new slot was found
@@ -1572,18 +1599,27 @@ static int hmcsim_clock_reorg_vault_rsp( 	struct hmcsim_t *hmc,
 		 * if the slot is valid, look upstream in the queue
 		 *
 		 */
-		if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid == HMC_RQST_VALID ){
+		//if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid == HMC_RQST_VALID ){
+		if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid != HMC_RQST_INVALID ){
 
 			/*
 			 * find the lowest appropriate slot
 			 *
 			 */
 			slot = i;
+                        for(j=0; j<i; j++ ){
+                          if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[j].valid == HMC_RQST_INVALID ){
+                            slot = j;
+                            break;
+                          }
+                        }
+#if 0
 			for( j=(i-1); j>0; j-- ){
 				if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[j].valid == HMC_RQST_INVALID ){
 					slot = j;
 				}
 			}
+#endif
 
 			/*
 		 	 * check to see if a new slot was found
