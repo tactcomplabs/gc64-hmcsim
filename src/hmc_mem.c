@@ -144,6 +144,7 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 	}
 
 	//hmc->__ptr_vaults = malloc( sizeof( struct hmc_vault_t ) * hmc->num_devs * hmc->num_vaults );
+        // this should be *4, 8 vaults per quadrant
 	hmc->__ptr_vaults = malloc( sizeof( struct hmc_vault_t ) * hmc->num_devs * hmc->num_vaults * 8 );
 	if( hmc->__ptr_vaults == NULL ){ 
 #ifdef HMC_DEBUG

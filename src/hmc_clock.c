@@ -339,8 +339,6 @@ static int hmcsim_clock_process_rqst_queue_new( struct hmcsim_t *hmc,
 	 *
 	 */
 
-	//for( i=0; i<hmc->xbar_depth; i++ ){
-
 		if( hmc->devs[dev].xbar[link].xbar_rqst[i].valid != HMC_RQST_INVALID ){ 
 
 			/*
@@ -469,16 +467,6 @@ static int hmcsim_clock_process_rqst_queue_new( struct hmcsim_t *hmc,
 				 *     Search bottom-up
 				 *
 				 */
-#if 0
-				t_slot = hmc->queue_depth+1;
-                                for( j=0; j<hmc->queue_depth; j++ ){
-                                  if( hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[j].valid
-                                      == HMC_RQST_INVALID ){
-                                    t_slot = j;
-                                    break;
-                                  }
-                                }
-#endif
 				cur    = hmc->queue_depth-1;
                                 t_slot = hmc->queue_depth+1;
 				for( j=0; j<hmc->queue_depth; j++ ){
@@ -849,16 +837,6 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 				 *     Search bottom-up
 				 *
 				 */
-#if 0
-				t_slot = hmc->queue_depth+1;
-                                for( j=0; j<hmc->queue_depth; j++ ){
-                                  if( hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[j].valid
-                                      == HMC_RQST_INVALID ){
-                                    t_slot = j;
-                                    break;
-                                  }
-                                }
-#endif
 				cur    = hmc->queue_depth-1;
                                 t_slot = hmc->queue_depth+1;
 				for( j=0; j<hmc->queue_depth; j++ ){
@@ -1172,19 +1150,6 @@ static int hmcsim_clock_root_xbar( struct hmcsim_t *hmc )
 			    hmcsim_clock_process_rqst_queue_new( hmc, i, j, k );
                           }
                         }
-#if 0
-			for( j=0; j<hmc->num_links; j++ ){
-
-				hmcsim_clock_process_rqst_queue( hmc, i, j );
-
-				/*
-				 * no point in walking the response queues,
-				 * the host must drain these manually
-				 * using recv's
-				 *
-				 */
-			}
-#endif
 		}
 
 		/*
@@ -1226,15 +1191,6 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
                             if ((hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay == 0) &&
                                    ( hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid == HMC_RQST_VALID)) {
                                    //( hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid != HMC_RQST_INVALID)) {
-#if 0
-                                t_slot = hmc->queue_depth+1;
-                                for (i = 0; i < hmc->queue_depth; i++) {
-                                    if (hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid == HMC_RQST_INVALID) {
-                                        t_slot = i;
-                                        break;
-                                    }
-                                }
-#endif
                                 t_slot = hmc->queue_depth+1;
                                 cur = hmc->queue_depth-1;
                                 for (i = 0; i < hmc->queue_depth; i++) {
@@ -1501,77 +1457,6 @@ static int hmcsim_clock_rw_ops( struct hmcsim_t *hmc )
             } /* vaults */
           } /* num_quads */
         } /* num_devs */
-#if 0
-				/*
-				 * process the first
-				 * min( HMC_NUM_BANKS, queue_depth )
-				 * queue slots and process the requests
-				 *
-				 */
-
-				if( hmc->queue_depth > HMC_MAX_BANKS ){
-
-					/*
-					 * queue_depth is > MAX_BANKS
-					 *
-					 */
-					for( x=0; x<hmc->num_banks; x++ ){
-
-						/*
-						 * determine whether the
-						 * queue slot is valid and not
-						 * a bank conflict
-						 *
-						 */
-						test = 0x00000000;
-						test = hmc->devs[i].quads[j].vaults[k].rqst_queue[x].valid;
-
-						if( (test > 0 ) && (test != 2) ){
-
-							/*
-							 * valid and no conflict
-							 * process the request
-							 *
-							 */
-							hmcsim_process_rqst( hmc, i, j, k, x );
-                                                        venable[k] = 1;
-						}
-					}
-
-				} else {
-
-					/*
-					 * queue_depth is < NUM_BANKS
-					 *
-					 */
-					for( x=0; x<hmc->queue_depth; x++ ){
-
-						/*
-						 * determine whether the
-						 * queue slot is valid and not
-						 * a bank conflict
-						 *
-						 */
-						test = 0x00000000;
-						test = hmc->devs[i].quads[j].vaults[k].rqst_queue[x].valid;
-
-						if( (test > 0 ) && (test != 2) ){
-
-							/*
-							 * valid and no conflict
-							 * process the request
-							 *
-							 */
-							hmcsim_process_rqst( hmc, i, j, k, x );
-                                                        venable[k] = 1;
-						}
-					}
-
-				}
-			}/* end k<8 vaults */
-		}
-	}
-#endif
 
         /* record the control power enable for each active vault */
         for( i=0; i<8; i++ ){
@@ -1772,13 +1657,6 @@ static int hmcsim_clock_reorg_xbar_rqst( struct hmcsim_t *hmc, uint32_t dev, uin
                             break;
                           }
                         }
-#if 0
-			for( j=(i-1); j>=0; j-- ){
-				if( hmc->devs[dev].xbar[link].xbar_rqst[j].valid == HMC_RQST_INVALID ){
-					slot = j;
-				}
-			}
-#endif
 
 			/*
 		 	 * check to see if a new slot was found
@@ -1846,14 +1724,6 @@ static int hmcsim_clock_reorg_xbar_rsp( struct hmcsim_t *hmc, uint32_t dev, uint
                             break;
                           }
                         }
-#if 0
-			for( j=(i-1); j>=0; j-- ){
-				if( hmc->devs[dev].xbar[link].xbar_rsp[j].valid == HMC_RQST_INVALID ){
-					slot = j;
-				}
-
-			}
-#endif
 
 			/*
 		 	 * check to see if a new slot was found
@@ -1924,13 +1794,6 @@ static int hmcsim_clock_reorg_vault_rqst( 	struct hmcsim_t *hmc,
                             break;
                           }
                         }
-#if 0
-			for( j=(i-1); j>0; j-- ){
-				if( hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[j].valid == HMC_RQST_INVALID ){
-					slot = j;
-				}
-			}
-#endif
 
 			/*
 		 	 * check to see if a new slot was found
@@ -2001,13 +1864,6 @@ static int hmcsim_clock_reorg_vault_rsp( 	struct hmcsim_t *hmc,
                             break;
                           }
                         }
-#if 0
-			for( j=(i-1); j>0; j-- ){
-				if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[j].valid == HMC_RQST_INVALID ){
-					slot = j;
-				}
-			}
-#endif
 
 			/*
 		 	 * check to see if a new slot was found
