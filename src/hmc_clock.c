@@ -14,6 +14,11 @@
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
+extern int      hmcsim_power_vault_rsp_slot( struct hmcsim_t *hmc,
+                                             uint32_t dev,
+                                             uint32_t quad,
+                                             uint32_t vault,
+                                             uint32_t slot );
 extern int hmcsim_power_xbar_rsp_slot( struct hmcsim_t *hmc,
                                         uint32_t dev,
                                         uint32_t link,
@@ -1208,6 +1213,9 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
                                         hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].packet[i] = 
                                           hmc->devs[dev].quads[quad].vaults[vault].banks[bank].packet[i];
                                         hmc->devs[dev].quads[quad].vaults[vault].banks[bank].packet[i] = 0x00ll;
+                                    }
+                                    if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                                      hmcsim_power_vault_rsp_slot( hmc, dev, quad, vault, t_slot );
                                     }
                                     hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_INVALID;
                                     hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = 0;
