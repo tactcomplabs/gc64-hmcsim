@@ -1,4 +1,5 @@
 %option noyywrap
+%option nounput
 %{
 /* HMC_CONFIG_PARSER.LEX */
 
@@ -17,7 +18,8 @@ enum {
   VAULT_RQST_SLOT_POWER,
   VAULT_RSP_SLOT_POWER,
   VAULT_CTRL_POWER,
-  ROW_ACCESS_POWER
+  ROW_ACCESS_POWER,
+  TECPLOT_OUTPUT
 };
 
 int state;
@@ -36,6 +38,7 @@ struct hmcsim_t *lhmc;
 ^VAULT_RSP_SLOT_POWER       { state = VAULT_RSP_SLOT_POWER; }
 ^VAULT_CTRL_POWER           { state = VAULT_CTRL_POWER; }
 ^ROW_ACCESS_POWER           { state = ROW_ACCESS_POWER; }
+^TECPLOT_OUTPUT             { state = TECPLOT_OUTPUT; }
 [a-zA-Z0-9\/.-]+     { if( state!=LOOKUP) config_func(state, yytext);}
 . ;
 %%
@@ -52,6 +55,7 @@ int hmcsim_lex_config( struct hmcsim_t *hmc, char *config ){
 
 int
 config_func( int type, char *word ){
+  int temp_tecplot = 0;
   switch( type ){
     case LINK_PHY_POWER:
       lhmc->power.link_phy = (float)atof(word);
@@ -82,6 +86,14 @@ config_func( int type, char *word ){
       break;
     case ROW_ACCESS_POWER:
       lhmc->power.row_access = (float)atof(word);
+      break;
+    case TECPLOT_OUTPUT:
+      temp_tecplot = atoi(word);
+      if( temp_tecplot != 0 ){
+        lhmc->power.tecplot = 1;
+      }else{
+        lhmc->power.tecplot = 0;
+      }
       break;
     default:
     break;
