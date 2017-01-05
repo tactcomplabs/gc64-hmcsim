@@ -51,6 +51,9 @@ static void hmcsim_init_power( struct hmcsim_t *hmc ){
   hmc->power.t_vault_rsp_slot     = 0.0;
   hmc->power.t_vault_ctrl         = 0.0;
   hmc->power.t_row_access         = 0.0;
+
+  /* -- output formats */
+  hmc->power.tecplot              = 0;
 }
 
 /* ----------------------------------------------------- HMCSIM_INIT_DRAM_LATENCY */

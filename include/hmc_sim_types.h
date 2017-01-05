@@ -324,6 +324,9 @@ struct hmc_power_t{
   float t_vault_rsp_slot;     /*! HMC_POWER_T: TOTAL POWER FOR VAULT RESPONSE SLOT */
   float t_vault_ctrl;         /*! HMC_POWER_T: TOTAL POWER FOR VAULT CONTROLLER PER ACTIVE CLOCK */
   float t_row_access;         /*! HMC_POWER_T: TOTAL POWER FOR ROW ACCESS */
+
+  /* -- output formats */
+  int tecplot;                /*! HMC_POWER_T: INDICATES TECPLOT OUTPUT FORMAT */
 };
 
 struct hmcsim_t{
