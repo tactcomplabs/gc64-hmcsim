@@ -328,6 +328,7 @@ struct hmc_power_t{
 
   /* -- output formats */
   int tecplot;                /*! HMC_POWER_T: INDICATES TECPLOT OUTPUT FORMAT */
+  char prefix[1024];          /*! HMC_POWER_T: TECPLOT FILE NAME PREFIX */
 
   /* -- tecplot output data */
   struct HMC4LinkTec H4L;     /*! HMC_POWER_T: 4Link Tecplot data */

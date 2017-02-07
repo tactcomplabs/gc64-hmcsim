@@ -19,7 +19,8 @@ enum {
   VAULT_RSP_SLOT_POWER,
   VAULT_CTRL_POWER,
   ROW_ACCESS_POWER,
-  TECPLOT_OUTPUT
+  TECPLOT_OUTPUT,
+  TECPLOT_PREFIX
 };
 
 int state;
@@ -39,6 +40,7 @@ struct hmcsim_t *lhmc;
 ^VAULT_CTRL_POWER           { state = VAULT_CTRL_POWER; }
 ^ROW_ACCESS_POWER           { state = ROW_ACCESS_POWER; }
 ^TECPLOT_OUTPUT             { state = TECPLOT_OUTPUT; }
+^TECPLOT_PREFIX             { state = TECPLOT_PREFIX; }
 [a-zA-Z0-9\/.-]+     { if( state!=LOOKUP) config_func(state, yytext);}
 . ;
 %%
@@ -94,6 +96,9 @@ config_func( int type, char *word ){
       }else{
         lhmc->power.tecplot = 0;
       }
+      break;
+    case TECPLOT_PREFIX:
+      sprintf( lhmc->power.prefix, "%s", word );
       break;
     default:
     break;
