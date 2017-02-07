@@ -22,6 +22,7 @@ extern "C" {
 #include <stdint.h>
 #include <sys/types.h>
 #include "hmc_sim_macros.h"
+#include "hmc_sim_tecplot.h"
 
 /* -------------------------------------------------- ENUMERATED TYPES */
 typedef enum{
