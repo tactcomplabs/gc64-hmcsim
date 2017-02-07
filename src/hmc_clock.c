@@ -14,6 +14,7 @@
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
+extern int hmcsim_tecplot( struct hmcsim_t *hmc );
 extern int      hmcsim_power_vault_rsp_slot( struct hmcsim_t *hmc,
                                              uint32_t dev,
                                              uint32_t quad,
@@ -1991,8 +1992,12 @@ extern int	hmcsim_clock( struct hmcsim_t *hmc )
 	 *
 	 * Stage 5: Register any necessary responses with
 	 * 	    the xbar
+         *
+         * Stage 6: Reorder the request queues
 	 *
-	 * Stage 6: Update the internal clock value
+         * Stage 7: [optional] Print power tracing data
+         *
+	 * Stage 8: Update the internal clock value
 	 *
 	 */
 
@@ -2058,7 +2063,7 @@ extern int	hmcsim_clock( struct hmcsim_t *hmc )
 	}
 
 	/*
-	 * Stage 5a: Reorder all the request queues
+	 * Stage 6: Reorder all the request queues
 	 *
 	 */
 #ifdef HMC_DEBUG
@@ -2069,7 +2074,7 @@ extern int	hmcsim_clock( struct hmcsim_t *hmc )
 	}
 
         /*
-         * Stage 6: optionally print all the power tracing data
+         * Stage 7: optionally print all the power tracing data
          *
          */
 #ifdef HMC_DEBUG
@@ -2078,10 +2083,13 @@ extern int	hmcsim_clock( struct hmcsim_t *hmc )
         if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
           hmcsim_power_links( hmc );
           hmcsim_trace_power( hmc );
+          if( hmc->power.tecplot == 1 ){
+            hmcsim_tecplot( hmc );
+          }
         }
 
 	/*
-	 * Stage 7: update the clock value
+	 * Stage 8: update the clock value
 	 *
 	 */
 #ifdef HMC_DEBUG
