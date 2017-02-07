@@ -328,6 +328,10 @@ struct hmc_power_t{
 
   /* -- output formats */
   int tecplot;                /*! HMC_POWER_T: INDICATES TECPLOT OUTPUT FORMAT */
+
+  /* -- tecplot output data */
+  struct HMC4LinkTec H4L;     /*! HMC_POWER_T: 4Link Tecplot data */
+  struct HMC8LinkTec H8L;     /*! HMC_POWER_T: 8Link Tecplot data */
 };
 
 struct hmcsim_t{
