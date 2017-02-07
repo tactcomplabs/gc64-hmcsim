@@ -24,6 +24,8 @@ extern int	hmc_reset_device( struct hmcsim_t *hmc, uint32_t dev );
 
 /* ----------------------------------------------------- HMCSIM_INIT_POWER */
 static void hmcsim_init_power( struct hmcsim_t *hmc ){
+  int i = 0;
+
   if( hmc == NULL ){
     return ;
   }
@@ -54,6 +56,60 @@ static void hmcsim_init_power( struct hmcsim_t *hmc ){
 
   /* -- output formats */
   hmc->power.tecplot              = 0;
+
+  /* -- tecplot values */
+  hmc->power.H4L.row_access_power = 0.;
+  hmc->power.H4L.row_access_btu = 0.;
+  hmc->power.H8L.row_access_power = 0.;
+  hmc->power.H8L.row_access_btu = 0.;
+
+  for( i=0; i<32; i++ ){
+    hmc->power.H4L.vault_rsp_power[i] = 0.;
+    hmc->power.H4L.vault_rqst_power[i] = 0.;
+    hmc->power.H4L.vault_ctrl_power[i] = 0.;
+    hmc->power.H4L.vault_rsp_btu[i] = 0.;
+    hmc->power.H4L.vault_rqst_btu[i] = 0.;
+    hmc->power.H4L.vault_ctrl_btu[i] = 0.;
+
+    hmc->power.H8L.vault_rsp_power[i] = 0.;
+    hmc->power.H8L.vault_rqst_power[i] = 0.;
+    hmc->power.H8L.vault_ctrl_power[i] = 0.;
+    hmc->power.H8L.vault_rsp_btu[i] = 0.;
+    hmc->power.H8L.vault_rqst_btu[i] = 0.;
+    hmc->power.H8L.vault_ctrl_btu[i] = 0.;
+  }
+
+  for( i=0; i<4; i++ ){
+    hmc->power.H4L.xbar_rqst_power[i] = 0.;
+    hmc->power.H4L.xbar_rsp_power[i] = 0.;
+    hmc->power.H4L.xbar_route_extern_power[i] = 0.;
+    hmc->power.H4L.link_local_route_power[i] = 0.;
+    hmc->power.H4L.link_remote_route_power[i] = 0.;
+    hmc->power.H4L.link_phy_power[i] = 0.;
+
+    hmc->power.H4L.xbar_rqst_btu[i] = 0.;
+    hmc->power.H4L.xbar_rsp_btu[i] = 0.;
+    hmc->power.H4L.xbar_route_extern_btu[i] = 0.;
+    hmc->power.H4L.link_local_route_btu[i] = 0.;
+    hmc->power.H4L.link_remote_route_btu[i] = 0.;
+    hmc->power.H4L.link_phy_btu[i] = 0.;
+  }
+
+  for( i=0; i<8; i++ ){
+    hmc->power.H8L.xbar_rqst_power[i] = 0.;
+    hmc->power.H8L.xbar_rsp_power[i] = 0.;
+    hmc->power.H8L.xbar_route_extern_power[i] = 0.;
+    hmc->power.H8L.link_local_route_power[i] = 0.;
+    hmc->power.H8L.link_remote_route_power[i] = 0.;
+    hmc->power.H8L.link_phy_power[i] = 0.;
+
+    hmc->power.H8L.xbar_rqst_btu[i] = 0.;
+    hmc->power.H8L.xbar_rsp_btu[i] = 0.;
+    hmc->power.H8L.xbar_route_extern_btu[i] = 0.;
+    hmc->power.H8L.link_local_route_btu[i] = 0.;
+    hmc->power.H8L.link_remote_route_btu[i] = 0.;
+    hmc->power.H8L.link_phy_btu[i] = 0.;
+  }
 }
 
 /* ----------------------------------------------------- HMCSIM_INIT_DRAM_LATENCY */
