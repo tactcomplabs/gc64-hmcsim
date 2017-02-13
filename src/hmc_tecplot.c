@@ -22,6 +22,7 @@ static int hmcsim_tecplot8( struct HMC8LinkTec Tec,
   FILE *ofile   = NULL;
   int i         = 0;
   int j         = 0;
+  int cur       = 0;
   /* ---- */
 
   /* -- build the file names */
@@ -74,57 +75,31 @@ static int hmcsim_tecplot8( struct HMC8LinkTec Tec,
       fprintf( ofile, "%s%f%s%f\n",
                "4.5 40.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
+               " ", Tec.vault_rqst_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "4.5 49.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
+               " ", Tec.vault_rsp_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "4.5 58.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
     }
     for( j=2; j<4; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "13.5 40.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
+               " ", Tec.vault_rqst_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "13.5 49.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
+               " ", Tec.vault_rsp_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "13.5 58.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
-    }
-    for( j=4; j<6; j++ ){
-      fprintf( ofile, "%s%f%s%f\n",
-               "22.5 40.5 ",
-               ((float)(i)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "22.5 49.5 ",
-               ((float)(i)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "22.5 58.5 ",
-               ((float)(i)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
-    }
-    for(j=6; j<8; j++ ){
-      fprintf( ofile, "%s%f%s%f\n",
-               "31.5 40.5 ",
-               ((float)(i)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "31.5 49.5 ",
-               ((float)(i)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "31.5 58.5 ",
-               ((float)(i)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
     }
   }
 
@@ -148,59 +123,33 @@ static int hmcsim_tecplot8( struct HMC8LinkTec Tec,
 
     for( j=0; j<2; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
-               "40.5 40.5 ",
+               "22.5 40.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
+               " ", Tec.vault_rqst_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
-               "40.5 49.5 ",
+               "22.5 49.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
+               " ", Tec.vault_rsp_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
-               "40.5 58.5 ",
+               "22.5 58.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
     }
     for( j=2; j<4; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
-               "49.5 40.5 ",
+               "31.5 40.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
+               " ", Tec.vault_rqst_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
-               "49.5 49.5 ",
+               "31.5 49.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
+               " ", Tec.vault_rsp_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
-               "49.5 58.5 ",
+               "31.5 58.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
-    }
-    for( j=4; j<6; j++ ){
-      fprintf( ofile, "%s%f%s%f\n",
-               "58.5 40.5 ",
-               ((float)(i-2)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "58.5 49.5 ",
-               ((float)(i-2)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "58.5 58.5 ",
-               ((float)(i-2)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
-    }
-    for( j=6; j<8; j++ ){
-      fprintf( ofile, "%s%f%s%f\n",
-               "67.5 40.5 ",
-               ((float)(i-2)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "67.5 49.5 ",
-               ((float)(i-2)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "67.5 58.5 ",
-               ((float)(i-2)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
     }
   }
 
@@ -222,6 +171,36 @@ static int hmcsim_tecplot8( struct HMC8LinkTec Tec,
              "90 31.5 ", ((float)(i-4)*(float)(36.0))+(float)(18.0), " ",
              Tec.link_remote_route_power[i] );
 
+    for( j=0; j<2; j++ ){
+      fprintf( ofile, "%s%f%s%f\n",
+               "40.5 40.5 ",
+               ((float)(i-4)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rqst_power[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "40.5 49.5 ",
+               ((float)(i-4)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rsp_power[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "40.5 58.5 ",
+               ((float)(i-4)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
+    }
+    for( j=2; j<4; j++ ){
+      fprintf( ofile, "%s%f%s%f\n",
+               "49.5 40.5 ",
+               ((float)(i-4)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rqst_power[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "49.5 49.5 ",
+               ((float)(i-4)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rsp_power[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "49.5 58.5 ",
+               ((float)(i-4)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
+    }
   }
 
   /* -- -- link+quad 6,7 */
@@ -242,6 +221,36 @@ static int hmcsim_tecplot8( struct HMC8LinkTec Tec,
              "126 31.5 ", ((float)(i-6)*(float)(36.0))+(float)(18.0), " ",
              Tec.link_remote_route_power[i] );
 
+    for( j=0; j<2; j++ ){
+      fprintf( ofile, "%s%f%s%f\n",
+               "58.5 40.5 ",
+               ((float)(i-6)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rqst_power[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "58.5 49.5 ",
+               ((float)(i-6)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rsp_power[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "58.5 58.5 ",
+               ((float)(i-6)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
+    }
+    for( j=2; j<4; j++ ){
+      fprintf( ofile, "%s%f%s%f\n",
+               "67.5 40.5 ",
+               ((float)(i-6)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rqst_power[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "67.5 49.5 ",
+               ((float)(i-6)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rsp_power[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "67.5 58.5 ",
+               ((float)(i-6)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
+    }
   }
 
   /* -- -- dram data */
@@ -262,6 +271,8 @@ static int hmcsim_tecplot8( struct HMC8LinkTec Tec,
   fprintf( ofile, "%s\n", "VARIABLES = \"X\", \"Y\", \"Z\", \"Btu\"" );
   fprintf( ofile, "%s\n", "ZONE T=\"HMC\", I=144, J=144, F=POINT" );
   fprintf( ofile, "\n\n" );
+
+  cur = 0;
 
   /* -- -- link+quad 0,1 */
   for( i=0; i<2; i++ ){
@@ -287,57 +298,31 @@ static int hmcsim_tecplot8( struct HMC8LinkTec Tec,
       fprintf( ofile, "%s%f%s%f\n",
                "4.5 40.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
+               " ", Tec.vault_rqst_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "4.5 49.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
+               " ", Tec.vault_rsp_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "4.5 58.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
     }
     for( j=2; j<4; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "13.5 40.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
+               " ", Tec.vault_rqst_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "13.5 49.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
+               " ", Tec.vault_rsp_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "13.5 58.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
-    }
-    for( j=4; j<6; j++ ){
-      fprintf( ofile, "%s%f%s%f\n",
-               "22.5 40.5 ",
-               ((float)(i)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "22.5 49.5 ",
-               ((float)(i)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "22.5 58.5 ",
-               ((float)(i)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
-    }
-    for(j=6; j<8; j++ ){
-      fprintf( ofile, "%s%f%s%f\n",
-               "31.5 40.5 ",
-               ((float)(i)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "31.5 49.5 ",
-               ((float)(i)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "31.5 58.5 ",
-               ((float)(i)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
     }
   }
 
@@ -361,59 +346,33 @@ static int hmcsim_tecplot8( struct HMC8LinkTec Tec,
 
     for( j=0; j<2; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
-               "40.5 40.5 ",
+               "22.5 40.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
+               " ", Tec.vault_rqst_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
-               "40.5 49.5 ",
+               "22.5 49.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
+               " ", Tec.vault_rsp_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
-               "40.5 58.5 ",
+               "22.5 58.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
     }
     for( j=2; j<4; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
-               "49.5 40.5 ",
+               "31.5 40.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
+               " ", Tec.vault_rqst_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
-               "49.5 49.5 ",
+               "31.5 49.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
+               " ", Tec.vault_rsp_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
-               "49.5 58.5 ",
+               "31.5 58.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
-    }
-    for( j=4; j<6; j++ ){
-      fprintf( ofile, "%s%f%s%f\n",
-               "58.5 40.5 ",
-               ((float)(i-2)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "58.5 49.5 ",
-               ((float)(i-2)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "58.5 58.5 ",
-               ((float)(i-2)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
-    }
-    for( j=6; j<8; j++ ){
-      fprintf( ofile, "%s%f%s%f\n",
-               "67.5 40.5 ",
-               ((float)(i-2)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "67.5 49.5 ",
-               ((float)(i-2)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
-      fprintf( ofile, "%s%f%s%f\n",
-               "67.5 58.5 ",
-               ((float)(i-2)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
     }
   }
 
@@ -435,6 +394,36 @@ static int hmcsim_tecplot8( struct HMC8LinkTec Tec,
              "90 31.5 ", ((float)(i-4)*(float)(36.0))+(float)(18.0), " ",
              Tec.link_remote_route_btu[i] );
 
+    for( j=0; j<2; j++ ){
+      fprintf( ofile, "%s%f%s%f\n",
+               "40.5 40.5 ",
+               ((float)(i-4)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rqst_btu[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "40.5 49.5 ",
+               ((float)(i-4)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rsp_btu[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "40.5 58.5 ",
+               ((float)(i-4)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
+    }
+    for( j=2; j<4; j++ ){
+      fprintf( ofile, "%s%f%s%f\n",
+               "49.5 40.5 ",
+               ((float)(i-4)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rqst_btu[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "49.5 49.5 ",
+               ((float)(i-4)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rsp_btu[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "49.5 58.5 ",
+               ((float)(i-4)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
+    }
   }
 
   /* -- -- link+quad 6,7 */
@@ -455,8 +444,37 @@ static int hmcsim_tecplot8( struct HMC8LinkTec Tec,
              "126 31.5 ", ((float)(i-6)*(float)(36.0))+(float)(18.0), " ",
              Tec.link_remote_route_btu[i] );
 
+    for( j=0; j<2; j++ ){
+      fprintf( ofile, "%s%f%s%f\n",
+               "58.5 40.5 ",
+               ((float)(i-6)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rqst_btu[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "58.5 49.5 ",
+               ((float)(i-6)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rsp_btu[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "58.5 58.5 ",
+               ((float)(i-6)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
+    }
+    for( j=2; j<4; j++ ){
+      fprintf( ofile, "%s%f%s%f\n",
+               "67.5 40.5 ",
+               ((float)(i-6)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rqst_btu[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "67.5 49.5 ",
+               ((float)(i-6)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_rsp_btu[cur] );
+      fprintf( ofile, "%s%f%s%f\n",
+               "67.5 58.5 ",
+               ((float)(i-6)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
+    }
   }
-
 
   /* -- -- dram data */
   fprintf( ofile, "%s%f\n", "72 63 72 ", Tec.row_access_btu );
@@ -478,6 +496,7 @@ static int hmcsim_tecplot4( struct HMC4LinkTec Tec,
   FILE *ofile   = NULL;
   int i         = 0;
   int j         = 0;
+  int cur       = 0;
   /* ---- */
 
   /* -- build the file names */
@@ -530,57 +549,61 @@ static int hmcsim_tecplot4( struct HMC4LinkTec Tec,
       fprintf( ofile, "%s%f%s%f\n",
                "4.5 40.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
+               " ", Tec.vault_rqst_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "4.5 49.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
+               " ", Tec.vault_rsp_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "4.5 58.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
     }
     for( j=2; j<4; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "13.5 40.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
+               " ", Tec.vault_rqst_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "13.5 49.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
+               " ", Tec.vault_rsp_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "13.5 58.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
     }
     for( j=4; j<6; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "22.5 40.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
+               " ", Tec.vault_rqst_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "22.5 49.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
+               " ", Tec.vault_rsp_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "22.5 58.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
     }
     for(j=6; j<8; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "31.5 40.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
+               " ", Tec.vault_rqst_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "31.5 49.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
+               " ", Tec.vault_rsp_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "31.5 58.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
     }
   }
 
@@ -606,57 +629,61 @@ static int hmcsim_tecplot4( struct HMC4LinkTec Tec,
       fprintf( ofile, "%s%f%s%f\n",
                "40.5 40.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
+               " ", Tec.vault_rqst_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "40.5 49.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
+               " ", Tec.vault_rsp_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "40.5 58.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
     }
     for( j=2; j<4; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "49.5 40.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
+               " ", Tec.vault_rqst_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "49.5 49.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
+               " ", Tec.vault_rsp_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "49.5 58.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
     }
     for( j=4; j<6; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "58.5 40.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
+               " ", Tec.vault_rqst_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "58.5 49.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
+               " ", Tec.vault_rsp_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "58.5 58.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
     }
     for( j=6; j<8; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "67.5 40.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_power[i*j] );
+               " ", Tec.vault_rqst_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "67.5 49.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_power[i*j] );
+               " ", Tec.vault_rsp_power[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "67.5 58.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_power[i*j] );
+               " ", Tec.vault_ctrl_power[cur] );
+      cur++;
     }
   }
 
@@ -679,6 +706,8 @@ static int hmcsim_tecplot4( struct HMC4LinkTec Tec,
   fprintf( ofile, "%s\n", "ZONE T=\"HMC\", I=72, J=72, F=POINT" );
   fprintf( ofile, "\n\n" );
 
+  cur = 0;
+
   /* -- -- link+quad 0,1 */
   for( i=0; i<2; i++ ){
     /* X Y Z Data */
@@ -703,57 +732,61 @@ static int hmcsim_tecplot4( struct HMC4LinkTec Tec,
       fprintf( ofile, "%s%f%s%f\n",
                "4.5 40.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
+               " ", Tec.vault_rqst_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "4.5 49.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
+               " ", Tec.vault_rsp_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "4.5 58.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
     }
     for( j=2; j<4; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "13.5 40.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
+               " ", Tec.vault_rqst_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "13.5 49.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
+               " ", Tec.vault_rsp_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "13.5 58.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
     }
     for( j=4; j<6; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "22.5 40.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
+               " ", Tec.vault_rqst_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "22.5 49.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
+               " ", Tec.vault_rsp_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "22.5 58.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
     }
     for(j=6; j<8; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "31.5 40.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
+               " ", Tec.vault_rqst_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "31.5 49.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
+               " ", Tec.vault_rsp_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "31.5 58.5 ",
                ((float)(i)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
     }
   }
 
@@ -779,57 +812,61 @@ static int hmcsim_tecplot4( struct HMC4LinkTec Tec,
       fprintf( ofile, "%s%f%s%f\n",
                "40.5 40.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
+               " ", Tec.vault_rqst_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "40.5 49.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
+               " ", Tec.vault_rsp_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "40.5 58.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
     }
     for( j=2; j<4; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "49.5 40.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
+               " ", Tec.vault_rqst_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "49.5 49.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
+               " ", Tec.vault_rsp_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "49.5 58.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-2)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
     }
     for( j=4; j<6; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "58.5 40.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
+               " ", Tec.vault_rqst_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "58.5 49.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
+               " ", Tec.vault_rsp_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "58.5 58.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-4)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
     }
     for( j=6; j<8; j++ ){
       fprintf( ofile, "%s%f%s%f\n",
                "67.5 40.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rqst_btu[i*j] );
+               " ", Tec.vault_rqst_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "67.5 49.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_rsp_btu[i*j] );
+               " ", Tec.vault_rsp_btu[cur] );
       fprintf( ofile, "%s%f%s%f\n",
                "67.5 58.5 ",
                ((float)(i-2)*(float)(36.0)) + ((float)(j-6)*(float)(18)) + ((float)(9.0)),
-               " ", Tec.vault_ctrl_btu[i*j] );
+               " ", Tec.vault_ctrl_btu[cur] );
+      cur++;
     }
   }
 
