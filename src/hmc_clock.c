@@ -609,7 +609,7 @@ static int hmcsim_clock_process_rqst_queue_new( struct hmcsim_t *hmc,
 										i, 
 										3 ); 
 						}
-		
+
 						success = 0;
 					}else {
 						/*
@@ -979,7 +979,7 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 										i, 
 										3 ); 
 						}
-		
+
 						success = 0;
 					}else {
 						/*
@@ -1242,6 +1242,7 @@ static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
  *
  */
 #if 0
+/* -- currently disabled */
 static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 {
 	/* vars */
@@ -1537,7 +1538,41 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 									     x,
 									     &r_link );
 
-                                                /* TODO: if link is not local, register latency */
+                                                /* if link is not local, register latency */
+				                if( r_link != j ){
+					          /*
+					           * higher latency
+					           *
+					           */
+
+					          if( (hmc->tracelevel & HMC_TRACE_LATENCY) > 0 ){ 
+						    hmcsim_trace_latency( hmc,
+									i,
+									r_link,
+									x,
+									j,
+									k );
+					          }
+					          if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){ 
+					            hmcsim_power_remote_route( hmc,
+					                        i,
+					                        r_link,
+					                        x,
+					                        j,
+					                        k );
+                                                  }
+				                }else{
+                                                  /* local route */
+				                  if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+			                            hmcsim_power_local_route( hmc,
+					                      i,
+					                      r_link,
+					                      x,
+					                      j,
+					                      k );
+                                                  }
+                                                }/* end tracing route latency */
+
 
 						/*
 						 * determine if the response
@@ -1684,7 +1719,6 @@ static int hmcsim_clock_reorg_xbar_rqst( struct hmcsim_t *hmc, uint32_t dev, uin
 						hmc->devs[dev].xbar[link].xbar_rqst[i].packet[j];	
 
 					hmc->devs[dev].xbar[link].xbar_rqst[i].packet[j] =0x00ll;	
-					
 				}
 
 				hmc->devs[dev].xbar[link].xbar_rqst[slot].valid = 1;	
@@ -1751,7 +1785,6 @@ static int hmcsim_clock_reorg_xbar_rsp( struct hmcsim_t *hmc, uint32_t dev, uint
 						hmc->devs[dev].xbar[link].xbar_rsp[i].packet[j];	
 
 					hmc->devs[dev].xbar[link].xbar_rsp[i].packet[j] =0x00ll;	
-					
 				}
 
 				hmc->devs[dev].xbar[link].xbar_rsp[slot].valid = 1;	
