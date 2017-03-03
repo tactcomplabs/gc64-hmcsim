@@ -373,6 +373,8 @@ struct hmcsim_t{
 
 	uint64_t clk;			/*! HMC-SIM: HMCSIM_T: CLOCK TICK */
 
+        uint32_t simple_link;           /*! HMC-SIM: HMCSIM_T: SIMPLIFIED API LINK HANDLER */
+
         struct hmc_power_t power;       /*! HMC-SIM: HMCSIM_T: POWER MEASUREMENT VALUES */
 
         struct hmc_token_t tokens[1024];/*! HMC-SIM: HMCSIM_T: SIMPLE API TOKEN HANDLERS */
