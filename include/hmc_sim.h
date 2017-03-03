@@ -389,7 +389,7 @@ extern int hmcsim_simple_read( struct hmcsim_t *hmc, uint64_t addr, int size );
  *      \param *data is a pointer to a valid array containing the data to write
  *      \return Token ID on success, -1 if request queues are full, -2 if an error occurred
  */
-extern int hmcsim_simple_write( struct hmcsim_t *hmc, uint64_t addr, int size );
+extern int hmcsim_simple_write( struct hmcsim_t *hmc, uint64_t addr, int size, uint8_t *data );
 
 /*!     \fn int hmcsim_simple_stat( struct hmcsim_t *hmc, int token, uint8_t *data )
  *      \brief Queries the status of the target token ID within the given clock cycle.

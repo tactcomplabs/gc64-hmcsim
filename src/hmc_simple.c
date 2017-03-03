@@ -144,8 +144,109 @@ extern int hmcsim_simple_read( struct hmcsim_t *hmc, uint64_t addr, int size ){
   }
 }
 
-extern int hmcsim_simple_write( struct hmcsim_t *hmc, uint64_t addr, int size ){
+extern int hmcsim_simple_write( struct hmcsim_t *hmc, uint64_t addr,
+                                int size, uint8_t *data ){
+  int token = -1;
+  int ret = 0;
+  int i = 0;
+  int cur = 0;
+  int shift = 0;
+  int tailp = 0;
+  uint64_t head;
+  uint64_t tail;
+  uint64_t payload[32];
+  uint64_t packet[HMC_MAX_UQ_PACKET];
+  hmc_rqst_t type;
+
   if( hmc == NULL ){
+    return -2;
+  }
+  if( data == NULL ){
+    return -2;
+  }
+
+  /* grab a new token */
+  token = find_valid_token( hmc );
+  if( token == -1 ){
+    return -1;
+  }
+
+  /* we have a valid token, try to create a request */
+  switch( size ){
+  case 16:
+    type = WR16;
+    tailp = 3;
+    break;
+  case 32:
+    type = WR32;
+    tailp = 5;
+    break;
+  case 48:
+    type = WR48;
+    tailp = 7;
+    break;
+  case 64:
+    type = WR64;
+    tailp = 9;
+    break;
+  case 80:
+    type = WR80;
+    tailp = 11;
+    break;
+  case 96:
+    type = WR96;
+    tailp = 13;
+    break;
+  case 112:
+    type = WR112;
+    tailp = 15;
+    break;
+  case 128:
+    type = WR128;
+    tailp = 17;
+    break;
+  case 256:
+    type = WR256;
+    tailp = 33;
+    break;
+  default:
+    /* invalid packet size */
+    return -2;
+    break;
+  }
+
+  /* copy the data to the uint64_t payload array */
+  do{
+    payload[cur] |= ((uint64_t)(data[i])<<(shift*8));
+    i++;
+    shift++;
+    if( shift == 8 ){
+      shift = 0;
+      cur++;
+    }
+  }while(i<size);
+
+  /* create the packet request */
+  if( hmcsim_build_memrequest( hmc, 0, addr, (uint16_t)(token), type,
+                               hmc->simple_link, &(payload[0]), &head, &tail ) != 0 ){
+    return -2;
+  }
+  packet[0] = head;
+  packet[tailp] = tail;
+
+  /* increment the link */
+  incr_link(hmc);
+
+  /* try to send the packet */
+  ret = hmcsim_send( hmc, &(packet[0]) );
+  if( ret == 0 ){
+    hmc->tokens[token].status = 1;
+    hmc->tokens[token].rsp = WR_RS;
+    hmc->tokens[token].rsp_size = 0;
+    return token;
+  }else if( ret == HMC_STALL ){
+    return -1;
+  }else{
     return -2;
   }
 }
@@ -175,7 +276,7 @@ extern int hmcsim_simple_stat( struct hmcsim_t *hmc, int token, uint8_t *data ){
     for( i=0; i<hmc->tokens[token].rsp_size; i++ ){
       data[i] = hmc->tokens[token].data[i];
     }
-  }
+  }/* else, no response data is required */
 
   /* clear the token */
   hmc->tokens[token].status = 0;
