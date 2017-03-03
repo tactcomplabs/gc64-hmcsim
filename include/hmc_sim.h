@@ -364,6 +364,45 @@ extern int hmcsim_init_dram_latency( struct hmcsim_t *hmc,
                                      uint32_t latency );
 
 /* ----------------------------------- SIMPLIFIED INTERFACE API */
+/*!     \fn int hmcsim_simple_init( struct hmcsim_t *hmc, int size )
+ *      \brief Initializes the HMC simplified API
+ *      \param *hmc is a pointer to a valid HMC structure
+ *      \param size is the size of the device to initialize in gigabytes (4 or 8)
+ *      \return 0 on success, nonzero otherwise
+ */
+extern int hmcsim_simple_init( struct hmcsim_t *hmc, int size );
+
+/*!     \fn int hmcsim_simple_read( struct hmcsim_t *hmc, uint64_t addr, int size )
+ *      \brief Initiates a simplified read request of SIZE bytes starting at address ADDR
+ *      \param *hmc is a pointer to a valid HMC structure
+ *      \param addr is the starting address of the request
+ *      \param size is the size of the request in bytes.  Must be a supported HMC packet size.
+ *      \return Token ID on success, -1 if request queues are full, -2 if an error occurred
+ */
+extern int hmcsim_simple_read( struct hmcsim_t *hmc, uint64_t addr, int size );
+
+/*!     \fn int hmcsim_simple_write( struct hmcsim_t *hmc, uint64_t addr, int size, uint8_t *data )
+ *      \brief Initiates a simplified write request of SIZE bytes starting at address ADDR
+ *      \param *hmc is a pointer to a valid HMC structure
+ *      \param addr is the starting address of the request
+ *      \param size is the size of the request in bytes.  Must be a supported HMC packet size.
+ *      \param *data is a pointer to a valid array containing the data to write
+ *      \return Token ID on success, -1 if request queues are full, -2 if an error occurred
+ */
+extern int hmcsim_simple_write( struct hmcsim_t *hmc, uint64_t addr, int size );
+
+/*!     \fn int hmcsim_simple_stat( struct hmcsim_t *hmc, int token, uint8_t *data )
+ *      \brief Queries the status of the target token ID within the given clock cycle.
+ *            If the token has a valid response, the token is cleared and any potential 
+ *            response data is returned.
+ *      \param *hmc is a pointer to a valid HMC structure
+ *      \param token is a valid HMC token (0-1023)
+ *      \param *data is a pointer to a valid data structure containing the response data
+ *            from read or atomic requests
+ *      \return 1 on success with a valid response, 0 on success with no response found,
+ *              -1 if an error occurred
+ */
+extern int hmcsim_simple_stat( struct hmcsim_t *hmc, int token, uint8_t *data );
 
 
 #ifdef __cplusplus
