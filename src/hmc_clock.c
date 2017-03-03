@@ -176,6 +176,31 @@ static int hmcsim_clock_print_vault_stats( struct hmcsim_t *hmc,
 }
 #endif
 
+/* ----------------------------------------------------- HMCSIM_TOKEN_UPDATE */
+static void hmcsim_token_update( struct hmcsim_t *hmc, uint64_t *pkt ){
+  int tag = -1;
+  int i = 0;
+  int shift = 0;
+  int cur = 0;
+
+  /* get the tag */
+  tag = (int)((pkt[0]>>12) & 0x7FF);
+
+  /* set the status */
+  hmc->tokens[tag].status = 2;
+
+  /* copy the data */
+  do{
+    hmc->tokens[tag].data[i] = (uint8_t)((pkt[cur]>>shift)&0x1FF);
+    i++;
+    shift+=8;
+    if(shift == 64){
+      shift = 0;
+      cur++;
+    }
+  }while(i<256);
+}
+
 /* ----------------------------------------------------- HMCSIM_CLOCK_PROCESS_RSP_QUEUE */
 /*
  * HMCSIM_CLOCK_PROCESS_RSP_QUEUE
@@ -1621,6 +1646,13 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 							 *
 							 */
 							lq[x].valid = HMC_RQST_INVALID;
+
+                                                        /*
+                                                         * update the token log for the simple api
+                                                         *
+                                                         */
+                                                        hmcsim_token_update( hmc,
+                                                          &(hmc->devs[i].xbar[r_link].xbar_rsp[r_slot].packet[0]) );
 
 						}else{
 
