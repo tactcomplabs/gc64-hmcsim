@@ -190,6 +190,7 @@ struct hmc_token_t{
                                           2 = set and response ready
                                           */
   hmc_response_t rsp;                   /*! HMC-SIM: HMC_TOKEN_T: Response type */
+  uint32_t rsp_size;                    /*! HMC-SIM: HMC_TOKEN_T: Response data size */
   uint64_t en_clock;                    /*! HMC-SIM: HMC_TOKEN_T: Clock cycle of incoming packet */
   uint8_t data[256];                    /*! HMC-SIM: HMC_TOKEN_T: Response data */
 };
