@@ -22,6 +22,25 @@ extern int	hmcsim_config_devices( struct hmcsim_t *sim );
 extern int	hmc_reset_device( struct hmcsim_t *hmc, uint32_t dev );
 
 
+/* ----------------------------------------------------- HMCSIM_INIT_TOKENS */
+static void hmcsim_init_tokens( struct hmcsim_t *hmc ){
+  int i = 0;
+  int j = 0;
+
+  if( hmc == NULL ){
+    return ;
+  }
+
+  for( i=0; i<1024; i++ ){
+    hmc->tokens[i].status  = 0;
+    hmc->tokens[i].rsp     = RSP_NONE;
+    hmc->tokens[i].en_clock= 0x00ull;
+    for( j=0; j<256; j++ ){
+      hmc->tokens[i].data[j] = 0x0;
+    }
+  }
+}
+
 /* ----------------------------------------------------- HMCSIM_INIT_POWER */
 static void hmcsim_init_power( struct hmcsim_t *hmc ){
   int i = 0;
@@ -302,6 +321,12 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
          *
          */
         hmcsim_init_power( hmc );
+
+        /*
+         * init the token handlers for simplified api
+         *
+         */
+        hmcsim_init_tokens( hmc );
 
 	return 0;
 }

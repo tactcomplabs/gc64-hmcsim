@@ -184,6 +184,15 @@ typedef enum{
 
 /* -------------------------------------------------- DATA STRUCTURES */
 
+struct hmc_token_t{
+  uint8_t status;                       /*! HMC-SIM: HMC_TOKEN_T: Status bits
+                                          0 = unused; 1=set but no response;
+                                          2 = set and response ready
+                                          */
+  hmc_response_t rsp;                   /*! HMC-SIM: HMC_TOKEN_T: Response type */
+  uint64_t en_clock;                    /*! HMC-SIM: HMC_TOKEN_T: Clock cycle of incoming packet */
+  uint8_t data[256];                    /*! HMC-SIM: HMC_TOKEN_T: Response data */
+};
 
 struct hmc_link_t{
 
@@ -364,6 +373,8 @@ struct hmcsim_t{
 	uint64_t clk;			/*! HMC-SIM: HMCSIM_T: CLOCK TICK */
 
         struct hmc_power_t power;       /*! HMC-SIM: HMCSIM_T: POWER MEASUREMENT VALUES */
+
+        struct hmc_token_t tokens[1024];/*! HMC-SIM: HMCSIM_T: SIMPLE API TOKEN HANDLERS */
 
         int (*readmem)(struct hmcsim_t *,
                        uint64_t,
