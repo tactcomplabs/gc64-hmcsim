@@ -1,5 +1,5 @@
 /*
- * _SIMPLE4GB_CPP_
+ * _SIMPLE8GB_CPP_
  *
  * HMC-Sim SIMPLE API 4GB test
  *
@@ -15,7 +15,7 @@ int main( int argc, char **argv ){
   struct hmcsim_t hmc;
 
   /* init the environment */
-  ret = hmcsim_simple_init( &hmc, 4 );
+  ret = hmcsim_simple_init( &hmc, 8 );
   if( ret != 0 ){
     std::cout << "error : hmcsim_simple_init returned an error : " << ret << std::endl;
     return -1;

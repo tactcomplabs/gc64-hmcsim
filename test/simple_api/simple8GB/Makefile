@@ -2,15 +2,15 @@
 #
 # HMCSIM TEST APPLICATIONS
 #
-# TEST: SIMPLE4GB
+# TEST: SIMPLE8GB
 # ---------------------------------------
 
 include ../Makefile.inc
 
 SRC=./src
 
-all: simple4GB
+all: simple8GB
 simple4GB:
-	$(CXX) $(CXXFLAGS) -o $@ $(SRC)/simple4GB.cpp $(LDFLAGS) $(LDLIBS)
+	$(CXX) $(CXXFLAGS) -o $@ $(SRC)/simple8GB.cpp $(LDFLAGS) $(LDLIBS)
 clean:
-	rm -Rf ./simple4GB ./src/*.o
+	rm -Rf ./simple8GB ./src/*.o
