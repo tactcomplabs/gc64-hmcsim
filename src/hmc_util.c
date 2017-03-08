@@ -748,7 +748,7 @@ extern int hmcsim_util_set_all_max_blocksize( struct hmcsim_t *hmc, uint32_t bsi
  	 */
 	if( (bsize != 32) && 
 		(bsize != 64) &&
-		(bsize != 128) ){
+		(bsize != 128) && (bsize != 256)){
 		return -1;
 	}
 
