@@ -36,29 +36,57 @@ extern int hmcsim_simple_init( struct hmcsim_t *hmc, int size ){
   }
 
   if( size == 4 ){
+#ifdef HMC_DEBUG
+    HMCSIM_PRINT_TRACE( "INITIALIZING 4GB DEVICE" );
+#endif
     if( hmcsim_init( hmc, 1, 4, 32, 64, 16, 20, 4, 128 ) != 0 ){
       return -1;
     }
+#ifdef HMC_DEBUG
+    HMCSIM_PRINT_TRACE( "SUCCESS INITIALIZING 4GB DEVICE" );
+    HMCSIM_PRINT_TRACE( "INITIALIZING 4GB LINKS" );
+#endif
     for( i=0; i<4; i++ ){
       if( hmcsim_link_config( hmc, 2, 0, i, i, HMC_LINK_HOST_DEV ) != 0 ){
         return -1;
       }
     }
+#ifdef HMC_DEBUG
+    HMCSIM_PRINT_TRACE( "SUCCESS INITIALIZING 4GB LINKS" );
+    HMCSIM_PRINT_TRACE( "INITIALIZING 4GB MAX BLOCKSIZE" );
+#endif
     if( hmcsim_util_set_all_max_blocksize( hmc, 256 ) != 0 ){
       return -1;
     }
+#ifdef HMC_DEBUG
+    HMCSIM_PRINT_TRACE( "SUCCESS INITIALIZING 4GB MAX BLOCKSIZE" );
+#endif
   }else if( size == 8 ){
+#ifdef HMC_DEBUG
+    HMCSIM_PRINT_TRACE( "INITIALIZING 8GB DEVICE" );
+#endif
     if( hmcsim_init( hmc, 1, 8, 64, 64, 16, 20, 8, 128 ) != 0 ){
       return -1;
     }
+#ifdef HMC_DEBUG
+    HMCSIM_PRINT_TRACE( "SUCCESS INITIALIZING 8GB DEVICE" );
+    HMCSIM_PRINT_TRACE( "INITIALIZING 8GB LINKS" );
+#endif
     for( i=0; i<8; i++ ){
       if( hmcsim_link_config( hmc, 2, 0, i, i, HMC_LINK_HOST_DEV ) != 0 ){
         return -1;
       }
     }
+#ifdef HMC_DEBUG
+    HMCSIM_PRINT_TRACE( "SUCCESS INITIALIZING 8GB LINKS" );
+    HMCSIM_PRINT_TRACE( "INITIALIZING 8GB MAX BLOCKSIZE" );
+#endif
     if( hmcsim_util_set_all_max_blocksize( hmc, 256 ) != 0 ){
       return -1;
     }
+#ifdef HMC_DEBUG
+    HMCSIM_PRINT_TRACE( "SUCCESS INITIALIZING 8GB MAX BLOCKSIZE" );
+#endif
   }else{
     return -1;
   }
