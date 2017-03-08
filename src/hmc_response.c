@@ -146,7 +146,7 @@ extern int	hmcsim_decode_memresponse( 	struct hmcsim_t *hmc,
 	 * tag field
 	 *
 	 */
-        tmp16   = (uint16_t)( (tmp64 >> 12) & 0x7FF);
+        tmp16   = (uint16_t)( (tmp64 >> 12) & 0x3FF);
 	*tag	= tmp16;
 	tmp16	= 0x0000;
 

@@ -35,6 +35,9 @@ static void hmcsim_init_tokens( struct hmcsim_t *hmc ){
     hmc->tokens[i].status  = 0;
     hmc->tokens[i].rsp     = RSP_NONE;
     hmc->tokens[i].rsp_size= 0;
+    hmc->tokens[i].device  = 0;
+    hmc->tokens[i].link    = 0;
+    hmc->tokens[i].slot    = 0;
     hmc->tokens[i].en_clock= 0x00ull;
     for( j=0; j<256; j++ ){
       hmc->tokens[i].data[j] = 0x0;

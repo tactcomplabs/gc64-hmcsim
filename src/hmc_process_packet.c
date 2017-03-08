@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
@@ -183,7 +184,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	 *
  	 */
 	/* -- tag = [22:12] */
-	tag	= (uint32_t)((head >> 12) & 0x7FF);
+	tag	= (uint32_t)((head >> 12) & 0x3FF);
 
 	/* -- addr = [57:24] */
 	addr	= ((head >> 24) & 0x1FFFFFFFF );

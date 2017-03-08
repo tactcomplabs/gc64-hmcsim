@@ -177,17 +177,21 @@ static int hmcsim_clock_print_vault_stats( struct hmcsim_t *hmc,
 #endif
 
 /* ----------------------------------------------------- HMCSIM_TOKEN_UPDATE */
-static void hmcsim_token_update( struct hmcsim_t *hmc, uint64_t *pkt ){
+static void hmcsim_token_update( struct hmcsim_t *hmc, uint64_t *pkt,
+                                 uint32_t device, uint32_t link, uint32_t slot ){
   int tag = -1;
   int i = 0;
   int shift = 0;
   int cur = 0;
 
   /* get the tag */
-  tag = (int)((pkt[0]>>12) & 0x7FF);
+  tag = (int)((pkt[0]>>12) & 0x3FF);
 
   /* set the status */
   hmc->tokens[tag].status = 2;
+  hmc->tokens[tag].device = device;
+  hmc->tokens[tag].link   = link;
+  hmc->tokens[tag].slot   = slot;
 
   /* copy the data */
   do{
@@ -1652,7 +1656,8 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
                                                          *
                                                          */
                                                         hmcsim_token_update( hmc,
-                                                          &(hmc->devs[i].xbar[r_link].xbar_rsp[r_slot].packet[0]) );
+                                                          &(hmc->devs[i].xbar[r_link].xbar_rsp[r_slot].packet[0]),
+                                                          i, r_link, r_slot );
 
 						}else{
 
