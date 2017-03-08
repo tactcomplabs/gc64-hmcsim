@@ -10,7 +10,7 @@ include ../Makefile.inc
 SRC=./src
 
 all: simple8GB
-simple4GB:
+simple8GB:
 	$(CXX) $(CXXFLAGS) -o $@ $(SRC)/simple8GB.cpp $(LDFLAGS) $(LDLIBS)
 clean:
 	rm -Rf ./simple8GB ./src/*.o
