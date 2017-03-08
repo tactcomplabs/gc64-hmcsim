@@ -22,7 +22,7 @@ static int find_valid_token( struct hmcsim_t *hmc ){
 
   for( i=0; i<1023; i++ ){
     if( hmc->tokens[i].status == 0 ){
-      return 0;
+      return i;
     }
   }
   return -1;
@@ -313,6 +313,12 @@ extern int hmcsim_simple_stat( struct hmcsim_t *hmc, int token, uint8_t *data ){
   hmc->tokens[token].en_clock = 0x00ull;
   for( i=0; i<256; i++ ){
     hmc->tokens[token].data[i] = 0x0;
+  }
+
+  /* clear the xbar response slot */
+  hmc->devs[hmc->tokens[token].device].xbar[hmc->tokens[token].link].xbar_rsp[hmc->tokens[token].slot].valid = HMC_RQST_INVALID;
+  for( i=0; i<HMC_MAX_UQ_PACKET; i++ ){
+    hmc->devs[hmc->tokens[token].device].xbar[hmc->tokens[token].link].xbar_rsp[hmc->tokens[token].slot].packet[i] = 0x00ull;
   }
 
   return 1;

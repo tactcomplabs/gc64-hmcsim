@@ -191,6 +191,9 @@ struct hmc_token_t{
                                           */
   hmc_response_t rsp;                   /*! HMC-SIM: HMC_TOKEN_T: Response type */
   uint32_t rsp_size;                    /*! HMC-SIM: HMC_TOKEN_T: Response data size */
+  uint32_t device;                      /*! HMC-SIM: HMC_TOKEN_T: Response device */
+  uint32_t link;                        /*! HMC-SIM: HMC_TOKEN_T: Response link */
+  uint32_t slot;                        /*! HMC-SIM: HMC_TOKEN_T: Response slot */
   uint64_t en_clock;                    /*! HMC-SIM: HMC_TOKEN_T: Clock cycle of incoming packet */
   uint8_t data[256];                    /*! HMC-SIM: HMC_TOKEN_T: Response data */
 };
