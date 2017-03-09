@@ -5,7 +5,7 @@
 # Drives building all the hmcsim simple api tests
 
 
-SUBDIRS :=	simple4GB simple8GB simple4GBio simple8GBio simple4GBstall simple8GBstall simpletrace4GB simpletrace8GB simpleconfig4GB simpleconfig8GB
+SUBDIRS :=	simple4GB simple8GB simple4GBio simple8GBio simple4GBstall simple8GBstall simpletrace4GB simpletrace8GB simpleconfig4GB simpleconfig8GB simpletecplot4GB simpletecplot8GB
 
 CLEANDIRS :=	$(addsuffix .clean, $(SUBDIRS))
 
