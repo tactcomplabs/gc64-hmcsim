@@ -404,6 +404,16 @@ extern int hmcsim_simple_write( struct hmcsim_t *hmc, uint64_t addr, int size, u
  */
 extern int hmcsim_simple_stat( struct hmcsim_t *hmc, int token, uint8_t *data );
 
+/*!     \fn int hmcsim_simple_cmc( struct hmcsim_t *hmc, uint64_t addr, int size, uint8_t *data )
+ *      \brief Initiates a simplified CMC request of SIZE bytes starting at address ADDR
+ *      \param *hmc is a pointer to a valid HMC structure
+ *      \param addr is the starting address of the request
+ *      \param *data is a pointer to a valid array containing any input data for the operation
+ *      \param op is a valid CMC packet designator that has been loaded via hmcsim_load_cmc
+ *      \return Token ID on success, -1 if request queues are full, -2 if an error occurred
+ */
+extern int hmcsim_simple_cmc( struct hmcsim_t *hmc, uint64_t addr, uint8_t *data, hmc_rqst_t op );
+
 
 #ifdef __cplusplus
 } /* extern C */
