@@ -183,6 +183,207 @@ extern int hmcsim_simple_read( struct hmcsim_t *hmc, uint64_t addr, int size ){
   }
 }
 
+/* -------------------------------------------- HMCSIM_SIMPLE_AMO */
+extern int hmcsim_simple_amo( struct hmcsim_t *hmc,
+                              uint64_t addr,
+                              uint8_t *data,
+                              hmc_rqst_t op ){
+  int token = -1;
+  int ret = 0;
+  int i = 0;
+  int cur = 0;
+  int shift = 0;
+  int tailp = 0;
+  uint8_t cmd = 0;
+  uint32_t size = 0;
+  uint32_t rsp_size = 0;
+  uint64_t head;
+  uint64_t tail;
+  uint64_t payload[32];
+  uint64_t packet[HMC_MAX_UQ_PACKET];
+  hmc_response_t rsp;
+
+  if( hmc == NULL ){
+    return -2;
+  }
+  if( data == NULL ){
+    return -2;
+  }
+
+  /* grab a new token */
+  token = find_valid_token( hmc );
+  if( token == -1 ){
+    return -1;
+  }
+
+  /* setup the packet data */
+  switch( op ){
+  case TWOADD8:
+    rsp = WR_RS;
+    rsp_size = 0;
+    size = 16;
+    break;
+  case ADD16:
+    rsp = WR_RS;
+    rsp_size = 0;
+    size = 16;
+    break;
+  case P_2ADD8:
+    rsp = RSP_NONE;
+    rsp_size = 0;
+    size = 16;
+    break;
+  case P_ADD16:
+    rsp = RSP_NONE;
+    rsp_size = 0;
+    size = 16;
+    break;
+  case TWOADDS8R:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case ADDS16R:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case INC8:
+    rsp = WR_RS;
+    rsp_size = 0;
+    size = 0;
+    break;
+  case P_INC8:
+    rsp = RSP_NONE;
+    rsp_size = 0;
+    size = 0;
+    break;
+  case XOR16:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case OR16:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case NOR16:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case AND16:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case NAND16:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case CASGT8:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case CASGT16:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case CASLT8:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case CASLT16:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case CASEQ8:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case CASZERO16:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case EQ8:
+    rsp = WR_RS;
+    rsp_size = 0;
+    size = 16;
+    break;
+  case EQ16:
+    rsp = WR_RS;
+    rsp_size = 0;
+    size = 16;
+    break;
+  case BWR8R:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case SWAP16:
+    rsp = RD_RS;
+    rsp_size = 16;
+    size = 16;
+    break;
+  case BWR:
+    rsp = WR_RS;
+    rsp_size = 0;
+    size = 16;
+    break;
+  case P_BWR:
+    rsp = RSP_NONE;
+    rsp_size = 0;
+    size = 16;
+    break;
+  default:
+    /* erroneous packet request */
+    return -2;
+  }
+
+  /* copy the data to the uint64_t payload array */
+  do{
+    payload[cur] |= ((uint64_t)(data[i])<<(shift*8));
+    i++;
+    shift++;
+    if( shift == 8 ){
+      shift = 0;
+      cur++;
+    }
+  }while(i<size);
+
+  /* create the packet request */
+  if( hmcsim_build_memrequest( hmc, 0, addr, (uint16_t)(token), op,
+                               hmc->simple_link, &(payload[0]), &head, &tail ) != 0 ){
+    return -2;
+  }
+  packet[0] = head;
+  packet[tailp] = tail;
+
+  /* increment the link */
+  incr_link(hmc);
+
+  /* try to send the packet */
+  ret = hmcsim_send( hmc, &(packet[0]) );
+  if( ret == 0 ){
+    hmc->tokens[token].status = 1;
+    hmc->tokens[token].rsp = rsp;
+    hmc->tokens[token].rsp_size = rsp_size;
+    return token;
+  }else if( ret == HMC_STALL ){
+    return -1;
+  }else{
+    return -2;
+  }
+}
+
 /* -------------------------------------------- HMCSIM_SIMPLE_CMC */
 extern int hmcsim_simple_cmc( struct hmcsim_t *hmc,
                               uint64_t addr,
