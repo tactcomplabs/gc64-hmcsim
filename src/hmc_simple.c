@@ -9,6 +9,14 @@
 #include <stdlib.h>
 #include "hmc_sim.h"
 
+/* -------------------------------------------- FUNCTION DEFINITIONS */
+extern uint32_t hmcsim_cmc_cmdtoidx( hmc_rqst_t rqst );
+extern int  hmcsim_query_cmc( struct hmcsim_t *hmc,
+                              hmc_rqst_t type,
+                              uint32_t *flits,
+                              uint8_t *cmd );
+
+/* -------------------------------------------- INCR_LINK */
 static int incr_link( struct hmcsim_t *hmc ){
   hmc->simple_link++;
   if( hmc->simple_link == hmc->num_links ){
@@ -17,6 +25,7 @@ static int incr_link( struct hmcsim_t *hmc ){
   return 0;
 }
 
+/* -------------------------------------------- FIND_VALID_TOKEN */
 static int find_valid_token( struct hmcsim_t *hmc ){
   int i = 0;
 
@@ -28,6 +37,7 @@ static int find_valid_token( struct hmcsim_t *hmc ){
   return -1;
 }
 
+/* -------------------------------------------- HMCSIM_SIMPLE_INIT */
 extern int hmcsim_simple_init( struct hmcsim_t *hmc, int size ){
   int i = 0;
 
@@ -94,6 +104,7 @@ extern int hmcsim_simple_init( struct hmcsim_t *hmc, int size ){
   return 0;
 }
 
+/* -------------------------------------------- HMCSIM_SIMPLE_READ */
 extern int hmcsim_simple_read( struct hmcsim_t *hmc, uint64_t addr, int size ){
   int token = -1;
   int ret = 0;
@@ -172,6 +183,89 @@ extern int hmcsim_simple_read( struct hmcsim_t *hmc, uint64_t addr, int size ){
   }
 }
 
+/* -------------------------------------------- HMCSIM_SIMPLE_CMC */
+extern int hmcsim_simple_cmc( struct hmcsim_t *hmc,
+                              uint64_t addr,
+                              uint8_t *data,
+                              hmc_rqst_t op ){
+  int token = -1;
+  int ret = 0;
+  int i = 0;
+  int cur = 0;
+  int shift = 0;
+  int tailp = 0;
+  uint32_t size = 0;
+  uint32_t flits = 0;
+  uint8_t cmd = 0;
+  uint64_t head;
+  uint64_t tail;
+  uint64_t payload[32];
+  uint64_t packet[HMC_MAX_UQ_PACKET];
+
+  if( hmc == NULL ){
+    return -2;
+  }
+  if( data == NULL ){
+    return -2;
+  }
+
+  /* grab a new token */
+  token = find_valid_token( hmc );
+  if( token == -1 ){
+    return -1;
+  }
+
+  /* query the cmc command */
+  if( hmcsim_query_cmc( hmc, op, &flits, &cmd ) != 0 ){
+    /* erroneous command */
+    return -2;
+  }
+
+  /* derive the tail packet location */
+  tailp = (flits*2)-1;
+
+  /* derive the size */
+  size = (flits*16)-16;
+
+  /* copy the data to the uint64_t payload array */
+  if( size > 0 ){
+    do{
+      payload[cur] |= ((uint64_t)(data[i])<<(shift*8));
+      i++;
+      shift++;
+      if( shift == 8 ){
+        shift = 0;
+        cur++;
+      }
+    }while(i<size);
+  }
+
+  /* create the packet request */
+  if( hmcsim_build_memrequest( hmc, 0, addr, (uint16_t)(token), op,
+                               hmc->simple_link, &(payload[0]), &head, &tail ) != 0 ){
+    return -2;
+  }
+  packet[0] = head;
+  packet[tailp] = tail;
+
+  /* increment the link */
+  incr_link(hmc);
+
+  /* try to send the packet */
+  ret = hmcsim_send( hmc, &(packet[0]) );
+  if( ret == 0 ){
+    hmc->tokens[token].rsp = hmc->cmcs[hmcsim_cmc_cmdtoidx(op)].rsp_cmd;
+    hmc->tokens[token].rsp_size = ((hmc->cmcs[hmcsim_cmc_cmdtoidx(op)].rsp_len*16)-16);
+    hmc->tokens[token].status = 1;
+    return token;
+  }else if( ret == HMC_STALL ){
+    return -1;
+  }else{
+    return -2;
+  }
+}
+
+/* -------------------------------------------- HMCSIM_SIMPLE_WRITE */
 extern int hmcsim_simple_write( struct hmcsim_t *hmc, uint64_t addr,
                                 int size, uint8_t *data ){
   int token = -1;
@@ -279,6 +373,7 @@ extern int hmcsim_simple_write( struct hmcsim_t *hmc, uint64_t addr,
   }
 }
 
+/* -------------------------------------------- HMCSIM_SIMPLE_STAT */
 extern int hmcsim_simple_stat( struct hmcsim_t *hmc, int token, uint8_t *data ){
   int i = 0;
 
