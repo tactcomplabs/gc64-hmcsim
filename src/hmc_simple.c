@@ -194,7 +194,6 @@ extern int hmcsim_simple_amo( struct hmcsim_t *hmc,
   int cur = 0;
   int shift = 0;
   int tailp = 0;
-  uint8_t cmd = 0;
   uint32_t size = 0;
   uint32_t rsp_size = 0;
   uint64_t head;
