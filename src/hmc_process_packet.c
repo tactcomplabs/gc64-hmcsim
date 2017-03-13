@@ -639,7 +639,6 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 			break;
 		case 18:
 			/* TWOADD8 */
-
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
 				hmcsim_trace_rqst(	hmc,
 							"TWOADD8",

@@ -187,6 +187,21 @@ static void hmcsim_token_update( struct hmcsim_t *hmc, uint64_t *pkt,
   /* get the tag */
   tag = (int)((pkt[0]>>12) & 0x3FF);
 
+  if( hmc->tokens[tag].rsp == RSP_NONE ){
+    /* null response, probably a posted request */
+    hmc->tokens[tag].status = 0;
+    hmc->tokens[tag].rsp     = RSP_NONE;
+    hmc->tokens[tag].rsp_size= 0;
+    hmc->tokens[tag].device  = 0;
+    hmc->tokens[tag].link    = 0;
+    hmc->tokens[tag].slot    = 0;
+    hmc->tokens[tag].en_clock= 0x00ull;
+    for( i=0; i<256; i++ ){
+      hmc->tokens[tag].data[i] = 0x0;
+    }
+    return ;
+  }
+
   /* set the status */
   hmc->tokens[tag].status = 2;
   hmc->tokens[tag].device = device;

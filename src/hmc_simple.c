@@ -221,126 +221,151 @@ extern int hmcsim_simple_amo( struct hmcsim_t *hmc,
     rsp = WR_RS;
     rsp_size = 0;
     size = 16;
+    tailp = 3;
     break;
   case ADD16:
     rsp = WR_RS;
     rsp_size = 0;
     size = 16;
+    tailp = 3;
     break;
   case P_2ADD8:
     rsp = RSP_NONE;
     rsp_size = 0;
     size = 16;
+    tailp = 3;
     break;
   case P_ADD16:
     rsp = RSP_NONE;
     rsp_size = 0;
     size = 16;
+    tailp = 3;
     break;
   case TWOADDS8R:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case ADDS16R:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case INC8:
     rsp = WR_RS;
     rsp_size = 0;
     size = 0;
+    tailp = 1;
     break;
   case P_INC8:
     rsp = RSP_NONE;
     rsp_size = 0;
     size = 0;
+    tailp = 1;
     break;
   case XOR16:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case OR16:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case NOR16:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case AND16:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case NAND16:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case CASGT8:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case CASGT16:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case CASLT8:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case CASLT16:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case CASEQ8:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case CASZERO16:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case EQ8:
     rsp = WR_RS;
     rsp_size = 0;
     size = 16;
+    tailp = 3;
     break;
   case EQ16:
     rsp = WR_RS;
     rsp_size = 0;
     size = 16;
+    tailp = 3;
     break;
   case BWR8R:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case SWAP16:
     rsp = RD_RS;
     rsp_size = 16;
     size = 16;
+    tailp = 3;
     break;
   case BWR:
     rsp = WR_RS;
     rsp_size = 0;
     size = 16;
+    tailp = 3;
     break;
   case P_BWR:
     rsp = RSP_NONE;
     rsp_size = 0;
     size = 16;
+    tailp = 3;
     break;
   default:
     /* erroneous packet request */
