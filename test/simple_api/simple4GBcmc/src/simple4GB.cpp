@@ -26,6 +26,7 @@ int main( int argc, char **argv ){
   ret = hmcsim_load_cmc( &hmc, "../../../cmc/amo_popcount/libamopopcount.so");
   if( ret != 0 ){
     std::cout << "error : hmcsim_load_cmc returned an error : " << ret << std::endl;
+    hmcsim_free( &hmc );
     return -1;
   }else{
     std::cout << "success : loaded cmc library at ../../../cmc/amo_popcount/libamopopcount.so" << std::endl;
