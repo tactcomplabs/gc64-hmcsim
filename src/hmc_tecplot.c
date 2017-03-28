@@ -32,6 +32,8 @@ static int hmcsim_tecplot8( struct HMC8LinkTec Tec,
   }
   fname_t = malloc( sizeof( char ) * (strlen(prefix)+40) );
   if( fname_t == NULL ){
+    free( fname_p );
+    fname_p = NULL;
     return -1;
   }
 
@@ -483,6 +485,11 @@ static int hmcsim_tecplot8( struct HMC8LinkTec Tec,
   fclose( ofile );
   ofile = NULL;
 
+  free( fname_p );
+  free( fname_t );
+  fname_p = NULL;
+  fname_t = NULL;
+
 
   return 0;
 }
@@ -506,6 +513,8 @@ static int hmcsim_tecplot4( struct HMC4LinkTec Tec,
   }
   fname_t = malloc( sizeof( char ) * (strlen(prefix)+40) );
   if( fname_t == NULL ){
+    free( fname_p );
+    fname_p = NULL;
     return -1;
   }
 
@@ -876,6 +885,11 @@ static int hmcsim_tecplot4( struct HMC4LinkTec Tec,
   /* -- close the file */
   fclose( ofile );
   ofile = NULL;
+
+  free( fname_p );
+  free( fname_t );
+  fname_p = NULL;
+  fname_t = NULL;
 
   return 0;
 }
