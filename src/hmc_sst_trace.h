@@ -84,6 +84,9 @@ Statistic<uint64_t>* BankConflict;
 /* -- xbar latency */
 Statistic<uint64_t>* XbarLatency;
 
+/* -- power */
+
+/* -- thermal */
 
 #endif /* SST_ENABLE_STAT */
 #endif /* _HMC_SST_TRACE_H_ */

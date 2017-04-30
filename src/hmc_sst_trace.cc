@@ -12,6 +12,85 @@
 // force the use of the SST namespace
 using namespace SST;
 
+/* ----------------------------------------------------- HMCSIM_SST_REGISTER_THERMAL */
+static void hmcsim_sst_register_thermal(){
+}
+
+/* ----------------------------------------------------- HMCSIM_SST_REGISTER_POWER */
+static void hmcsim_sst_register_power(){
+}
+
+/* ----------------------------------------------------- HMCSIM_SST_REGISTER_MISC */
+static void hmcsim_sst_register_misc(){
+  BankConflict = registerStatistic<uint64_t>("BankConflict");
+  XbarLatency = registerStatistic<uint64_t>("XbarLatency");
+}
+
+/* ----------------------------------------------------- HMCSIM_SST_REGISTER_STALLS */
+static void hmcsim_sst_register_stalls(){
+  XbarRqstStall = registerStatistic<uint64_t>("XbarRqstStall");
+  VaultRqstStall = registerStatistic<uint64_t>("VaultRqstStall");
+  XbarRspStall = registerStatistic<uint64_t>("XbarRspStall");
+  RouteRqstStall = registerStatistic<uint64_t>("RouteRqstStall");
+  RouteRspStall = registerStatistic<uint64_t>("RouteRspStall");
+  UndefStall = registerStatistic<uint64_t>("UndefStall");
+}
+
+/* ----------------------------------------------------- HMCSIM_SST_REGISTER_PACKETS */
+static void hmcsim_sst_register_packets(){
+  Write16Ops = registerStatistic<uint64_t>("WR16");
+  Write32Ops = registerStatistic<uint64_t>("WR32");
+  Write48Ops = registerStatistic<uint64_t>("WR48");
+  Write64Ops = registerStatistic<uint64_t>("WR64");
+  Write80Ops = registerStatistic<uint64_t>("WR80");
+  Write96Ops = registerStatistic<uint64_t>("WR96");
+  Write112Ops = registerStatistic<uint64_t>("WR112");
+  Write128Ops = registerStatistic<uint64_t>("WR128");
+  Write256Ops = registerStatistic<uint64_t>("WR256");
+  Read16Ops = registerStatistic<uint64_t>("RD16");
+  Read32Ops = registerStatistic<uint64_t>("RD32");
+  Read48Ops = registerStatistic<uint64_t>("RD48");
+  Read64Ops = registerStatistic<uint64_t>("RD64");
+  Read80Ops = registerStatistic<uint64_t>("RD80");
+  Read96Ops = registerStatistic<uint64_t>("RD96");
+  Read112Ops = registerStatistic<uint64_t>("RD112");
+  Read128Ops = registerStatistic<uint64_t>("RD128");
+  Read256Ops = registerStatistic<uint64_t>("RD256");
+  ModeWriteOps = registerStatistic<uint64_t>("MD_WR");
+  ModeReadOps = registerStatistic<uint64_t>("MD_RD");
+  BWROps = registerStatistic<uint64_t>("BWR");
+  TwoAdd8Ops = registerStatistic<uint64_t>("2ADD8");
+  Add16Ops = registerStatistic<uint64_t>("ADD16");
+  PWrite16Ops = registerStatistic<uint64_t>("P_WR16");
+  PWrite32Ops = registerStatistic<uint64_t>("P_WR32");
+  PWrite48Ops = registerStatistic<uint64_t>("P_WR48");
+  PWrite64Ops = registerStatistic<uint64_t>("P_WR64");
+  PWrite80Ops = registerStatistic<uint64_t>("P_WR80");
+  PWrite96Ops = registerStatistic<uint64_t>("P_WR96");
+  PWrite112Ops = registerStatistic<uint64_t>("P_WR112");
+  PWrite128Ops = registerStatistic<uint64_t>("P_128");
+  PWrite256Ops = registerStatistic<uint64_t>("P_256");
+  TwoAddS8ROps = registerStatistic<uint64_t>("2ADDS8R");
+  AddS16ROps = registerStatistic<uint64_t>("ADDS16");
+  Inc8Ops = registerStatistic<uint64_t>("INC8");
+  PInc8Ops = registerStatistic<uint64_t>("P_INC8");
+  Xor16Ops = registerStatistic<uint64_t>("XOR16");
+  Or16Ops = registerStatistic<uint64_t>("OR16");
+  Nor16Ops = registerStatistic<uint64_t>("NOR16");
+  And16Ops = registerStatistic<uint64_t>("AND16");
+  Nand16Ops = registerStatistic<uint64_t>("NAND16");
+  CasGT8Ops = registerStatistic<uint64_t>("CASGT8");
+  CasGT16Ops = registerStatistic<uint64_t>("CASGT16");
+  CasLT8Ops = registerStatistic<uint64_t>("CASLT8");
+  CasLT16Ops = registerStatistic<uint64_t>("CASLT16");
+  CasEQ8Ops = registerStatistic<uint64_t>("CASEQ8");
+  CasZero16Ops = registerStatistic<uint64_t>("CASZERO16");
+  Eq8Ops = registerStatistic<uint64_t>("EQ8");
+  Eq16Ops = registerStatistic<uint64_t>("EQ16");
+  BWR8ROps = registerStatistic<uint64_t>("BWR8R");
+  Swap16Ops = registerStatistic<uint64_t>("SWAP16");
+}
+
 /* ----------------------------------------------------- HMCSIM_SST_TRACE_INIT */
 extern "C" int hmcsim_sst_trace_init();
 int hmcsim_sst_trace_init(){
@@ -20,6 +99,11 @@ int hmcsim_sst_trace_init(){
   primaryComponentDoNotEndSim();
 
   /* register all the new components */
+  hmcsim_sst_register_packets();
+  hmcsim_sst_register_stalls();
+  hmcsim_sst_register_power();
+  hmcsim_sst_register_thermal();
+  hmcsim_sst_register_misc();
 
   return 0;
 }
