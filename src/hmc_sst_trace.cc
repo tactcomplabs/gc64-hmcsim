@@ -8,6 +8,7 @@
 #ifdef SST_ENABLE_STAT
 
 #include "hmc_sst_trace.h"
+#include "hmc_sim.h"
 
 // force the use of the SST namespace
 using namespace SST;
@@ -159,7 +160,7 @@ int hmcsim_sst_trace_stall( struct hmcsim_t *hmc,
 
 /* ----------------------------------------------------- HMCSIM_SST_TRACE_RQST */
 extern "C" int hmcsim_sst_trace_rqst( struct hmcsim_t *hmc,
-                           char *rqst,
+                           hmc_rqst_t rqst,
                            uint32_t dev,
                            uint32_t quad,
                            uint32_t vault,
@@ -167,13 +168,125 @@ extern "C" int hmcsim_sst_trace_rqst( struct hmcsim_t *hmc,
                            uint64_t addr1,
                            uint32_t size );
 int hmcsim_sst_trace_rqst( struct hmcsim_t *hmc,
-                           char *rqst,
+                           hmc_rqst_t rqst,
                            uint32_t dev,
                            uint32_t quad,
                            uint32_t vault,
                            uint32_t bank,
                            uint64_t addr1,
                            uint32_t size ){
+  switch( rqst ){
+  case WR16:
+    break;
+  case WR32:
+    break;
+  case WR48:
+    break;
+  case WR64:
+    break;
+  case WR80:
+    break;
+  case WR96:
+    break;
+  case WR112:
+    break;
+  case WR128:
+    break;
+  case WR256:
+    break;
+  case RD16:
+    break;
+  case RD32:
+    break;
+  case RD48:
+    break;
+  case RD64:
+    break;
+  case RD80:
+    break;
+  case RD96:
+    break;
+  case RD112:
+    break;
+  case RD128:
+    break;
+  case RD256:
+    break;
+  case MD_WR:
+    break;
+  case BWR:
+    break;
+  case TWOADD8:
+    break;
+  case ADD16:
+    break;
+  case P_WR16:
+    break;
+  case P_WR32:
+    break;
+  case P_WR48:
+    break;
+  case P_WR64:
+    break;
+  case P_WR80:
+    break;
+  case P_WR96:
+    break;
+  case P_WR112:
+    break;
+  case P_WR128:
+    break;
+  case P_WR256:
+    break;
+  case MD_RD:
+    break;
+  case TWOADDS8R:
+    break;
+  case ADDS16R:
+    break;
+  case INC8:
+    break;
+  case P_INC8:
+    break;
+  case XOR16:
+    break;
+  case OR16:
+    break;
+  case NOR16:
+    break;
+  case AND16:
+    break;
+  case NAND16:
+    break;
+  case CASGT8:
+    break;
+  case CASGT16:
+    break;
+  case CASLT8:
+    break;
+  case CASLT16:
+    break;
+  case CASEQ8:
+    break;
+  case CASZERO16:
+    break;
+  case EQ8:
+    break;
+  case EQ16:
+    break;
+  case BWR8R:
+    break;
+  case SWAP16:
+    break;
+  case FLOW_NULL:
+  case PRET:
+  case TRET:
+  case IRTRY:
+  default:
+    return -1;
+    break;
+  }
+
   return 0;
 }
 
