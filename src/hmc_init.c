@@ -20,6 +20,9 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc );
 extern int	hmcsim_free_memory( struct hmcsim_t *hmc );
 extern int	hmcsim_config_devices( struct hmcsim_t *sim );
 extern int	hmc_reset_device( struct hmcsim_t *hmc, uint32_t dev );
+#ifdef SST_ENABLE_STAT
+extern int      hmcsim_sst_trace_init();
+#endif
 
 
 /* ----------------------------------------------------- HMCSIM_INIT_TOKENS */
@@ -332,6 +335,14 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
          *
          */
         hmcsim_init_tokens( hmc );
+
+        /*
+         * init the SST Statistics API
+         *
+         */
+#ifdef SST_ENABLE_STAT
+        hmcsim_sst_trace_init();
+#endif
 
 	return 0;
 }
