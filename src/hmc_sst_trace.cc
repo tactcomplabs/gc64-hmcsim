@@ -177,106 +177,157 @@ int hmcsim_sst_trace_rqst( struct hmcsim_t *hmc,
                            uint32_t size ){
   switch( rqst ){
   case WR16:
+    Write16Ops->addData(1);
     break;
   case WR32:
+    Write32Ops->addData(1);
     break;
   case WR48:
+    Write48Ops->addData(1);
     break;
   case WR64:
+    Write64Ops->addData(1);
     break;
   case WR80:
+    Write80Ops->addData(1);
     break;
   case WR96:
+    Write96Ops->addData(1);
     break;
   case WR112:
+    Write112Ops->addData(1);
     break;
   case WR128:
+    Write128Ops->addData(1);
     break;
   case WR256:
+    Write256Ops->addData(1);
     break;
   case RD16:
+    Read16Ops->addData(1);
     break;
   case RD32:
+    Read32Ops->addData(1);
     break;
   case RD48:
+    Read48Ops->addData(1);
     break;
   case RD64:
+    Read64Ops->addData(1);
     break;
   case RD80:
+    Read80Ops->addData(1);
     break;
   case RD96:
+    Read96Ops->addData(1);
     break;
   case RD112:
+    Read112Ops->addData(1);
     break;
   case RD128:
+    Read128Ops->addData(1);
     break;
   case RD256:
+    Read256Ops->addData(1);
     break;
   case MD_WR:
+    ModeWriteOps->addData(1);
     break;
   case BWR:
+    BWROps->addData(1);
     break;
   case TWOADD8:
+    TwoAdd8Ops->addData(1);
     break;
   case ADD16:
+    Add16Ops->addData(1);
     break;
   case P_WR16:
+    PWrite16Ops->addData(1);
     break;
   case P_WR32:
+    PWrite32Ops->addData(1);
     break;
   case P_WR48:
+    PWrite48Ops->addData(1);
     break;
   case P_WR64:
+    PWrite64Ops->addData(1);
     break;
   case P_WR80:
+    PWrite80Ops->addData(1);
     break;
   case P_WR96:
+    PWrite96Ops->addData(1);
     break;
   case P_WR112:
+    PWrite112Ops->addData(1);
     break;
   case P_WR128:
+    PWrite128Ops->addData(1);
     break;
   case P_WR256:
+    PWrite256Ops->addData(1);
     break;
   case MD_RD:
+    ModeReadOps->addData(1);
     break;
   case TWOADDS8R:
+    TwoAddS8ROps->addData(1);
     break;
   case ADDS16R:
+    AddS16ROps->addData(1);
     break;
   case INC8:
+    Inc8Ops->addData(1);
     break;
   case P_INC8:
+    PInc8Ops->addData(1);
     break;
   case XOR16:
+    Xor16Ops->addData(1);
     break;
   case OR16:
+    Or16Ops->addData(1);
     break;
   case NOR16:
+    Nor16Ops->addData(1);
     break;
   case AND16:
+    And16Ops->addData(1);
     break;
   case NAND16:
+    Nand16Ops->addData(1);
     break;
   case CASGT8:
+    CasGT8Ops->addData(1);
     break;
   case CASGT16:
+    CasGT16Ops->addData(1);
     break;
   case CASLT8:
+    CasLT8Ops->addData(1);
     break;
   case CASLT16:
+    CasLT16Ops->addData(1);
     break;
   case CASEQ8:
+    CasEQ8Ops->addData(1);
     break;
   case CASZERO16:
+    CasZero16Ops->addData(1);
     break;
   case EQ8:
+    Eq8Ops->addData(1);
     break;
   case EQ16:
+    Eq16Ops->addData(1);
     break;
   case BWR8R:
+    BWR8ROps->addData(1);
     break;
   case SWAP16:
+    Swap16Ops->addData(1);
     break;
   case FLOW_NULL:
   case PRET:
