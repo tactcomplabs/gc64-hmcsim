@@ -531,6 +531,155 @@ int hmcsim_sst_trace_latency( struct hmcsim_t *hmc,
   return 0;
 }
 
+/* ----------------------------------------------------- HMCSIM_SST_TRACE_POWER_LINKS */
+extern "C" int hmcsim_sst_trace_power_links( struct hmcsim_t *hmc );
+int hmcsim_sst_trace_power_links( struct hmcsim_t *hmc ){
+  LinkPhyPower->addData(hmc->power.link_phy);
+  LinkPhyTherm->addData(hmc->power.link_phy * HMC_MILLIWATT_TO_BTU);
+  return 0;
+}
+
+
+/* ----------------------------------------------------- HMCSIM_SST_TRACE_POWER_REMOTE_ROUTE */
+extern "C" int hmcsim_sst_trace_power_remote_route( struct hmcsim_t *hmc,
+                                                   uint32_t dev,
+                                                   uint32_t link,
+                                                   uint32_t slot,
+                                                   uint32_t quad,
+                                                   uint32_t vault );
+int hmcsim_sst_trace_power_remote_route( struct hmcsim_t *hmc,
+                                        uint32_t dev,
+                                        uint32_t link,
+                                        uint32_t slot,
+                                        uint32_t quad,
+                                        uint32_t vault ){
+  LinkRemoteRoutePower->addData(hmc->power.link_remote_route);
+  LinkRemoteRouteTherm->addData(hmc->power.link_remote_route * HMC_MILLIWATT_TO_BTU);
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_SST_TRACE_POWER_LOCAL_ROUTE */
+extern "C" int hmcsim_sst_trace_power_local_route( struct hmcsim_t *hmc,
+                                                   uint32_t dev,
+                                                   uint32_t link,
+                                                   uint32_t slot,
+                                                   uint32_t quad,
+                                                   uint32_t vault );
+int hmcsim_sst_trace_power_local_route( struct hmcsim_t *hmc,
+                                        uint32_t dev,
+                                        uint32_t link,
+                                        uint32_t slot,
+                                        uint32_t quad,
+                                        uint32_t vault ){
+  LinkLocalRoutePower->addData(hmc->power.link_local_route);
+  LinkLocalRouteTherm->addData(hmc->power.link_local_route * HMC_MILLIWATT_TO_BTU);
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_SST_TRACE_POWER_ROUTE_EXTERN */
+extern "C" int hmcsim_sst_trace_power_route_extern( struct hmcsim_t *hmc,
+                                                uint32_t srcdev,
+                                                uint32_t srclink,
+                                                uint32_t srcslot,
+                                                uint32_t destdev,
+                                                uint32_t destlink,
+                                                uint32_t destslot );
+int hmcsim_sst_trace_power_route_extern( struct hmcsim_t *hmc,
+                                     uint32_t srcdev,
+                                     uint32_t srclink,
+                                     uint32_t srcslot,
+                                     uint32_t destdev,
+                                     uint32_t destlink,
+                                     uint32_t destslot ){
+  XbarRouteExternPower->addData(hmc->power.xbar_rsp_slot);
+  XbarRouteExternTherm->addData(hmc->power.xbar_rsp_slot * HMC_MILLIWATT_TO_BTU);
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_SST_TRACE_POWER_VAULT_CTRL */
+extern "C" int hmcsim_sst_trace_power_vault_ctrl( struct hmcsim_t *hmc,
+                                                  uint32_t vault );
+int hmcsim_sst_trace_power_vault_ctrl( struct hmcsim_t *hmc,
+                                       uint32_t vault ){
+  VaultCtrlPower->addData(hmc->power.vault_ctrl);
+  VaultCtrlTherm->addData(hmc->power.vault_ctrl * HMC_MILLIWATT_TO_BTU);
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_SST_TRACE_POWER_XBAR_RQST_SLOT */
+extern "C" int hmcsim_sst_trace_power_xbar_rqst_slot( struct hmcsim_t *hmc,
+                                                     uint32_t dev,
+                                                     uint32_t link,
+                                                     uint32_t slot );
+int hmcsim_sst_trace_power_xbar_rqst_slot( struct hmcsim_t *hmc,
+                                          uint32_t dev,
+                                          uint32_t link,
+                                          uint32_t slot ){
+  XbarRqstSlotPower->addData(hmc->power.xbar_rqst_slot);
+  XbarRqstSlotTherm->addData(hmc->power.xbar_rqst_slot * HMC_MILLIWATT_TO_BTU);
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_SST_TRACE_POWER_XBAR_RSP_SLOT */
+extern "C" int hmcsim_sst_trace_power_xbar_rsp_slot( struct hmcsim_t *hmc,
+                                                     uint32_t dev,
+                                                     uint32_t link,
+                                                     uint32_t slot );
+int hmcsim_sst_trace_power_xbar_rsp_slot( struct hmcsim_t *hmc,
+                                          uint32_t dev,
+                                          uint32_t link,
+                                          uint32_t slot ){
+  XbarRspSlotPower->addData(hmc->power.xbar_rsp_slot);
+  XbarRspSlotTherm->addData(hmc->power.xbar_rsp_slot * HMC_MILLIWATT_TO_BTU);
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_SST_TRACE_POWER_ROW_ACCESS */
+extern "C" int hmcsim_sst_trace_power_row_access( struct hmcsim_t *hmc,
+                                                  uint64_t addr,
+                                                  uint32_t mult );
+int hmcsim_sst_trace_power_row_access( struct hmcsim_t *hmc,
+                                       uint64_t addr,
+                                       uint32_t mult ){
+  RowAccessPower->addData(hmc->power.row_access * (float)(mult));
+  RowAccessTherm->addData(hmc->power.row_access * (float)(mult) * HMC_MILLIWATT_TO_BTU);
+  return 0;
+}
+
+
+/* ----------------------------------------------------- HMCSIM_SST_TRACE_POWER_VAULT_RQST_SLOT */
+extern "C" int hmcsim_sst_trace_power_vault_rqst_slot( struct hmcsim_t *hmc,
+                                                      uint32_t dev,
+                                                      uint32_t quad,
+                                                      uint32_t vault,
+                                                      uint32_t slot );
+int hmcsim_sst_trace_power_vault_rqst_slot( struct hmcsim_t *hmc,
+                                           uint32_t dev,
+                                           uint32_t quad,
+                                           uint32_t vault,
+                                           uint32_t slot ){
+  VaultRqstSlotPower->addData(hmc->power.vault_rqst_slot);
+  VaultRqstSlotTherm->addData(hmc->power.vault_rqst_slot * HMC_MILLIWATT_TO_BTU);
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_SST_TRACE_POWER_VAULT_RSP_SLOT */
+extern "C" int hmcsim_sst_trace_power_vault_rsp_slot( struct hmcsim_t *hmc,
+                                                      uint32_t dev,
+                                                      uint32_t quad,
+                                                      uint32_t vault,
+                                                      uint32_t slot );
+int hmcsim_sst_trace_power_vault_rsp_slot( struct hmcsim_t *hmc,
+                                           uint32_t dev,
+                                           uint32_t quad,
+                                           uint32_t vault,
+                                           uint32_t slot ){
+  VaultRspSlotPower->addData(hmc->power.vault_rsp_slot);
+  VaultRspSlotTherm->addData(hmc->power.vault_rsp_slot * HMC_MILLIWATT_TO_BTU);
+  return 0;
+}
+
+
 #endif /* SST_ENABLE_STAT */
 
 /* EOF */
