@@ -16,30 +16,30 @@ using namespace SST;
 
 /* ----------------------------------------------------- HMCSIM_SST_REGISTER_THERMAL */
 static void hmcsim_sst_register_thermal(){
-  LinkPhyTherm = registerStatistic<uint64_t>("LinkPhyTherm");
-  LinkLocalRouteTherm = registerStatistic<uint64_t>("LinkLocalRouteTherm");
-  LinkRemoteRouteTherm = registerStatistic<uint64_t>("LinkRemoteRouteTherm");
-  XbarRqstSlotTherm = registerStatistic<uint64_t>("XbarRqstSlotTherm");
-  XbarRspSlotTherm = registerStatistic<uint64_t>("XbarRspSlotTherm");
-  XbarRouteExternTherm = registerStatistic<uint64_t>("XbarRouteExternTherm");
-  VaultRqstSlotTherm = registerStatistic<uint64_t>("VaultRqstSlotTherm");
-  VaultRspSlotTherm = registerStatistic<uint64_t>("VaultRspSlotTherm");
-  VaultCtrlTherm = registerStatistic<uint64_t>("VaultCtrlTherm");
-  RowAccessTherm = registerStatistic<uint64_t>("RowAccessTherm");
+  LinkPhyTherm = registerStatistic<float>("LinkPhyTherm");
+  LinkLocalRouteTherm = registerStatistic<float>("LinkLocalRouteTherm");
+  LinkRemoteRouteTherm = registerStatistic<float>("LinkRemoteRouteTherm");
+  XbarRqstSlotTherm = registerStatistic<float>("XbarRqstSlotTherm");
+  XbarRspSlotTherm = registerStatistic<float>("XbarRspSlotTherm");
+  XbarRouteExternTherm = registerStatistic<float>("XbarRouteExternTherm");
+  VaultRqstSlotTherm = registerStatistic<float>("VaultRqstSlotTherm");
+  VaultRspSlotTherm = registerStatistic<float>("VaultRspSlotTherm");
+  VaultCtrlTherm = registerStatistic<float>("VaultCtrlTherm");
+  RowAccessTherm = registerStatistic<float>("RowAccessTherm");
 }
 
 /* ----------------------------------------------------- HMCSIM_SST_REGISTER_POWER */
 static void hmcsim_sst_register_power(){
-  LinkPhyPower = registerStatistic<uint64_t>("LinkPhyPower");
-  LinkLocalRoutePower = registerStatistic<uint64_t>("LinkLocalRoutePower");
-  LinkRemoteRoutePower = registerStatistic<uint64_t>("LinkRemoteRoutePower");
-  XbarRqstSlotPower = registerStatistic<uint64_t>("XbarRqstSlotPower");
-  XbarRspSlotPower = registerStatistic<uint64_t>("XbarRspSlotPower");
-  XbarRouteExternPower = registerStatistic<uint64_t>("XbarRouteExternPower");
-  VaultRqstSlotPower = registerStatistic<uint64_t>("VaultRqstSlotPower");
-  VaultRspSlotPower = registerStatistic<uint64_t>("VaultRspSlotPower");
-  VaultCtrlPower = registerStatistic<uint64_t>("VaultCtrlPower");
-  RowAccessPower = registerStatistic<uint64_t>("RowAccessPower");
+  LinkPhyPower = registerStatistic<float>("LinkPhyPower");
+  LinkLocalRoutePower = registerStatistic<float>("LinkLocalRoutePower");
+  LinkRemoteRoutePower = registerStatistic<float>("LinkRemoteRoutePower");
+  XbarRqstSlotPower = registerStatistic<float>("XbarRqstSlotPower");
+  XbarRspSlotPower = registerStatistic<float>("XbarRspSlotPower");
+  XbarRouteExternPower = registerStatistic<float>("XbarRouteExternPower");
+  VaultRqstSlotPower = registerStatistic<float>("VaultRqstSlotPower");
+  VaultRspSlotPower = registerStatistic<float>("VaultRspSlotPower");
+  VaultCtrlPower = registerStatistic<float>("VaultCtrlPower");
+  RowAccessPower = registerStatistic<float>("RowAccessPower");
 }
 
 /* ----------------------------------------------------- HMCSIM_SST_REGISTER_MISC */

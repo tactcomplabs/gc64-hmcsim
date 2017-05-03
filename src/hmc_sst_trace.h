@@ -85,28 +85,28 @@ Statistic<uint64_t>* BankConflict;
 Statistic<uint64_t>* XbarLatency;
 
 /* -- power */
-Statistic<uint64_t>* LinkPhyPower;
-Statistic<uint64_t>* LinkLocalRoutePower;
-Statistic<uint64_t>* LinkRemoteRoutePower;
-Statistic<uint64_t>* XbarRqstSlotPower;
-Statistic<uint64_t>* XbarRspSlotPower;
-Statistic<uint64_t>* XbarRouteExternPower;
-Statistic<uint64_t>* VaultRqstSlotPower;
-Statistic<uint64_t>* VaultRspSlotPower;
-Statistic<uint64_t>* VaultCtrlPower;
-Statistic<uint64_t>* RowAccessPower;
+Statistic<float>* LinkPhyPower;
+Statistic<float>* LinkLocalRoutePower;
+Statistic<float>* LinkRemoteRoutePower;
+Statistic<float>* XbarRqstSlotPower;
+Statistic<float>* XbarRspSlotPower;
+Statistic<float>* XbarRouteExternPower;
+Statistic<float>* VaultRqstSlotPower;
+Statistic<float>* VaultRspSlotPower;
+Statistic<float>* VaultCtrlPower;
+Statistic<float>* RowAccessPower;
 
 /* -- thermal */
-Statistic<uint64_t>* LinkPhyTherm;
-Statistic<uint64_t>* LinkLocalRouteTherm;
-Statistic<uint64_t>* LinkRemoteRouteTherm;
-Statistic<uint64_t>* XbarRqstSlotTherm;
-Statistic<uint64_t>* XbarRspSlotTherm;
-Statistic<uint64_t>* XbarRouteExternTherm;
-Statistic<uint64_t>* VaultRqstSlotTherm;
-Statistic<uint64_t>* VaultRspSlotTherm;
-Statistic<uint64_t>* VaultCtrlTherm;
-Statistic<uint64_t>* RowAccessTherm;
+Statistic<float>* LinkPhyTherm;
+Statistic<float>* LinkLocalRouteTherm;
+Statistic<float>* LinkRemoteRouteTherm;
+Statistic<float>* XbarRqstSlotTherm;
+Statistic<float>* XbarRspSlotTherm;
+Statistic<float>* XbarRouteExternTherm;
+Statistic<float>* VaultRqstSlotTherm;
+Statistic<float>* VaultRspSlotTherm;
+Statistic<float>* VaultCtrlTherm;
+Statistic<float>* RowAccessTherm;
 
 
 #endif /* SST_ENABLE_STAT */
