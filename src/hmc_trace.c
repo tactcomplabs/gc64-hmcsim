@@ -48,6 +48,49 @@ int hmcsim_sst_trace_stall( struct hmcsim_t *hmc,
                             uint32_t link,
                             uint32_t slot,
                             uint32_t type );
+int hmcsim_sst_trace_power_vault_rsp_slot( struct hmcsim_t *hmc,
+                                           uint32_t dev,
+                                           uint32_t quad,
+                                           uint32_t vault,
+                                           uint32_t slot );
+int hmcsim_sst_trace_power_vault_rqst_slot( struct hmcsim_t *hmc,
+                                            uint32_t dev,
+                                            uint32_t quad,
+                                            uint32_t vault,
+                                            uint32_t slot );
+int hmcsim_sst_trace_power_row_access( struct hmcsim_t *hmc,
+                                       uint64_t addr,
+                                       uint32_t mult );
+int hmcsim_sst_trace_power_xbar_rsp_slot( struct hmcsim_t *hmc,
+                                          uint32_t dev,
+                                          uint32_t link,
+                                          uint32_t slot );
+int hmcsim_sst_trace_power_xbar_rqst_slot( struct hmcsim_t *hmc,
+                                           uint32_t dev,
+                                           uint32_t link,
+                                           uint32_t slot );
+int hmcsim_sst_trace_power_vault_ctrl( struct hmcsim_t *hmc,
+                                       uint32_t vault );
+int hmcsim_trace_power_route_extern( struct hmcsim_t *hmc,
+                                     uint32_t srcdev,
+                                     uint32_t srclink,
+                                     uint32_t srcslot,
+                                     uint32_t destdev,
+                                     uint32_t destlink,
+                                     uint32_t destslot );
+int hmcsim_sst_trace_power_local_route( struct hmcsim_t *hmc,
+                                        uint32_t dev,
+                                        uint32_t link,
+                                        uint32_t slot,
+                                        uint32_t quad,
+                                        uint32_t vault );
+int hmcsim_sst_trace_power_remote_route( struct hmcsim_t *hmc,
+                                        uint32_t dev,
+                                        uint32_t link,
+                                        uint32_t slot,
+                                        uint32_t quad,
+                                        uint32_t vault );
+int hmcsim_sst_trace_power_links( struct hmcsim_t *hmc );
 #endif
 
 /* ----------------------------------------------------- HMCSIM_TRACE_POWER_VAULT_RSP_SLOT */
@@ -90,8 +133,14 @@ extern int      hmcsim_trace_power_vault_rsp_slot( struct hmcsim_t *hmc,
            ":",
            hmc->power.vault_rsp_slot * HMC_MILLIWATT_TO_BTU );
 
+#ifdef SST_ENABLE_STAT
+  hmcsim_sst_trace_power_vault_rsp_slot( hmc, dev, quad, vault, slot );
+#endif
+
   return 0;
 }
+
+/* ----------------------------------------------------- HMCSIM_TRACE_POWER_VAULT_RQST_SLOT */
 
 /* ----------------------------------------------------- HMCSIM_TRACE_POWER_VAULT_RQST_SLOT */
 extern int      hmcsim_trace_power_vault_rqst_slot( struct hmcsim_t *hmc,
@@ -133,6 +182,10 @@ extern int      hmcsim_trace_power_vault_rqst_slot( struct hmcsim_t *hmc,
            ":",
            hmc->power.vault_rqst_slot * HMC_MILLIWATT_TO_BTU );
 
+#ifdef SST_ENABLE_STAT
+  hmcsim_sst_trace_power_vault_rqst_slot( hmc, dev, quad, vault, slot );
+#endif
+
   return 0;
 }
 
@@ -161,6 +214,10 @@ extern int hmcsim_trace_power_row_access( struct hmcsim_t *hmc,
            addr,
            ":",
            hmc->power.row_access * (float)(mult) * HMC_MILLIWATT_TO_BTU );
+
+#ifdef SST_ENABLE_STAT
+  hmcsim_sst_trace_power_row_access( hmc, addr, mult );
+#endif
 
   return 0;
 }
@@ -200,6 +257,10 @@ extern int hmcsim_trace_power_xbar_rsp_slot( struct hmcsim_t *hmc,
            ":",
            hmc->power.xbar_rsp_slot * HMC_MILLIWATT_TO_BTU );
 
+#ifdef SST_ENABLE_STAT
+  hmcsim_sst_trace_power_xbar_rsp_slot( hmc, dev, link, slot );
+#endif
+
   return 0;
 }
 
@@ -238,6 +299,10 @@ extern int hmcsim_trace_power_xbar_rqst_slot( struct hmcsim_t *hmc,
            ":",
            hmc->power.xbar_rqst_slot * HMC_MILLIWATT_TO_BTU );
 
+#ifdef SST_ENABLE_STAT
+  hmcsim_sst_trace_power_xbar_rqst_slot( hmc, dev, link, slot );
+#endif
+
   return 0;
 }
 
@@ -265,6 +330,10 @@ extern int hmcsim_trace_power_vault_ctrl( struct hmcsim_t *hmc,
            vault,
            ":",
            hmc->power.vault_ctrl * HMC_MILLIWATT_TO_BTU );
+
+#ifdef SST_ENABLE_STAT
+  hmcsim_sst_trace_power_vault_ctrl( hmc, vault );
+#endif
 
   return 0;
 }
@@ -319,6 +388,16 @@ extern int hmcsim_trace_power_route_extern( struct hmcsim_t *hmc,
            ":",
            hmc->power.xbar_rsp_slot * HMC_MILLIWATT_TO_BTU );
 
+#ifdef SST_ENABLE_STAT
+  hmcsim_sst_trace_power_route_extern( hmc,
+                                      srcdev,
+                                      srclink,
+                                      srcslot,
+                                      destdev,
+                                      destlink,
+                                      destslot );
+#endif
+
   return 0;
 }
 
@@ -366,6 +445,15 @@ extern int hmcsim_trace_power_local_route( struct hmcsim_t *hmc,
            slot,
            ":",
            hmc->power.link_local_route * HMC_MILLIWATT_TO_BTU );
+
+#ifdef SST_ENABLE_STAT
+  hmcsim_sst_trace_power_local_route( hmc,
+                                  dev,
+                                  link,
+                                  slot,
+                                  quad,
+                                  vault );
+#endif
 
   return 0;
 }
@@ -415,6 +503,15 @@ extern int hmcsim_trace_power_remote_route( struct hmcsim_t *hmc,
            ":",
            hmc->power.link_remote_route * HMC_MILLIWATT_TO_BTU );
 
+#ifdef SST_ENABLE_STAT
+  hmcsim_sst_trace_power_remote_route( hmc,
+                                  dev,
+                                  link,
+                                  slot,
+                                  quad,
+                                  vault );
+#endif
+
   return 0;
 }
 
@@ -449,6 +546,9 @@ extern int hmcsim_trace_power_links( struct hmcsim_t *hmc ){
              i,/*link*/
              ":",
              hmc->power.link_phy * HMC_MILLIWATT_TO_BTU );
+#ifdef SST_ENABLE_STAT
+      hmcsim_sst_trace_power_links(hmc);
+#endif
     }
   }
 
