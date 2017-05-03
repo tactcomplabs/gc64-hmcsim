@@ -39,6 +39,15 @@ int hmcsim_sst_trace_latency( struct hmcsim_t *hmc,
                               uint32_t slot,
                               uint32_t quad,
                               uint32_t vault );
+int hmcsim_sst_trace_stall( struct hmcsim_t *hmc,
+                            uint32_t dev,
+                            uint32_t quad,
+                            uint32_t vault,
+                            uint32_t src,
+                            uint32_t dest,
+                            uint32_t link,
+                            uint32_t slot,
+                            uint32_t type );
 #endif
 
 /* ----------------------------------------------------- HMCSIM_TRACE_POWER_VAULT_RSP_SLOT */
@@ -788,6 +797,11 @@ extern int	hmcsim_trace_stall( 	struct hmcsim_t *hmc,
 					slot );
 
 	}
+
+#ifdef SST_ENABLE_STAT
+        hmcsim_sst_trace_stall( hmc, dev, quad, vault, src,
+                                dest, link, slot, type );
+#endif
 
 	return 0;
 }

@@ -156,6 +156,32 @@ int hmcsim_sst_trace_stall( struct hmcsim_t *hmc,
                             uint32_t link,
                             uint32_t slot,
                             uint32_t type ){
+  switch( type ){
+  case 0:
+    // xbar request stall
+    XbarRqstStall->addData(1);
+    break;
+  case 1:
+    // vault request stall
+    VaultRqstStall->addData(1);
+    break;
+  case 2:
+    // xbar response stall
+    XbarRspStall->addData(1);
+    break;
+  case 3:
+    // route request stall
+    RouteRqstStall->addData(1);
+    break;
+  case 4:
+    // route response stall
+    RouteRspStall->addData(1);
+    break;
+  default:
+    // undef
+    UndefStall->addData(1);
+    break;
+  }
   return 0;
 }
 
