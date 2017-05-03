@@ -484,6 +484,7 @@ int hmcsim_sst_trace_bank_conflict( struct hmcsim_t *hmc,
                                     uint32_t vault,
                                     uint32_t bank,
                                     uint64_t addr ){
+  BankConflict->addData(1);
   return 0;
 }
 
@@ -500,6 +501,7 @@ int hmcsim_sst_trace_latency( struct hmcsim_t *hmc,
                               uint32_t slot,
                               uint32_t quad,
                               uint32_t vault ){
+  XbarLatency->addData(1);
   return 0;
 }
 
