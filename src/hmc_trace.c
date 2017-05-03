@@ -18,6 +18,16 @@
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
 extern void hmcsim_cmc_trace_header( struct hmcsim_t *hmc );
+#ifdef SST_ENABLE_STAT
+extern int hmcsim_sst_trace_rqst( struct hmcsim_t *hmc,
+                                  char *rqst,
+                                  uint32_t dev,
+                                  uint32_t quad,
+                                  uint32_t vault,
+                                  uint32_t bank,
+                                  uint64_t addr1,
+                                  uint32_t size );
+#endif
 
 /* ----------------------------------------------------- HMCSIM_TRACE_POWER_VAULT_RSP_SLOT */
 extern int      hmcsim_trace_power_vault_rsp_slot( struct hmcsim_t *hmc,
@@ -804,6 +814,9 @@ extern int	hmcsim_trace_rqst( 	struct hmcsim_t *hmc,
 				bank,
 				addr1,
 				size );
+#ifdef SST_ENABLE_STAT
+        hmcsim_sst_trace_rqst( hmc, rqst, dev, quad, vault, bank, addr1, size );
+#endif
 
 	return 0;
 
