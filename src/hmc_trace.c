@@ -27,6 +27,18 @@ extern int hmcsim_sst_trace_rqst( struct hmcsim_t *hmc,
                                   uint32_t bank,
                                   uint64_t addr1,
                                   uint32_t size );
+int hmcsim_sst_trace_bank_conflict( struct hmcsim_t *hmc,
+                                    uint32_t dev,
+                                    uint32_t quad,
+                                    uint32_t vault,
+                                    uint32_t bank,
+                                    uint64_t addr );
+int hmcsim_sst_trace_latency( struct hmcsim_t *hmc,
+                              uint32_t dev,
+                              uint32_t link,
+                              uint32_t slot,
+                              uint32_t quad,
+                              uint32_t vault );
 #endif
 
 /* ----------------------------------------------------- HMCSIM_TRACE_POWER_VAULT_RSP_SLOT */
@@ -850,6 +862,10 @@ extern int	hmcsim_trace_bank_conflict( struct hmcsim_t *hmc,
 				bank,
 				addr1 );
 
+#ifdef SST_ENABLE_STAT
+        hmcsim_sst_trace_bank_conflict( hmc, dev, quad, vault, bank, addr1 );
+#endif
+
 	return 0;
 
 }
@@ -882,6 +898,10 @@ extern int	hmcsim_trace_latency( 	struct hmcsim_t *hmc,
 				slot,
 				quad,
 				vault );
+
+#ifdef SST_ENABLE_STAT
+        hmcsim_sst_trace_latency( hmc, dev, link, slot, quad, vault );
+#endif
 
 	return 0;
 }
