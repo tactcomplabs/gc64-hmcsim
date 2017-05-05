@@ -11,6 +11,8 @@ SRCDIR := src
 CMCDIR := ./cmc
 BUILDDIR := build
 SHBUILDDIR := shbuild
+CXXBUILDDIR := cxxbuild
+CXXSHBUILDDIR := cxxshbuild
 LIBS :=
 TARGET := lib$(LIBNAME).a
 SHTARGET := lib$(LIBNAME).so
@@ -21,28 +23,41 @@ SHLIB := -shared
 .PHONY : test tools cmc viz
 
 SRCEXT = c
+CXXSRCEXT = cc
+CXXSOURCES := $(shell find $(SRCDIR) -type f -name *.$(CXXSRCEXT))
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 SHOBJECTS := $(patsubst $(SRCDIR)/%,$(SHBUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
+CXXOBJECTS := $(patsubst $(SRCDIR)/%,$(CXXBUILDDIR)/%,$(CXXSOURCES:.$(CXXSRCEXT)=.o))
+CXXSHOBJECTS := $(patsubst $(SRCDIR)/%,$(CXXSHBUILDDIR)/%,$(CXXSOURCES:.$(CXXSRCEXT)=.o))
 DEPS := $(OBJECTS:.o=.deps)
+DEPS := $(CXXOBJECTS:.o=.deps)
 
 all: $(TARGET) $(SHTARGET)
 
-$(SHTARGET): $(SHOBJECTS)
-	@echo " Linking Shared Lib..."; $(CC) -shared -o $(SHTARGET) $(SHOBJECTS) -ldl
+$(SHTARGET): $(SHOBJECTS) $(CXXSHOBJECTS)
+	@echo " Linking Shared Lib..."; $(CC) -shared -o $(SHTARGET) $(SHOBJECTS) $(CXXSHOBJECTS) -ldl
 	@echo " Building CMC Libs..."; make -C ./cmc/
 
-$(TARGET): $(OBJECTS)
-	@echo " Linking Static Lib..."; $(AR) $(AR_OPTS) $(TARGET) $(OBJECTS)
+$(TARGET): $(OBJECTS) $(CXXOBJECTS)
+	@echo " Linking Static Lib..."; $(AR) $(AR_OPTS) $(TARGET) $(OBJECTS) $(CXXOBJECTS)
 	@echo " Building CMC Libs..."; make -C ./cmc/
+
+$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
+	@mkdir -p $(BUILDDIR)
+	@echo " CC $<"; $(CC) $(CFLAGS) -MD -MF $(@:.o=.deps) -c -o $@ $< -ldl
 
 $(SHBUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(SHBUILDDIR)
 	@echo " CC $<"; $(CC) $(CFLAGS) -MD -MF $(@:.o=.deps) -c -fpic -o $@ $< -ldl
 
-$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
-	@mkdir -p $(BUILDDIR)
-	@echo " CC $<"; $(CC) $(CFLAGS) -MD -MF $(@:.o=.deps) -c -o $@ $< -ldl
+$(CXXBUILDDIR)/%.o: $(SRCDIR)/%.$(CXXSRCEXT)
+	@mkdir -p $(CXXBUILDDIR)
+	@echo " CXX $<"; $(CXX) $(CXXFLAGS) -MD -MF $(@:.o=.deps) -c -o $@ $< -ldl
+
+$(CXXSHBUILDDIR)/%.o: $(SRCDIR)/%.$(CXXSRCEXT)
+	@mkdir -p $(CXXSHBUILDDIR)
+	@echo " CXX $<"; $(CXX) $(CXXFLAGS) -MD -MF $(@:.o=.deps) -c -fpic -o $@ $< -ldl
 
 docs:
 	@echo " Building Docs..."; $(DOXYGEN) ./doxygen/hmc_sim.cfg
