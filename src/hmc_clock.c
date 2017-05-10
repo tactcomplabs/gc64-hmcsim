@@ -14,6 +14,7 @@
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
+extern void hmcsim_clear_stat( struct hmcsim_t *hmc );
 extern int hmcsim_tecplot( struct hmcsim_t *hmc );
 extern int      hmcsim_power_vault_rsp_slot( struct hmcsim_t *hmc,
                                              uint32_t dev,
@@ -2059,6 +2060,12 @@ extern int	hmcsim_clock( struct hmcsim_t *hmc )
 	if( hmc == NULL ){
 		return -1;
 	}
+
+        /*
+         * Clear the stats!
+         *
+         */
+        hmcsim_clear_stat( hmc );
 
 	/*
 	 * Overview of the clock handler structure
