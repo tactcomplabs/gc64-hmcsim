@@ -22,9 +22,6 @@ extern int hmcsim_writemem( struct hmcsim_t *hmc,
                             uint64_t addr,
                             uint64_t *data,
                             uint32_t len);
-#ifdef SST_ENABLE_STAT
-extern int hmcsim_sst_trace_close();
-#endif
 
 
 /* ----------------------------------------------------- HMCSIM_FREE_MEMORY */
@@ -262,10 +259,6 @@ extern int	hmcsim_free( struct hmcsim_t *hmc )
 	if( hmc->tfile != NULL ){
 		fflush( hmc->tfile );
 	}
-
-#ifdef SST_ENABLE_STAT
-        hmcsim_sst_trace_close();
-#endif
 
 	return hmcsim_free_memory( hmc );
 }

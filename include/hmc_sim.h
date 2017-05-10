@@ -424,6 +424,21 @@ extern int hmcsim_simple_cmc( struct hmcsim_t *hmc, uint64_t addr, uint8_t *data
  */
 extern int hmcsim_simple_amo( struct hmcsim_t *hmc, uint64_t addr, uint8_t *data, hmc_rqst_t op );
 
+/*!     \fn float hmcsim_float_stat( struct hmcsim_t *hmc, hmc_stat_t stat )
+ *      \brief Retrieves a status value from the internal HMC-Sim counters and returns it as a float
+ *      \param *hmc is a pointer to a valid HMC structure
+ *      \param stat is a valid hmc_stat_t enumerated type.  See hmc_sim_types.h
+ *      \return The value of the target stat
+ */
+extern float hmcsim_float_stat( struct hmcsim_t *hmc, hmc_stat_t stat );
+
+/*!     \fn uint64_t hmcsim_int_stat( struct hmcsim_t *hmc, hmc_stat_t stat )
+ *      \brief Retrieves a status value from the internal HMC-Sim counters and returns it as a uint64_t
+ *      \param *hmc is a pointer to a valid HMC structure
+ *      \param stat is a valid hmc_stat_t enumerated type.  See hmc_sim_types.h
+ *      \return The value of the target stat
+ */
+extern uint64_t hmcsim_int_stat( struct hmcsim_t *hmc, hmc_stat_t stat );
 
 #ifdef __cplusplus
 } /* extern C */
