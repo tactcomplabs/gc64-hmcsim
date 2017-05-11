@@ -38,9 +38,6 @@
 # !WARNING! WILL REQUIRE LARGE PHYSICAL MEMORY FOOTPRINT
 # -DHMC_ALLOC_MEM
 #
-# ENABLE SST-BASED STATISTICS/LOGGING
-# -DSST_ENABLE_STAT
-#
 #---------------------------------------------------------
 
 #-- HMCSIM_MACROS

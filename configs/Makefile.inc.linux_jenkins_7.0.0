@@ -38,9 +38,6 @@
 # !WARNING! WILL REQUIRE LARGE PHYSICAL MEMORY FOOTPRINT
 # -DHMC_ALLOC_MEM
 #
-# ENABLE SST-BASED STATISTICS/LOGGING
-# -DSST_ENABLE_STAT
-#
 #---------------------------------------------------------
 
 #-- HMCSIM_MACROS
@@ -52,7 +49,6 @@ HMCSIM_MACROS+=-DHMC_MINOR_VERSION=0
 HMCSIM_MACROS+=-DHMC_PROTOCOL_REVISION=2
 #HMCSIM_MACROS:=-DHMC_ALLOC_MEM
 #HMCSIM_MACROS:=-DHMC_DEBUG
-HMCSIM_MACROS+=-DSST_ENABLE_STAT
 
 
 #-- CC
@@ -89,6 +85,6 @@ DOXYGEN=/usr/bin/doxygen
 
 #-- PREFIX
 #-- INSTALLATION PREFIX
-PREFIX=/jenkins/sst/install/volatile/TOT/hmcsim
+PREFIX=/jenkins/sst/install/volatile/7.0.0/hmcsim
 
 #-- EOF
