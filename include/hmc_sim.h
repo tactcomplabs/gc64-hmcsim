@@ -440,6 +440,14 @@ extern float hmcsim_float_stat( struct hmcsim_t *hmc, hmc_stat_t stat );
  */
 extern uint64_t hmcsim_int_stat( struct hmcsim_t *hmc, hmc_stat_t stat );
 
+/*!     \fn uint64_t hmcsim_latency_stat( struct hmcsim_t *hmc, uint32_t tag)
+ *      \brief Retrieves the packet latency from internal HMC-Sim counters for target packet
+ *      \param *hmc is a pointer to a valid HMC structure
+ *      \param tag is a target packet number
+ *      \return The packet latency in clock cycles
+ */
+extern uint64_t hmcsim_latency_stat( struct hmcsim_t *hmc, uint32_t tag );
+
 #ifdef __cplusplus
 } /* extern C */
 #endif

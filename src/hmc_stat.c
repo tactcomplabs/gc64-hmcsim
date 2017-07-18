@@ -129,6 +129,19 @@ extern float hmcsim_float_stat( struct hmcsim_t *hmc, hmc_stat_t stat ){
   return 0.;
 }
 
+/* ----------------------------------------------------- HMCSIM_LATENCY_STAT */
+extern uint64_t hmcsim_latency_stat( struct hmcsim_t *hmc, uint32_t tag ){
+  if( hmc == NULL ){
+    return 0x00ull;
+  }
+
+  if( hmc->tokens[tag].status == 2 ){
+    return (hmc->clk - hmc->tokens[tag].en_clock);
+  }
+
+  return 0x00ull;
+}
+
 /* ----------------------------------------------------- HMCSIM_INT_STAT */
 extern uint64_t hmcsim_int_stat( struct hmcsim_t *hmc, hmc_stat_t stat ){
   if( hmc == NULL){

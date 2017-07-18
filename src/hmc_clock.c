@@ -67,6 +67,9 @@ extern int hmcsim_trace_latency( struct hmcsim_t *hmc,
 				uint32_t slot,
 				uint32_t quad,
 				uint32_t vault );
+extern int hmcsim_trace_packet_latency( struct hmcsim_t *hmc,
+                                        uint32_t tag,
+                                        uint64_t latency );
 extern int hmcsim_process_bank_conflicts( struct hmcsim_t *hmc,
 						uint32_t dev,
 						uint32_t quad,
@@ -219,6 +222,12 @@ static void hmcsim_token_update( struct hmcsim_t *hmc, uint64_t *pkt,
       cur++;
     }
   }while(i<256);
+
+  /* log the latency */
+  if( (hmc->tracelevel & HMC_TRACE_LATENCY) > 0 ){
+    hmcsim_trace_packet_latency( hmc, tag,
+                                 (hmc->clk - hmc->tokens[tag].en_clock) );
+  }
 }
 
 /* ----------------------------------------------------- HMCSIM_CLOCK_PROCESS_RSP_QUEUE */

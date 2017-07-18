@@ -127,9 +127,9 @@ static void hmcsim_posted_rsp( struct hmcsim_t *hmc, uint64_t hdr ){
     break;
   default:
     /* normal response, just return */
-    return ;
     break;
   }
+  hmc->tokens[tag].en_clock = hmc->clk;
 }
 
 /* ----------------------------------------------------- HMCSIM_SEND */
@@ -229,17 +229,17 @@ extern int	hmcsim_send( struct hmcsim_t *hmc, uint64_t *packet )
 	HMCSIM_PRINT_TRACE( "FOUND A VALID PACKET STRUCTURE" );
 #endif
 
-	/* 
+	/*
 	 * Now that we have the locality details
-	 * of the packet request destination, 
+	 * of the packet request destination,
 	 * go out and walk the respective link
 	 * xbar queues and try to push the request
 	 * into the first empty queue slot.
-	 * 
+	 *
 	 * NOTE: this will likely need to be changed
 	 *       if we ever support proper ordering
 	 * 	 constraints on the devices
-	 * 
+	 *
 	 */
 
 	cur = hmc->xbar_depth-1;
@@ -254,7 +254,7 @@ extern int	hmcsim_send( struct hmcsim_t *hmc, uint64_t *packet )
 #ifdef HMC_DEBUG
 	HMCSIM_PRINT_INT_TRACE( "TARGET SLOT", (int)(target) );
 #endif
-	
+
 
 	if( target == (hmc->xbar_depth+1) ) {
           /*

@@ -850,6 +850,25 @@ extern int	hmcsim_trace_bank_conflict( struct hmcsim_t *hmc,
 
 }
 
+/* ----------------------------------------------------- HMCSIM_TRACE_PACKET_LATENCY */
+/*
+ * HMCSIM_TRACE_PACKET_LATENCY
+ *
+ */
+extern int    hmcsim_trace_packet_latency( struct hmcsim_t *hmc,
+                                           uint32_t tag,
+                                           uint64_t latency ){
+  if( hmc->tfile == NULL ){
+    return -1;
+  }
+
+  fprintf( hmc->tfile, 	"HMCSIM_TRACE : %" PRIu64
+			" : PACKET_LATENCY : %" PRIu32
+			":%" PRIu64 "\n", hmc->clk, tag, latency );
+
+  return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_TRACE_LATENCY */
 /*
  * HMCSIM_TRACE_LATENCY
