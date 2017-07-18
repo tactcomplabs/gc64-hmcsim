@@ -54,7 +54,8 @@ typedef enum{
         VAULT_RQST_SLOT_THERM_STAT,          /*! HMC-SIM: HMC_STAT_T: VAULT REQUEST SLOT THERM */
         VAULT_RSP_SLOT_THERM_STAT,           /*! HMC-SIM: HMC_STAT_T: VAULT RESPONSE SLOT THERM */
         VAULT_CTRL_THERM_STAT,               /*! HMC-SIM: HMC_STAT_T: VAULT CONTROL THERM */
-        ROW_ACCESS_THERM_STAT                /*! HMC-SIM: HMC_STAT_T: ROW ACCESS THERM */
+        ROW_ACCESS_THERM_STAT,               /*! HMC-SIM: HMC_STAT_T: ROW ACCESS THERM */
+        AVG_PACKET_LATENCY                   /*! HMC-SIM: HMC_STAT_T: AVERAGE PACKET LATENCY */
 }hmc_stat_t;
 
 typedef enum{
@@ -356,6 +357,8 @@ struct hmc_internal_stat_t{
   uint64_t undef_stall;       /*! HMC_INTERNAL_STAT_T: UNDEFINED STALLS */
   uint64_t bank_conflict;     /*! HMC_INTERNAL_STAT_T: BANK CONFLICTS */
   uint64_t xbar_latency;      /*! HMC_INTERNAL_STAT_T: XBAR LATENCY EVENTS */
+  uint64_t packets;           /*! HMC_INTERNAL_STAT_T: NUMBER OF PACKETS */
+  uint64_t t_latency;         /*! HMC_INTERNAL_STAT_T: TOTAL PACKET LATENCY */
 };
 
 struct hmc_power_t{
