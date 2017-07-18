@@ -227,6 +227,8 @@ static void hmcsim_token_update( struct hmcsim_t *hmc, uint64_t *pkt,
   if( (hmc->tracelevel & HMC_TRACE_LATENCY) > 0 ){
     hmcsim_trace_packet_latency( hmc, tag,
                                  (hmc->clk - hmc->tokens[tag].en_clock) );
+    hmc->istat.t_latency += (hmc->clk - hmc->tokens[tag].en_clock);
+    hmc->istat.packets++;
   }
 }
 

@@ -123,6 +123,8 @@ extern float hmcsim_float_stat( struct hmcsim_t *hmc, hmc_stat_t stat ){
     case ROW_ACCESS_THERM_STAT:
       return hmc->power.t_row_access*HMC_MILLIWATT_TO_BTU;
       break;
+    case AVG_PACKET_LATENCY:
+      return (float)((float)(hmc->istat.t_latency)/(float)(hmc->istat.packets));
     default:
       break;
   }
