@@ -28,7 +28,7 @@ static void hmcsim_posted_rsp( struct hmcsim_t *hmc, uint64_t hdr ){
   uint32_t tag = 0;
   uint32_t cmd = 0;
 
-  tag = (uint32_t)((hdr>>12)&0x7FF);
+  tag = (uint32_t)((hdr>>12)&0x3FF);
   cmd = (uint32_t)(hdr&0x7F);
 
   switch( cmd ){

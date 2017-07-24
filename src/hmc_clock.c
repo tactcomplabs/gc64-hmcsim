@@ -184,6 +184,7 @@ static int hmcsim_clock_print_vault_stats( struct hmcsim_t *hmc,
 static void hmcsim_token_update( struct hmcsim_t *hmc, uint64_t *pkt,
                                  uint32_t device, uint32_t link, uint32_t slot ){
   int tag = -1;
+  int cmd = (int)(pkt[0] & 0x7F);
   int i = 0;
   int shift = 0;
   int cur = 0;
@@ -191,7 +192,7 @@ static void hmcsim_token_update( struct hmcsim_t *hmc, uint64_t *pkt,
   /* get the tag */
   tag = (int)((pkt[0]>>12) & 0x3FF);
 
-  if( hmc->tokens[tag].rsp == RSP_NONE ){
+  if( cmd == RSP_NONE ){
     /* null response, probably a posted request */
     hmc->tokens[tag].status = 0;
     hmc->tokens[tag].rsp     = RSP_NONE;

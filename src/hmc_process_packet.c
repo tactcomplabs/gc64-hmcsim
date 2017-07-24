@@ -2074,6 +2074,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                            -- to send a response
                         */
                         op_latency = hmc->dramlatency*row_ops;
+                        hmc->tokens[tag].rsp = rsp_cmd;;
 
                         switch( rsp_cmd ){
                         case MD_RD_RS:
