@@ -64,6 +64,20 @@ static hmc_response_t __rsp_cmd = RD_RS;
 */
 static uint8_t __rsp_cmd_code = 0x00;
 
+/* __transient_power : Contains the transient power of the respective
+                     : CMC operation.  If this field is unknown,
+                     : the CMC infrastructure will assume a value of 0.
+*/
+static float __transient_power = 0.5;
+
+/* __row_ops : Contains the number of row operations for the respective
+             : CMC operation.  If this field is unknown, the CMC
+             : infrastructure will assume a value of 1.
+*/
+static uint32_t __row_ops = 2;
+
+/* ----------------------------------------------------- GLOBALS */
+uint32_t __local_row_ops;
 
 /* ----------------------------------------------------- FE_GET_ADDR */
 /*
@@ -240,10 +254,11 @@ extern int hmcsim_execute_cmc(  void *hmc,
 
     rsp_payload[0] = data[0];
     rsp_payload[1] = 0x01ull;
-
+    __local_row_ops = __row_ops;
   }else{
     rsp_payload[0] = 0x00ull;
     rsp_payload[1] = 0x00ull;
+    __local_row_ops = 1;
   }
 
   return 0;
@@ -298,6 +313,20 @@ extern int hmcsim_register_cmc( hmc_rqst_t *rqst,
  */
 extern void hmcsim_cmc_str( char *out ){
   sprintf( out, "%s", __op_name );
+}
+
+/* ----------------------------------------------------- HMCSIM_CMC_POWER */
+/*
+ * Returns the amount of transient power and the number of row operations
+ * for this respective operation.  If these values are not known, then
+ * the CMC infrastructure assumes a transient power of 0 and 1 row op.
+ * Users can modify these values based upon the runtime of the operation.
+ * This function is not called until AFTER the processing is complete
+ *
+*/
+extern void hmcsim_cmc_power( uint32_t *row_ops, float *tpower ){
+  *row_ops = __local_row_ops;
+  *tpower  = __transient_power;
 }
 
 /* EOF */

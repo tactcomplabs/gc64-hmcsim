@@ -1,0 +1,62 @@
+HMCSIM TEST: STREAM_POWER
+-------------------------------------------
+Executes a Stream Triad against a target
+HMC-Sim configuration
+-------------------------------------------
+
+I.	Overview
+-------------------------------------------
+
+Executes a stream triad against a target
+HMC-Sim configuration.  The stream triad
+can be summarized as follows:
+
+a[i] = b[i] + scalar * c[i];
+
+Depending upon the target host architecture,
+the algorithmic loop construct may be
+executed using SIMD, MIMD or purely scalar
+techniques.  This test supports both the
+notion of SIMD, MIMD or both.  The test
+assumes that the memory pipeline and/or MMU
+has the ability to support all the
+incoming requests from an abitrary number
+of threads.
+
+II.	Building
+-------------------------------------------
+
+In order to build the Stream Triad test,
+you must first build the libhmcsim.a
+library object.  This can be done using
+the makefile at the top level of the
+HMC-Sim source directory.
+
+Once you have built the libhmcsim.a
+library object, you can build the 'stream'
+executable using the local makefile.
+Type 'make' to build the executable.
+
+III.	Execution
+-------------------------------------------
+
+Usage:
+./stream_power -bcdhlnqvx
+
+Options:
+-b <num_banks>  : number of banks in the device
+-c <capacity>   : capacity of the device
+-d <num_drams>  : number of drams in the device
+-h              : prints this help
+-l <num_links>  : number of links
+-m <block_size> : max block size
+-n <num_devs>   : number of devices
+-q <queue_depth>: queue depth
+-s <simd_width> : simd width
+-v <num_vaults> : number of vaults per device
+-x <xbar_depth> : xbar depth
+-N <num_rqsts>  : number of requests
+-T <num_threads>: number of threads
+
+-------------------------------------------
+EOF

@@ -25,6 +25,8 @@ struct htog_count_t{
 	uint64_t *rd64;
 	uint64_t *wr16;
 	uint64_t *rd16;
+	uint64_t *wr32;
+	uint64_t *rd32;
         uint64_t *hlock;
         uint64_t *hunlock;
         uint64_t *inc8;
@@ -84,6 +86,16 @@ static int htog_free( struct htog_t *htog ) {
 	if( htog->counts.rd16 != NULL ){
 		free( htog->counts.rd16 );
 		htog->counts.rd16 = NULL;
+	}
+
+	if( htog->counts.wr32 != NULL ){
+		free( htog->counts.wr32 );
+		htog->counts.wr32 = NULL;
+	}
+
+	if( htog->counts.rd32 != NULL ){
+		free( htog->counts.rd32 );
+		htog->counts.rd32 = NULL;
 	}
 
 	if( htog->counts.hlock != NULL ){
@@ -215,6 +227,34 @@ static int print_results( struct htog_t *htog ) {
 	ofile = NULL;
 
 	/*
+	 *  wr32
+	 *
+	 */
+	ofile = fopen( "wr32.out", "w+" );
+	if( ofile == NULL ){
+		return -1;
+	}
+	for( i=0; i<htog->num_clocks; i++ ){
+		fprintf( ofile, "%"PRIu64 " %"PRIu64 "\n", i, htog->counts.wr32[i] );
+	}
+	fclose( ofile );
+	ofile = NULL;
+
+	/*
+	 *  rd32
+	 *
+	 */
+	ofile = fopen( "rd32.out", "w+" );
+	if( ofile == NULL ){
+		return -1;
+	}
+	for( i=0; i<htog->num_clocks; i++ ){
+		fprintf( ofile, "%"PRIu64 " %"PRIu64 "\n", i, htog->counts.rd32[i] );
+	}
+	fclose( ofile );
+	ofile = NULL;
+
+	/*
 	 *  hlock
 	 *
 	 */
@@ -306,6 +346,16 @@ static int alloc_mem( struct htog_t *htog ) {
 		return -1;
 	}
 
+	htog->counts.wr32 = malloc( sizeof( uint64_t ) * htog->num_clocks );
+	if( htog->counts.wr32 == NULL ){
+		return -1;
+	}
+
+	htog->counts.rd32 = malloc( sizeof( uint64_t ) * htog->num_clocks );
+	if( htog->counts.rd32 == NULL ){
+		return -1;
+	}
+
 	htog->counts.hlock = malloc( sizeof( uint64_t ) * htog->num_clocks );
 	if( htog->counts.hlock == NULL ){
 		return -1;
@@ -333,6 +383,8 @@ static int alloc_mem( struct htog_t *htog ) {
 		htog->counts.rd64[i]		= 0x00ll;
 		htog->counts.wr16[i]		= 0x00ll;
 		htog->counts.rd16[i]		= 0x00ll;
+		htog->counts.wr32[i]		= 0x00ll;
+		htog->counts.rd32[i]		= 0x00ll;
 		htog->counts.hlock[i]		= 0x00ll;
 		htog->counts.hunlock[i]		= 0x00ll;
 		htog->counts.inc8[i]		= 0x00ll;
@@ -535,6 +587,10 @@ static int parse( FILE *infile, struct htog_t *htog ){
 				htog->counts.wr16[tc]++;
 			}else if( strcmp( pch, "RD16" ) == 0 ){
 				htog->counts.rd16[tc]++;
+			}else if( strcmp( pch, "WR32" ) == 0 ){
+				htog->counts.wr32[tc]++;
+			}else if( strcmp( pch, "RD32" ) == 0 ){
+				htog->counts.rd32[tc]++;
 			}else if( strcmp( pch, "HMC_LOCK" ) == 0 ){
 				htog->counts.hlock[tc]++;
 			}else if( strcmp( pch, "HMC_UNLOCK" ) == 0 ){
@@ -648,6 +704,8 @@ static int init_structs( struct htog_t *htog ){
 	htog->counts.rd64		= NULL;
 	htog->counts.wr16		= NULL;
 	htog->counts.rd16		= NULL;
+	htog->counts.wr32		= NULL;
+	htog->counts.rd32		= NULL;
         htog->counts.hlock              = NULL;
         htog->counts.hunlock            = NULL;
         htog->counts.inc8               = NULL;

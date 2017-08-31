@@ -11,9 +11,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
+extern int      hmcsim_power_vault_rsp_slot( struct hmcsim_t *hmc,
+                                              uint32_t dev,
+                                              uint32_t quad,
+                                              uint32_t vault,
+                                              uint32_t slot );
+extern int      hmcsim_power_vault_rqst_slot( struct hmcsim_t *hmc,
+                                              uint32_t dev,
+                                              uint32_t quad,
+                                              uint32_t vault,
+                                              uint32_t slot );
+extern int      hmcsim_power_row_access( struct hmcsim_t *hmc,
+                                         uint64_t addr,
+                                         uint32_t mult );
+extern int hmcsim_power_vault_ctrl_transient( struct hmcsim_t *hmc,
+                                              uint32_t vault,
+                                              float p );
 extern int	hmcsim_trace( struct hmcsim_t *hmc, char *str );
 extern int	hmcsim_trace_rqst( 	struct hmcsim_t *hmc,
 					char *rqst,
@@ -55,7 +72,9 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                                 uint64_t *rsp_payload,
                                 uint32_t *rsp_len,
                                 hmc_response_t *rsp_cmd,
-                                uint8_t *raw_rsp_cmd );
+                                uint8_t *raw_rsp_cmd,
+                                uint32_t *row_ops,
+                                float *tpower );
 
 
 
@@ -106,6 +125,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
         int use_cmc                     = 0x00;
 	hmc_response_t rsp_cmd		= RSP_ERROR;
 	uint8_t tmp8			= 0x0;
+        uint32_t row_ops                = 0x00;
+        float tpower                    = 0.;
+        uint32_t op_latency             = 0;
 	/* ---- */
 
 
@@ -130,6 +152,10 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	if( hmc == NULL ){
 		return -1;
 	}
+
+        if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+          hmcsim_power_vault_rqst_slot( hmc, dev, quad, vault, slot );
+        }
 
 	/*
 	 * Step 1: get the request
@@ -158,16 +184,33 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 	 *
  	 */
 	/* -- tag = [22:12] */
-	tag	= (uint32_t)((head >> 12) & 0x7FF);
+	tag	= (uint32_t)((head >> 12) & 0x3FF);
 
 	/* -- addr = [57:24] */
-	addr	= ((head >> 24) & 0x3FFFFFFFF );
+	addr	= ((head >> 24) & 0x1FFFFFFFF );
 
 	/* -- block size */
 	hmcsim_util_get_max_blocksize( hmc, dev, &bsize );
 
 	/* -- get the bank */
 	hmcsim_util_decode_bank( hmc, dev, bsize, addr, &bank );
+
+        /* Return stall if the bank is not available */
+        if (hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay > 0) {
+            queue->valid = HMC_RQST_STALLED;
+	    if( (hmc->tracelevel & HMC_TRACE_STALL) > 0 ){
+              hmcsim_trace_stall( hmc,
+			          dev,
+				  quad,
+				  vault,
+				  0,
+				  0,
+				  0,
+				  slot,
+				  1 );
+	    }
+            return HMC_STALL;
+        }
 
 	/*
  	 * Step 3: find a response slot
@@ -176,21 +219,29 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
  	 */
 
 	/* -- find a response slot */
-	cur = hmc->queue_depth-1;
-
+#if 0
 	for( j=0; j<hmc->queue_depth; j++){
+          if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[j].valid == HMC_RQST_INVALID ){
+            t_slot = j;
+            break;
+          }
+        }
+#endif
+        /* if our dram latency is set to zero, the logic should bypass
+         * the bank delay, go ahead and find a response slot
+         */
+        if( hmc->dramlatency == 0 ){
+	  cur = hmc->queue_depth-1;
+          t_slot = hmc->queue_depth+1;
+	  for( j=0; j<hmc->queue_depth; j++){
+	    if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[cur].valid == HMC_RQST_INVALID ){
+	      t_slot = cur;
+	    }
+            cur--;
+	  }
 
-		if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[cur].valid == HMC_RQST_INVALID ){
-			t_slot = cur;
-		}
-
-		cur--;
-	}
-
-	if( t_slot == hmc->queue_depth+1 ){
-
+	  if( t_slot == hmc->queue_depth+1 ){
 		/* STALL */
-
 		queue->valid = HMC_RQST_STALLED;
 
 		/*
@@ -210,7 +261,8 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 		}
 
 		return HMC_STALL;
-	}
+	  }
+        }/* end hmc->dramlatency */
 
        /* zero the temp payloads */
        for( i=0; i<16; i++ ){
@@ -237,9 +289,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
@@ -258,13 +316,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 10:
 			/* WR48 */
@@ -288,13 +352,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 11:
 			/* WR64 */
@@ -318,13 +388,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 12:
 			/* WR80 */
@@ -348,13 +424,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 13:
 			/* WR96 */
@@ -378,13 +460,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 14:
 			/* WR112 */
@@ -408,13 +496,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 15:
 			/* WR128 */
@@ -438,13 +532,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
                 case 79:
 			/* WR256 */
@@ -468,13 +568,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 
 		case 16:
@@ -490,13 +596,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = MD_WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 17:
 			/* BWR */
@@ -511,17 +623,22 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
                         /* set the response length in flits */
                         rsp_len = 1;
-
+                        
 			break;
 		case 18:
 			/* TWOADD8 */
-
 			if( (hmc->tracelevel & HMC_TRACE_CMD) > 0 ){
 				hmcsim_trace_rqst(	hmc,
 							"TWOADD8",
@@ -532,10 +649,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
+			/* set the response length in FLITS */
+			rsp_len = 1;
+                        
 			break;
 		case 19:
 			/* ADD16 */
@@ -550,13 +676,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 1;
-
+                        
 			break;
 		case 24:
 			/* P_WR16 */
@@ -571,9 +703,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 25:
@@ -589,9 +727,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+                        
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 26:
@@ -616,9 +760,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 27:
@@ -643,9 +793,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 28:
@@ -670,9 +826,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 29:
@@ -697,9 +859,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 30:
@@ -724,9 +892,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 31:
@@ -751,9 +925,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
                 case 95:
@@ -778,9 +958,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 33:
@@ -796,9 +982,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 34:
@@ -814,9 +1006,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 35:
@@ -832,9 +1030,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			break;
 		case 48:
@@ -850,13 +1054,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 2;
-
+                        
 			break;
 		case 49:
 			/* RD32 */
@@ -871,13 +1081,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 3;
-
+                        
 			break;
 		case 50:
 			/* RD48 */
@@ -901,13 +1117,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 4;
-
+                        
 			break;
 		case 51:
 			/* RD64 */
@@ -931,13 +1153,19 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
 
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
+
 			/* set the response length in FLITS */
 			rsp_len = 5;
-
+                        
 			break;
 		case 52:
 			/* RD80 */
@@ -961,9 +1189,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 6;
@@ -991,9 +1225,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 7;
@@ -1021,9 +1261,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 8;
@@ -1051,9 +1297,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 9;
@@ -1081,9 +1333,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 17;
@@ -1102,9 +1360,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 1 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = MD_RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1196,9 +1460,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1217,9 +1487,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1238,9 +1514,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
@@ -1259,9 +1541,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
                         no_response = 1;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
                         break;
                 case 64:
@@ -1277,9 +1565,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1298,9 +1592,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1319,9 +1619,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1340,9 +1646,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1361,9 +1673,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1382,9 +1700,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1403,9 +1727,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1424,9 +1754,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1445,9 +1781,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1466,9 +1808,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1487,9 +1835,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1508,9 +1862,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
@@ -1529,9 +1889,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = WR_RS;
+                        
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 1;
@@ -1550,9 +1916,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1571,9 +1943,15 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 							addr,
 							length );
 			}
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, 2 );
+                        }
 
 			/* set the response command */
 			rsp_cmd = RD_RS;
+
+                        /* set the latency */
+                        op_latency = hmc->dramlatency;
 
 			/* set the response length in FLITS */
 			rsp_len = 2;
@@ -1678,15 +2056,26 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                                                 &(rsp_payload[0]),
                                                 &rsp_len,
                                                 &rsp_cmd,
-                                                &tmp8)!=0){
+                                                &tmp8,
+                                                &row_ops,
+                                                &tpower)!=0){
                           /* error occurred */
                           return HMC_ERROR;
+                        }
+
+                        /* power measurement */
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_row_access( hmc, addr, row_ops );
+                          hmcsim_power_vault_ctrl_transient( hmc, vault, tpower );
                         }
 
                         /* -- operation was successful */
                         /* -- decode the response and see if we need
                            -- to send a response
                         */
+                        op_latency = hmc->dramlatency*row_ops;
+                        hmc->tokens[tag].rsp = rsp_cmd;;
+
                         switch( rsp_cmd ){
                         case MD_RD_RS:
                         case MD_WR_RS:
@@ -1711,7 +2100,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
  	 */
 step4_vr:
 	if( no_response == 0 ){
-
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "HANDLING PACKET RESPONSE");
+#endif
 		/* -- build the response */
 		rsp_slid 	= ((tail>>26) & 0x07);
 		rsp_tag		= tag;
@@ -1749,19 +2140,52 @@ step4_vr:
                 }
 
 		/* -- register the response */
-		hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].valid = HMC_RQST_VALID;
-		for( j=0; j<rsp_len; j++ ){
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "HANDLING OPERATION BANK LATENCY");
+  printf( "DEV:QUAD:VAULT:BANK = %d:%d:%d:%d\n", dev,quad,vault,bank );
+#endif
+		if (op_latency != 0) { /* Delay, stall the response for op_latency cycles */
+#ifdef HMC_DEBUG
+  printf( "STALLING BANK %d %d CYCLES\n", bank, op_latency );
+#endif
+                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_VALID;
+                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = op_latency;
+
+                    /* Record the response packet to be sent after the delay */
+                    //for (j=0; j<rsp_len; j++) {
+                    for (j=0; j<HMC_MAX_UQ_PACKET; j++) {
+                        hmc->devs[dev].quads[quad].vaults[vault].banks[bank].packet[j] = packet[j];
+                    }
+
+                } else { /* No delay, forward response immediately */
+#ifdef HMC_DEBUG
+  printf( "STALLING BANK %d %d CYCLES\n", bank, op_latency );
+#endif
+                    hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].valid = HMC_RQST_VALID;
+		    //for( j=0; j<rsp_len; j++ ){
+		    for( j=0; j<HMC_MAX_UQ_PACKET; j++ ){
 			hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].packet[j] = packet[j];
-		}
+		    }
+                    if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                        hmcsim_power_vault_rsp_slot( hmc, dev, quad, vault, t_slot );
+                    }
+                }
 
-	}/* else, no response required, probably flow control */
 
+	} else { /* else, no response required, probably flow control */
+            /* Stall the bank for op_latency cycles in the case where no response is generated */
+            hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_INVALID; 
+            hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = op_latency;        
+        }
 	/*
 	 * Step 5: invalidate the request queue slot
 	 *
  	 */
 	hmcsim_util_zero_packet( queue );
 
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "COMPLETED PACKET PROCESSING" );
+#endif
 	return 0;
 }
 

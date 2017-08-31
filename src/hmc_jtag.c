@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_JTAG_C_
- * 
- * HYBRID MEMORY CUBE SIMULATION LIBRARY 
- * 
+ *
+ * HYBRID MEMORY CUBE SIMULATION LIBRARY
+ *
  * HMC JTAG READ AND WRITE FUNCTIONS
- * 
+ *
  */
 
 
@@ -16,16 +16,16 @@
 
 
 /* ----------------------------------------------------- HMCSIM_JTAG_WRITE_GC */
-/* 
+/*
  * HMCSIM_JTAG_WRITE_GC
- * 
+ *
  */
 static int hmcsim_jtag_write_gc( struct hmcsim_t *hmc, uint64_t dev, uint64_t value )
 {
 
-	/* 
-	 * check for warm reset 
-	 * 
+	/*
+	 * check for warm reset
+	 *
  	 */
 	if( (value & 0x40) > 0 ){
 		/*
@@ -34,46 +34,46 @@ static int hmcsim_jtag_write_gc( struct hmcsim_t *hmc, uint64_t dev, uint64_t va
 		 */
 	}
 
-	/* 
+	/*
 	 * check for error clear
-	 * 
+	 *
 	 */
 	if( (value * 0x20 ) > 0 ){
 		/* 
 		 * clear all the errors
 		 * 
 		 */
-	}	
+	}
 
 	uint64_t temp = 0x00ll;
 	temp = (value & 0x1F);
-	
+
 	hmc->devs[dev].regs[HMC_REG_GC_IDX].reg |= temp;
 
 	return 0;
 }
 
 /* ----------------------------------------------------- HMCSIM_JTAG_WRITE_ERR */
-/* 
+/*
  * HMCSIM_JTAG_WRITE_ERR
- * 
+ *
  */
 static int hmcsim_jtag_write_err( struct hmcsim_t *hmc, uint64_t dev, uint64_t value )
 {
-	/* 
+	/*
 	 * or' out the lower 25 bits
-	 * 
+	 *
 	 */
 	uint64_t temp = 0x00ll;
 	temp = (value & 0x3FFFFFF);
 
 	hmc->devs[dev].regs[HMC_REG_ERR_IDX].reg |= temp;
-	
 
-	/* 
+
+	/*
 	 * check and see if we need to write
 	 * the start bit
-	 * 
+	 *
 	 */
 	if( (value & 0x80000000 ) > 0 ){
 		hmc->devs[dev].regs[HMC_REG_ERR_IDX].reg	|= 0x80000000;
@@ -83,15 +83,15 @@ static int hmcsim_jtag_write_err( struct hmcsim_t *hmc, uint64_t dev, uint64_t v
 }
 
 /* ----------------------------------------------------- HMCSIM_JTAG_REG_READ */
-/* 
+/*
  * HMCSIM_JTAG_REG_READ
- * 
+ *
  */
 extern int	hmcsim_jtag_reg_read( struct hmcsim_t *hmc, uint32_t dev, uint64_t reg, uint64_t *result )
 {
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 		return -1;
-	}	
+	}
 
 	if( dev > hmc->num_devs ){
 		return -1;
@@ -185,15 +185,15 @@ extern int	hmcsim_jtag_reg_read( struct hmcsim_t *hmc, uint32_t dev, uint64_t re
 }
 
 /* ----------------------------------------------------- HMCSIM_JTAG_REG_WRITE */
-/* 
+/*
  * HMCSIM_JTAG_REG_WRITE
- * 
+ *
  */
 extern int	hmcsim_jtag_reg_write( struct hmcsim_t *hmc, uint32_t dev, uint64_t reg, uint64_t value )
 {
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 		return -1;
-	}	
+	}
 
 	if( dev > hmc->num_devs ){
 		return -1;

@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_UTIL_C_
- * 
- * HYBRID MEMORY CUBE SIMULATION LIBRARY 
- * 
+ *
+ * HYBRID MEMORY CUBE SIMULATION LIBRARY
+ *
  * UTILITY FUNCTIONS
- * 
+ *
  */
 
 
@@ -16,7 +16,7 @@
 
 /* ----------------------------------------------------- HMCSIM_GET_CLOCK */
 extern uint64_t hmcsim_get_clock( struct hmcsim_t *hmc ){
-  if( hmc == NULL ){ 
+  if( hmc == NULL ){
     return 0x00ll;
   }
 
@@ -24,84 +24,144 @@ extern uint64_t hmcsim_get_clock( struct hmcsim_t *hmc ){
 }
 
 /* ----------------------------------------------------- HMCSIM_UTIL_IS_ROOT */
-/* 
- * HMCSIM_UTIL_IS_ROOT 
+/*
+ * HMCSIM_UTIL_IS_ROOT
  *
  */
-extern int hmcsim_util_is_root( struct hmcsim_t *hmc, 
+extern int hmcsim_util_is_root( struct hmcsim_t *hmc,
 				uint32_t dev )
 {
-	/* vars */
-	uint32_t	is_root = 0; 
-	uint32_t 	i	= 0;
-	/* ---- */
+  /* vars */
+  uint32_t	is_root = 0;
+  uint32_t 	i	= 0;
+  /* ---- */
 
-	/* 
-	 * walk the links and see if i am a root device 
-	 * root devices have a src_cub == num_devs+1
-	 * 
-	 */
-	for( i=0; i<hmc->num_links;i++ ){ 
+  /*
+   * walk the links and see if i am a root device
+   * root devices have a src_cub == num_devs+1
+   *
+   */
+  for( i=0; i<hmc->num_links;i++ ){
+    if( hmc->devs[dev].links[i].src_cub == (hmc->num_devs+1) ){
+      is_root = 1;
+    }
+  }
 
-		if( hmc->devs[dev].links[i].src_cub == (hmc->num_devs+1) ){
-			is_root = 1;
-		}
+  return is_root;
+}
 
-	}
+/* ----------------------------------------------------- HMCSIM_UTIL_DECODE_RSP_SLID */
+/*
+ * HMCSIM_UTIL_DECODE_RSP_SLID
+ *
+ */
+extern int hmcsim_util_decode_rsp_slid(	struct hmcsim_t *hmc,
+					struct hmc_queue_t *queue,
+					uint32_t slot,
+					uint32_t *slid )
+{
+  /* vars */
+  uint64_t header = 0x00ull;
+  uint32_t tmp	  = 0x00;
+  /* ---- */
 
-	return is_root;
+  /*
+   * sanity check
+   *
+   */
+  if( hmc == NULL ){
+    return -1;
+  }
+
+  if( slid == NULL ){
+    return -1;
+  }
+
+  if( queue == NULL ){
+    return -1;
+  }
+
+  /*
+   * get the packet header
+   *
+   */
+  header 	= queue[slot].packet[0];
+
+  tmp = (uint32_t)((header>>39)&0x7);
+
+  /*
+   * write it out
+   *
+   */
+  *slid 	= tmp;
+
+  return 0;
 }
 
 /* ----------------------------------------------------- HMCSIM_UTIL_DECODE_SLID */
-/* 
- * HMCSIM_UTIL_DECODE_SLID 
+/*
+ * HMCSIM_UTIL_DECODE_SLID
  *
  */
-extern int hmcsim_util_decode_slid(	struct hmcsim_t *hmc, 
-					struct hmc_queue_t *queue, 
-					uint32_t slot, 
+extern int hmcsim_util_decode_slid(	struct hmcsim_t *hmc,
+					struct hmc_queue_t *queue,
+					uint32_t slot,
 					uint32_t *slid )
 {
-	/* vars */
-	uint64_t header	= 0x00ll;
-	uint32_t tmp	= 0x00;
-	/* ---- */
+  /* vars */
+  uint64_t header = 0x00ull;
+  uint32_t tmp	  = 0x00;
+  uint64_t len    = 0x00ull;
+  uint64_t tail   = 0x00ull;
+  /* ---- */
 
-	/* 
-	 * sanity check 
-	 * 
-	 */
-	if( hmc == NULL ){ 
-		return -1;
-	}
+  /*
+   * sanity check
+   *
+   */
+  if( hmc == NULL ){
+    return -1;
+  }
 
-	if( slid == NULL ){ 
-		return -1;
-	}
+  if( slid == NULL ){
+    return -1;
+  }
 
-	if( queue == NULL ){ 
-		return -1;
-	}
+  if( queue == NULL ){
+    return -1;
+  }
 
-	/* 
-	 * get the packet header
-	 * 
-	 */
-	header 	= queue[slot].packet[0];
+  /*
+   * get the packet header
+   *
+   */
+  header 	= queue[slot].packet[0];
 
-	/* 
-	 * get the slid value [41:39]
-	 * 
-	 */
-	tmp 	= (uint32_t)((header>>39) & 0x7);
+  /*
+   * get the length of the packet
+   *
+   */
+  len = (uint64_t)((header>>7) & 0x1F);
 
-	/* 
-	 * write it out 
-	 * 
-	 */
-	*slid 	= tmp;
+  /*
+   * get the tail placement
+   *
+   */
+  tail = (len*2)-1;
 
-	return 0;
+  /*
+   * get the slid value [41:39]
+   *
+   */
+  tmp   = (uint32_t)((queue[slot].packet[tail]>>26) & 0x7);
+
+  /*
+   * write it out
+   *
+   */
+  *slid 	= tmp;
+
+  return 0;
 }
 
 /* ----------------------------------------------------- HMCSIM_UTIL_DECODE_QUAD */
@@ -115,6 +175,7 @@ extern int hmcsim_util_decode_quad( 	struct hmcsim_t *hmc,
 					uint64_t addr,
 					uint32_t *quad )
 {
+
 	/* vars */
 	uint32_t num_links	= 0x00;
 	uint32_t capacity	= 0x00;
@@ -122,114 +183,119 @@ extern int hmcsim_util_decode_quad( 	struct hmcsim_t *hmc,
 	/* ---- */
 
 	/*
-	 * sanity check 
-	 * 
+	 * sanity check
+	 *
 	 */
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 		return -1;
 	}
 
 	num_links	= hmc->num_links;
-	capacity	= hmc->capacity;	
+	capacity	= hmc->capacity;
 
-	/* 
-	 * link layout 
-	 * 
+	/*
+	 * link layout
+	 *
 	 */
-	if( num_links == 4 ){ 
-		/* 
-	 	 * 4-link device 
+	if( num_links == 4 ){
+		/*
+	 	 * 4-link device
 		 *
 		 */
 		if( capacity == 2 ){
-
 			switch( bsize )
 			{
 				case 32:
-					/* [8:7] */
-					tmp = (uint32_t)((addr>>7) & 0x3);
+					/* [6:5] */
+					tmp = (uint32_t)((addr>>8) & 0x3);
 					break;
 				case 64:
-					/* [9:8] */
+					/* [7:6] */
+					tmp = (uint32_t)((addr>>9) & 0x3);
+					break;
+				case 128:
+					/* [8:7] */
+					tmp = (uint32_t)((addr>>10) & 0x3);
+					break;
+				default:
+					break;
+			}
+
+		} else if( capacity == 4 ){
+			switch( bsize )
+			{
+				case 32:
+					/* [9:5] */
+					tmp = (uint32_t)((addr>>8) & 0x3);
+					break;
+				case 64:
+					/* [10:6] */
 					tmp = (uint32_t)((addr>>8) & 0x3);
 					break;
 				case 128:
-					/* [10:9] */
-					tmp = (uint32_t)((addr>>9) & 0x3);
+					/* [11:7] */
+					tmp = (uint32_t)((addr>>10) & 0x3); // hkim
 					break;
+                                case 256:
+                                        /* [12:8] */
+					tmp = (uint32_t)((addr>>11) & 0x3); // hkim
+                                        break;
 				default:
 					break;
 			}
-
-		} else if( capacity == 4 ){ 
-
-			switch( bsize )
-			{
-				case 32:
-					/* [12:11] */
-					tmp = (uint32_t)((addr>>11) & 0x3);
-					break;
-				case 64:
-					/* [13:12] */
-					tmp = (uint32_t)((addr>>12) & 0x3);
-					break;
-				case 128:
-					/* [14:13] */
-					tmp = (uint32_t)((addr>>13) & 0x3);
-					break;
-				default:
-					break;
-			}
-
 		}
-	} else if( num_links == 8 ){ 
-		/* 
-	 	 * 8-link device 
+	} else if( num_links == 8 ){
+		/*
+	 	 * 8-link device
 		 *
 		 */
 		if( capacity == 4 ){
-	
 			switch( bsize )
 			{
 				case 32:
-					/* [9:7] */
-					tmp = (uint32_t)((addr>>7) & 0x7);
+					/* [9:5] */
+					tmp = (uint32_t)((addr>>8) & 0x3);
 					break;
 				case 64:
-					/* [10:8] */
-					tmp = (uint32_t)((addr>>8) & 0x7);
+					/* [10:6] */
+					tmp = (uint32_t)((addr>>9) & 0x3);
 					break;
 				case 128:
-					/* [11:9] */
-					tmp = (uint32_t)((addr>>9) & 0x7);
+					/* [11:7] */
+					tmp = (uint32_t)((addr>>10) & 0x3); // hkim
 					break;
+                                case 256:
+                                        /* [12:8] */
+					tmp = (uint32_t)((addr>>11) & 0x3); // hkim
+                                        break;
 				default:
 					break;
 			}
-
-			
-		} else if( capacity == 8 ){ 
+		} else if( capacity == 8 ){
 
 			switch( bsize )
 			{
 				case 32:
-					/* [9:7] */
-					tmp = (uint32_t)((addr>>7) & 0x7);
+					/* [9:5] */
+					tmp = (uint32_t)((addr>>8) & 0x3);
 					break;
 				case 64:
-					/* [10:8] */
-					tmp = (uint32_t)((addr>>8) & 0x7);
+					/* [10:6] */
+					tmp = (uint32_t)((addr>>9) & 0x3);
 					break;
 				case 128:
-					/* [11:9] */
-					tmp = (uint32_t)((addr>>9) & 0x7);
+					/* [11:7] */
+					tmp = (uint32_t)((addr>>10) & 0x3); // hkim
 					break;
+                                case 256:
+                                        /* [12:8] */
+					tmp = (uint32_t)((addr>>11 & 0x3)); // hkim
+                                        break;
 				default:
 					break;
 			}
-
 		}
-	} else {	
+	} else {
 		return -1;
 	}
 
@@ -270,104 +336,109 @@ extern int hmcsim_util_decode_vault( 	struct hmcsim_t *hmc,
 	num_links	= hmc->num_links;
 	capacity	= hmc->capacity;	
 
-	/* 
-	 * link layout 
-	 * 
+	/*
+	 * link layout
+	 *
 	 */
-	if( num_links == 4 ){ 
-		/* 
-	 	 * 4-link device 
+	if( num_links == 4 ){
+		/*
+	 	 * 4-link device
 		 *
 		 */
 		if( capacity == 2 ){
-
 			switch( bsize )
 			{
 				case 32:
 					/* [6:5] */
-					tmp = (uint32_t)((addr>>5) & 0x3);
+					tmp = (uint32_t)((addr>>5) & 0x7);
 					break;
 				case 64:
 					/* [7:6] */
-					tmp = (uint32_t)((addr>>6) & 0x3);
+					tmp = (uint32_t)((addr>>6) & 0x7);
 					break;
 				case 128:
 					/* [8:7] */
-					tmp = (uint32_t)((addr>>7) & 0x3);
+					tmp = (uint32_t)((addr>>7) & 0x7);
 					break;
 				default:
 					break;
 			}
 
-		} else if( capacity == 4 ){ 
-
+		} else if( capacity == 4 ){
 			switch( bsize )
 			{
 				case 32:
-					/* [6:5] */
-					tmp = (uint32_t)((addr>>5) & 0x3);
+					/* [9:5] */
+					tmp = (uint32_t)((addr>>5) & 0x7);
 					break;
 				case 64:
-					/* [7:6] */
-					tmp = (uint32_t)((addr>>6) & 0x3);
+					/* [10:6] */
+					tmp = (uint32_t)((addr>>6) & 0x7);
 					break;
 				case 128:
-					/* [8:7] */
-					tmp = (uint32_t)((addr>>7) & 0x3); // hkim
+					/* [11:7] */
+					tmp = (uint32_t)((addr>>7) & 0x7); // hkim
 					break;
+                                case 256:
+                                        /* [12:8] */
+					tmp = (uint32_t)((addr>>8) & 0x7); // hkim
+                                        break;
 				default:
 					break;
 			}
-
 		}
-	} else if( num_links == 8 ){ 
-		/* 
-	 	 * 8-link device 
+	} else if( num_links == 8 ){
+		/*
+	 	 * 8-link device
 		 *
 		 */
 		if( capacity == 4 ){
-	
 			switch( bsize )
 			{
 				case 32:
-					/* [6:5] */
-					tmp = (uint32_t)((addr>>5) & 0x3);
+					/* [9:5] */
+					tmp = (uint32_t)((addr>>5) & 0x7);
 					break;
 				case 64:
-					/* [7:6] */
-					tmp = (uint32_t)((addr>>6) & 0x3);
+					/* [10:6] */
+					tmp = (uint32_t)((addr>>6) & 0x7);
 					break;
 				case 128:
-					/* [8:7] */
-					tmp = (uint32_t)((addr>>7) & 0x3);
+					/* [11:7] */
+					tmp = (uint32_t)((addr>>7) & 0x7); // hkim
 					break;
+                                case 256:
+                                        /* [12:8] */
+					tmp = (uint32_t)((addr>>8) & 0x7); // hkim
+                                        break;
 				default:
 					break;
 			}
-
-			
-		} else if( capacity == 8 ){ 
+		} else if( capacity == 8 ){
 
 			switch( bsize )
 			{
 				case 32:
-					/* [6:5] */
-					tmp = (uint32_t)((addr>>5) & 0x3);
+					/* [9:5] */
+					tmp = (uint32_t)((addr>>5) & 0x7);
 					break;
 				case 64:
-					/* [7:6] */
-					tmp = (uint32_t)((addr>>6) & 0x3);
+					/* [10:6] */
+					tmp = (uint32_t)((addr>>6) & 0x7);
 					break;
 				case 128:
-					/* [8:7] */
-					tmp = (uint32_t)((addr>>7) & 0x3);
+					/* [11:7] */
+					tmp = (uint32_t)((addr>>7) & 0x7); // hkim
 					break;
+                                case 256:
+                                        /* [12:8] */
+					tmp = (uint32_t)((addr>>8) & 0x7); // hkim
+                                        break;
 				default:
 					break;
 			}
-
 		}
-	} else {	
+	} else {
 		return -1;
 	}
 
@@ -478,15 +549,22 @@ extern int hmcsim_util_decode_bank( 	struct hmcsim_t *hmc,
 			{
 				case 32:
 					/* [12:9] */
-					tmp = (uint32_t)((addr>>9) & 0xF);
+					//tmp = (uint32_t)((addr>>9) & 0xF);
+					tmp = (uint32_t)((addr>>10) & 0x7);
 					break;
 				case 64:
 					/* [13:10] */
-					tmp = (uint32_t)((addr>>10) & 0xF);
+					//tmp = (uint32_t)((addr>>10) & 0xF);
+					tmp = (uint32_t)((addr>>11) & 0x7);
 					break;
 				case 128:
 					/* [14:11] */
-					tmp = (uint32_t)((addr>>11) & 0xF);
+					//tmp = (uint32_t)((addr>>11) & 0xF);
+					tmp = (uint32_t)((addr>>12) & 0x7);
+					break;
+                                case 256:
+                                        /* [ 15:13] */
+                                        tmp = (uint32_t)((addr>>13) & 0x7);
 					break;
 				default:
 					break;
@@ -503,22 +581,27 @@ extern int hmcsim_util_decode_bank( 	struct hmcsim_t *hmc,
 			switch( bsize )
 			{
 				case 32:
-					/* [12:10] */
+					/* [12:9] */
+					//tmp = (uint32_t)((addr>>9) & 0xF);
 					tmp = (uint32_t)((addr>>10) & 0x7);
 					break;
 				case 64:
-					/* [13:11] */
+					/* [13:10] */
+					//tmp = (uint32_t)((addr>>10) & 0xF);
 					tmp = (uint32_t)((addr>>11) & 0x7);
 					break;
 				case 128:
-					/* [14:12] */
+					/* [14:11] */
+					//tmp = (uint32_t)((addr>>11) & 0xF);
 					tmp = (uint32_t)((addr>>12) & 0x7);
+					break;
+                                case 256:
+                                        /* [ 15:13] */
+                                        tmp = (uint32_t)((addr>>13) & 0x7);
 					break;
 				default:
 					break;
 			}
-
-			
 		} else if( capacity == 8 ){ 
 
 			switch( bsize )
@@ -529,24 +612,28 @@ extern int hmcsim_util_decode_bank( 	struct hmcsim_t *hmc,
 					break;
 				case 64:
 					/* [14:11] */
-					tmp = (uint32_t)((addr>>12) & 0xF);
+					tmp = (uint32_t)((addr>>11) & 0xF);
 					break;
 				case 128:
 					/* [15:12] */
 					tmp = (uint32_t)((addr>>12) & 0xF);
+					break;
+				case 256:
+					/* [15:12] */
+					tmp = (uint32_t)((addr>>13) & 0xF);
 					break;
 				default:
 					break;
 			}
 
 		}
-	} else {	
+	} else {
 		return -1;
 	}
 
-	/* 
-	 * write out the value 
-	 * 
+	/*
+	 * write out the value
+	 *
  	 */
 	*bank = tmp;
 
@@ -554,9 +641,9 @@ extern int hmcsim_util_decode_bank( 	struct hmcsim_t *hmc,
 }
 
 /* ----------------------------------------------------- HMCSIM_UTIL_ZERO_PACKET */
-/* 
+/*
  * HMCSIM_UTIL_ZERO_PACKET
- * 
+ *
  */
 extern int hmcsim_util_zero_packet( struct hmc_queue_t *queue  )
 {
@@ -564,11 +651,11 @@ extern int hmcsim_util_zero_packet( struct hmc_queue_t *queue  )
 	uint64_t i	= 0;
 	/* ---- */
 
-	/* 
-	 * sanity check 
-	 * 
+	/*
+	 * sanity check
+	 *
  	 */
-	if( queue == NULL ){ 
+	if( queue == NULL ){
 		return -1;
 	}
 
@@ -661,7 +748,7 @@ extern int hmcsim_util_set_all_max_blocksize( struct hmcsim_t *hmc, uint32_t bsi
  	 */
 	if( (bsize != 32) && 
 		(bsize != 64) &&
-		(bsize != 128) ){
+		(bsize != 128) && (bsize != 256)){
 		return -1;
 	}
 
