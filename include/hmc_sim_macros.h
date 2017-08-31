@@ -1,10 +1,10 @@
-/* 
+/*
  * _HMC_SIM_MACROS_H_
- * 
+ *
  * HYBRID MEMORY CUBE SIMULATION LIBRARY
- * 
- * MACROS HEADER FILE 
- * 
+ *
+ * MACROS HEADER FILE
+ *
  */
 
 #ifndef _HMC_SIM_MACROS_H_
@@ -18,7 +18,7 @@ extern "C" {
 
 /* -------------------------------------------- VERSION MACROS */
 #ifndef 	HMC_MAJOR_VERSION
-#define		HMC_MAJOR_VERSION	2
+#define		HMC_MAJOR_VERSION	3
 #endif
 
 #ifndef		HMC_MINOR_VERSION
@@ -60,6 +60,7 @@ extern "C" {
 #define		HMC_TRACE_CMD		0x0004
 #define		HMC_TRACE_STALL		0x0008
 #define		HMC_TRACE_LATENCY	0x0010
+#define         HMC_TRACE_POWER         0x0020
 
 /* -------------------------------------------- MACROS */
 #define		HMC_MAX_DEVS		8
@@ -67,8 +68,8 @@ extern "C" {
 #define		HMC_MIN_LINKS		4
 #define		HMC_MAX_CAPACITY	8
 #define		HMC_MIN_CAPACITY	4
-#define		HMC_MAX_VAULTS		32
-#define		HMC_MIN_VAULTS		16
+#define		HMC_MAX_VAULTS		64
+#define		HMC_MIN_VAULTS		32
 #define		HMC_MAX_BANKS		32
 #define		HMC_MIN_BANKS		8
 #define		HMC_MIN_DRAMS		20
@@ -143,6 +144,9 @@ extern "C" {
 #define		HMC_REG_VCR_IDX		0x000017
 #define		HMC_REG_FEAT_IDX	0x000018
 #define		HMC_REG_RVID_IDX	0x000019
+
+#define         HMC_MILLIWATT_TO_BTU    0.003414f
+#define         HMC_DEF_DRAM_LATENCY    2
 
 /* -------------------------------------------- TRACE MACROS */
 #define HMCSIM_PRINT_TRACE( s )		( fprintf( stdout, "HCMSIM_TRACE %s:%d : %s\n", __FUNCTION__, __LINE__, s ) )

@@ -143,7 +143,9 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 		return -1;
 	}
 
-	hmc->__ptr_vaults = malloc( sizeof( struct hmc_vault_t ) * hmc->num_devs * hmc->num_vaults );
+	//hmc->__ptr_vaults = malloc( sizeof( struct hmc_vault_t ) * hmc->num_devs * hmc->num_vaults );
+        // this should be *4, 8 vaults per quadrant
+	hmc->__ptr_vaults = malloc( sizeof( struct hmc_vault_t ) * hmc->num_devs * hmc->num_vaults * 8 );
 	if( hmc->__ptr_vaults == NULL ){ 
 #ifdef HMC_DEBUG
                 HMCSIM_PRINT_TRACE( "FAILED TO ALLOCATE __ptr_vaults" );
@@ -152,6 +154,7 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 	}
 
 	hmc->__ptr_banks = malloc( sizeof( struct hmc_bank_t ) 
+					//* hmc->num_devs * hmc->num_vaults * 8 * hmc->num_banks );
 					* hmc->num_devs * hmc->num_vaults * hmc->num_banks );
 	if( hmc->__ptr_banks == NULL ){
 #ifdef HMC_DEBUG

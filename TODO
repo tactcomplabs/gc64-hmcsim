@@ -1,51 +1,42 @@
+-------------------------------------------------------------------------------
 HMC-SIM TODO LIST
---------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
-- revisit hmc register decoding
 
-- add "hmc_init_skew()" to init the sim using a defined config 
+- integration with SST statistics functions
+
+- integration with Kitfox for power/thermal modeling
+
+- NOFIX: revisit hmc register decoding: deprecated; no public spec available
+
+- add "hmc_init_sku()" to init the sim using a defined config
 
 - decode bank to dram association
-
-- add function to simulate "clock"
-  -- in progress: need to finish the xbar section; then add the finish the top-level stages
-  -- S1:	done
-  -- S2: 	done
-  -- S3:	done
-  -- S4:	finish hmcsim_process_rqst : add dram handlers to each command block
-  -- S5:	done
-  -- S5a:	done
-  -- S6:	done
-  -- look for 'todo'
-
--- finish hmc_reset_device
-
--- finish the packet processor
-  - make sure and pay attention to the SLID value in the tail
-    for response routing
-  - go back through the response routing and make sure this is true
-  - probably done; but make sure
-
-- add warm reset function for JTAG requests
-
-- add size to the build_memrequest for the payload
-  -- maybe not, investigate
-
-- revise the link structure per page 19 of the spec;
-  -- child device links are configured as host links to go upstream;
-  -- parent links are configured as pass-thru's;
-  -- possible mark devices as being connected to real host or uplink
-  -- i think we're good here, but double check
 
 - future optimization
   -- keep lists of root devices & child devices
 
 - add cache analysis functions
 
+- faster packet processing
 
---------------------------------------------------------------------------------------------
+- faster bank conflict detection
+
+-------------------------------------------------------------------------------
 Completed Items:
---------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- add simplified api functions
+-- better integration with SST: DONE
+-- add thermal and power modeling functions: DONE
+-- finish the packet processor
+  - DONE: make sure and pay attention to the SLID value in the tail
+    for response routing
+  - DONE: go back through the response routing and make sure this is true
+  - DONE: probably done; but make sure
+
+- add warm reset function for JTAG requests
+  -- DONE: JTAG pseudo-deprecated given lack of additional info in spec
+
 - util function to determine if device is attached to a host [eg root device]
   -- DONE
 

@@ -14,7 +14,44 @@
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- FUNCTION PROTOTYPES */
+extern void hmcsim_clear_stat( struct hmcsim_t *hmc );
+extern int hmcsim_tecplot( struct hmcsim_t *hmc );
+extern int      hmcsim_power_vault_rsp_slot( struct hmcsim_t *hmc,
+                                             uint32_t dev,
+                                             uint32_t quad,
+                                             uint32_t vault,
+                                             uint32_t slot );
+extern int hmcsim_power_xbar_rsp_slot( struct hmcsim_t *hmc,
+                                        uint32_t dev,
+                                        uint32_t link,
+                                        uint32_t slot );
+extern int hmcsim_power_xbar_rqst_slot( struct hmcsim_t *hmc,
+                                        uint32_t dev,
+                                        uint32_t link,
+                                        uint32_t slot );
+extern int hmcsim_power_vault_ctrl( struct hmcsim_t *hmc, uint32_t vault );
+extern int hmcsim_power_route_extern( struct hmcsim_t *hmc,
+                                      uint32_t srcdev,
+                                      uint32_t srclink,
+                                      uint32_t srcslot,
+                                      uint32_t destdev,
+                                      uint32_t destlink,
+                                      uint32_t destslot );
+extern int hmcsim_power_links( struct hmcsim_t *hmc );
+extern int hmcsim_power_local_route( struct hmcsim_t *hmc,
+				 uint32_t dev,
+				 uint32_t link,
+				 uint32_t slot,
+				 uint32_t quad,
+				 uint32_t vault );
+extern int hmcsim_power_remote_route( struct hmcsim_t *hmc,
+				 uint32_t dev,
+				 uint32_t link,
+				 uint32_t slot,
+				 uint32_t quad,
+				 uint32_t vault );
 extern int hmcsim_trace( struct hmcsim_t *hmc, char *str );
+extern int hmcsim_trace_power( struct hmcsim_t *hmc );
 extern int hmcsim_trace_stall( 	struct hmcsim_t *hmc,
 				uint32_t dev,
 				uint32_t quad,
@@ -30,6 +67,9 @@ extern int hmcsim_trace_latency( struct hmcsim_t *hmc,
 				uint32_t slot,
 				uint32_t quad,
 				uint32_t vault );
+extern int hmcsim_trace_packet_latency( struct hmcsim_t *hmc,
+                                        uint32_t tag,
+                                        uint64_t latency );
 extern int hmcsim_process_bank_conflicts( struct hmcsim_t *hmc,
 						uint32_t dev,
 						uint32_t quad,
@@ -43,6 +83,10 @@ extern int hmcsim_process_rqst( struct hmcsim_t *hmc,
 				uint32_t slot );
 extern int hmcsim_util_zero_packet( struct hmc_queue_t *queue );
 extern int hmcsim_util_decode_slid( 	struct hmcsim_t *hmc,
+					struct hmc_queue_t *queue,
+					uint32_t slot,
+					uint32_t *slid );
+extern int hmcsim_util_decode_rsp_slid( struct hmcsim_t *hmc,
 					struct hmc_queue_t *queue,
 					uint32_t slot,
 					uint32_t *slid );
@@ -98,7 +142,9 @@ static int hmcsim_clock_print_xbar_stats( struct hmcsim_t *hmc,
 
 /* ----------------------------------------------------- HMCSIM_CLOCK_PRINT_VAULT_STATS */
 static int hmcsim_clock_print_vault_stats( struct hmcsim_t *hmc,
-					struct hmc_queue_t *queue )
+                                           uint32_t vault,
+					   struct hmc_queue_t *queue,
+                                           uint32_t type  )
 {
   /* vars */
   int nvalid	= 0;
@@ -120,12 +166,72 @@ static int hmcsim_clock_print_vault_stats( struct hmcsim_t *hmc,
     }
   }
 
-  printf( "VAULT:nvalid:ninvalid:nconflict:nstalled = %d:%d:%d:%d\n",
-          nvalid, ninvalid, nconflict, nstalled );
+  if( type == 0 ){
+    /* request */
+    printf( "RQST_VAULT:nvalid:ninvalid:nconflict:nstalled = %d:%d:%d:%d:%d\n",
+            vault,nvalid, ninvalid, nconflict, nstalled );
+  }else{
+    /* response */
+    printf( "RSP_VAULT:nvalid:ninvalid:nconflict:nstalled = %d:%d:%d:%d:%d\n",
+            vault,nvalid, ninvalid, nconflict, nstalled );
+  }
 
   return 0;
 }
 #endif
+
+/* ----------------------------------------------------- HMCSIM_TOKEN_UPDATE */
+static void hmcsim_token_update( struct hmcsim_t *hmc, uint64_t *pkt,
+                                 uint32_t device, uint32_t link, uint32_t slot ){
+  int tag = -1;
+  int cmd = (int)(pkt[0] & 0x7F);
+  int i = 0;
+  int shift = 0;
+  int cur = 0;
+
+  /* get the tag */
+  tag = (int)((pkt[0]>>12) & 0x3FF);
+
+  if( cmd == RSP_NONE ){
+    /* null response, probably a posted request */
+    hmc->tokens[tag].status = 0;
+    hmc->tokens[tag].rsp     = RSP_NONE;
+    hmc->tokens[tag].rsp_size= 0;
+    hmc->tokens[tag].device  = 0;
+    hmc->tokens[tag].link    = 0;
+    hmc->tokens[tag].slot    = 0;
+    hmc->tokens[tag].en_clock= 0x00ull;
+    for( i=0; i<256; i++ ){
+      hmc->tokens[tag].data[i] = 0x0;
+    }
+    return ;
+  }
+
+  /* set the status */
+  hmc->tokens[tag].status = 2;
+  hmc->tokens[tag].device = device;
+  hmc->tokens[tag].link   = link;
+  hmc->tokens[tag].slot   = slot;
+
+  /* copy the data */
+  do{
+    hmc->tokens[tag].data[i] = (uint8_t)((pkt[cur]>>shift)&0x1FF);
+    i++;
+    shift+=8;
+    if(shift == 64){
+      shift = 0;
+      cur++;
+    }
+  }while(i<256);
+
+  /* log the latency */
+  if( (hmc->tracelevel & HMC_TRACE_LATENCY) > 0 ){
+    hmcsim_trace_packet_latency( hmc, tag,
+                                 (hmc->clk - hmc->tokens[tag].en_clock) );
+    hmc->istat.t_latency += (hmc->clk - hmc->tokens[tag].en_clock);
+    hmc->istat.packets++;
+  }
+}
 
 /* ----------------------------------------------------- HMCSIM_CLOCK_PROCESS_RSP_QUEUE */
 /*
@@ -167,6 +273,10 @@ static int hmcsim_clock_process_rsp_queue( 	struct hmcsim_t *hmc,
 	 		 * process me
 			 *
 			 */
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_xbar_rsp_slot( hmc, dev, link, i );
+                        }
+
 
 			/*
 			 * Stage 1: get the corresponding cub device
@@ -184,6 +294,7 @@ static int hmcsim_clock_process_rsp_queue( 	struct hmcsim_t *hmc,
 			 *
 			 */
 			cur = hmc->xbar_depth-1;
+                        t_slot = hmc->xbar_depth+1;
 			for( j=0; j<hmc->xbar_depth; j++ ){
 				if( queue[cur].valid == HMC_RQST_INVALID ){
 
@@ -243,25 +354,25 @@ static int hmcsim_clock_process_rsp_queue( 	struct hmcsim_t *hmc,
 								i,
 								4 );
 				}
-			}
+			} /* end if+else */
 
-		}
-	}
+		} /* end if */
+	} /* i<hmc->xbar_depth */
 
 	return 0;
 }
 
-/* ----------------------------------------------------- HMCSIM_CLOCK_PROCESS_RQST_QUEUE */
+/* ----------------------------------------------------- HMCSIM_CLOCK_PROCESS_RQST_QUEUE_NEW */
 /*
- * HMCSIM_CLOCK_PROCESS_RQST_QUEUE
+ * HMCSIM_CLOCK_PROCESS_RQST_QUEUE_NEW
  *
  */
-static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
+static int hmcsim_clock_process_rqst_queue_new( struct hmcsim_t *hmc,
 						uint32_t dev,
-						uint32_t link )
+						uint32_t link,
+                                                uint32_t i )
 {
 	/* vars */
-	uint32_t i	= 0;
 	uint32_t j	= 0;
 	uint32_t cur	= 0;
 	uint32_t found	= 0;
@@ -291,14 +402,15 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 	 *
 	 */
 
-	for( i=0; i<hmc->xbar_depth; i++ ){
-
 		if( hmc->devs[dev].xbar[link].xbar_rqst[i].valid != HMC_RQST_INVALID ){ 
 
 			/*
 			 * process me
 			 *
 			 */
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_xbar_rqst_slot( hmc, dev, link, i );
+                        }
 
 #ifdef HMC_DEBUG
 			HMCSIM_PRINT_INT_TRACE( "PROCESSING REQUEST QUEUE FOR SLOT", (int)(i) );
@@ -310,13 +422,13 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 			 */
 			header	= hmc->devs[dev].xbar[link].xbar_rqst[i].packet[0];
 
-			addr	= ((header >> 24) & 0x3FFFFFFFF);
+			addr	= ((header >> 24) & 0x1FFFFFFFF);
 
 			/*
 			 * Step 2: Get the CUB.
 			 *
 			 */
-			cub = (uint8_t)((header>>61) & 0x3F );
+			cub = (uint8_t)((header>>61) & 0x7 );
 
 			/* Step 3: If it is equal to `dev`
 			 *         then we have a local request.
@@ -328,7 +440,7 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 			 * Stage 4: Get the packet length
 			 *
 			 */
-			len = (uint32_t)( (header & 0x780) >> 7);
+			len = (uint32_t)( (header >> 7) & 0x1F );
 			len *= 2;
 
 			/*
@@ -342,7 +454,7 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 			 * Stage 6: Get the link
 			 *
 			 */
-			plink = (uint8_t)( (tail & 0x7000000) >> 24 );
+                        plink = (uint8_t)( (tail>>26) & 0x7 );
 
 			if( cub == (uint8_t)(dev) ){
 #ifdef HMC_DEBUG
@@ -393,23 +505,39 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 									t_quad,
 									t_vault );
 					}
-				}
+					if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){ 
+					  hmcsim_power_remote_route( hmc,
+					                        dev,
+					                        link,
+					                        i,
+					                        t_quad,
+					                        t_vault );
+                                        }
+				}else{
+                                  /* local route */
+				  if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+			            hmcsim_power_local_route( hmc,
+					                      dev,
+					                      link,
+					                      i,
+					                      t_quad,
+					                      t_vault );
+                                  }
+                                }/* end tracing route latency */
 
 				/*
 				 * 9a: Search the vault queue for valid slot
 				 *     Search bottom-up
 				 *
 				 */
-				t_slot = hmc->queue_depth+1;
 				cur    = hmc->queue_depth-1;
-
+                                t_slot = hmc->queue_depth+1;
 				for( j=0; j<hmc->queue_depth; j++ ){
-
-					if( hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[cur].valid == HMC_RQST_INVALID ){
-						t_slot = cur;
-					}
-
-					cur--;
+			          if( hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[cur].valid
+                                      == HMC_RQST_INVALID ){
+				    t_slot = cur;
+				  }
+				  cur--;
 				}
 
 				if( t_slot == hmc->queue_depth+1 ){
@@ -450,7 +578,7 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 					 *
 					 */
 					hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[t_slot].valid = HMC_RQST_VALID;
-					for( j=0; j<HMC_MAX_UQ_PACKET; j++ ){ 
+					for( j=0; j<HMC_MAX_UQ_PACKET; j++ ){
 						hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[t_slot].packet[j] = 
 							hmc->devs[dev].xbar[link].xbar_rqst[i].packet[j];
 					}
@@ -501,9 +629,7 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 					 */
 					t_slot = hmc->xbar_depth+1;
 					cur    = hmc->xbar_depth-1;
-
 					for( j=0; j<hmc->xbar_depth; j++ ){
-	
 						/*
 						 * walk the queue from the bottom
 						 * up
@@ -540,7 +666,7 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 										i, 
 										3 ); 
 						}
-		
+
 						success = 0;
 					}else {
 						/*
@@ -560,6 +686,386 @@ static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
 							hmc->devs[cub].xbar[t_link].xbar_rqst[t_slot].packet[j] = 
 							hmc->devs[dev].xbar[link].xbar_rqst[i].packet[j];
 						}
+
+                                                if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                                                  hmcsim_power_route_extern( hmc,
+                                                                             cub,
+                                                                             t_link,
+                                                                             t_slot,
+                                                                             dev,
+                                                                             link,
+                                                                             i );
+                                                }
+
+						/*
+						 * signal success
+						 *
+						 */
+						success = 1;
+					}
+				}
+			}
+
+			if( success == 1 ){
+
+				/*
+				 * clear the packet
+				 *
+				 */
+#ifdef HMC_DEBUG
+				HMCSIM_PRINT_TRACE( "ZEROING PACKET" );
+#endif
+				hmcsim_util_zero_packet( &(hmc->devs[dev].xbar[link].xbar_rqst[i]) );
+			}
+
+		}
+
+		success = 0;
+	//}
+
+#ifdef HMC_DEBUG
+	hmcsim_clock_print_xbar_stats( hmc, hmc->devs[dev].xbar[link].xbar_rqst );
+	HMCSIM_PRINT_TRACE( "FINISHED PROCESSING REQUEST QUEUE" );
+#endif
+
+	return 0;
+}
+/* ----------------------------------------------------- HMCSIM_CLOCK_PROCESS_RQST_QUEUE */
+/*
+ * HMCSIM_CLOCK_PROCESS_RQST_QUEUE
+ *
+ */
+static int hmcsim_clock_process_rqst_queue( 	struct hmcsim_t *hmc,
+						uint32_t dev,
+						uint32_t link )
+{
+	/* vars */
+	uint32_t i	= 0;
+	uint32_t j	= 0;
+	uint32_t cur	= 0;
+	uint32_t found	= 0;
+	uint32_t success= 0;
+	uint32_t len	= 0;
+	uint32_t t_link	= 0;
+	uint32_t t_slot	= 0;
+	uint32_t t_quad = 0;
+	uint32_t bsize	= 0;
+	uint32_t t_vault= hmc->queue_depth+1;
+	uint8_t	cub	= 0;
+	uint8_t plink	= 0;
+	uint64_t header	= 0x00ll;
+	uint64_t tail	= 0x00ll;
+	uint64_t addr	= 0x00ll;
+	/* ---- */
+
+	/*
+	 * get the block size
+	 *
+	 */
+	hmcsim_util_get_max_blocksize( hmc, dev, &bsize );
+
+	/*
+	 * walk the queue and process all the valid
+	 * slots
+	 *
+	 */
+
+	for( i=0; i<hmc->xbar_depth; i++ ){
+
+		if( hmc->devs[dev].xbar[link].xbar_rqst[i].valid != HMC_RQST_INVALID ){ 
+
+			/*
+			 * process me
+			 *
+			 */
+                        if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                          hmcsim_power_xbar_rqst_slot( hmc, dev, link, i );
+                        }
+
+#ifdef HMC_DEBUG
+			HMCSIM_PRINT_INT_TRACE( "PROCESSING REQUEST QUEUE FOR SLOT", (int)(i) );
+#endif
+
+			/*
+			 * Step 1: Get the header
+			 *
+			 */
+			header	= hmc->devs[dev].xbar[link].xbar_rqst[i].packet[0];
+
+			addr	= ((header >> 24) & 0x1FFFFFFFF);
+
+			/*
+			 * Step 2: Get the CUB.
+			 *
+			 */
+			cub = (uint8_t)((header>>61) & 0x7 );
+
+			/* Step 3: If it is equal to `dev`
+			 *         then we have a local request.
+			 * 	   Otherwise, its a request to forward to
+			 * 	   an adjacent device.
+			 */
+
+			/*
+			 * Stage 4: Get the packet length
+			 *
+			 */
+			len = (uint32_t)( (header >> 7) & 0x1F );
+			len *= 2;
+
+			/*
+			 * Stage 5: Get the packet tail
+			 *
+			 */
+			tail = hmc->devs[dev].xbar[link].xbar_rqst[i].packet[len-1];
+
+
+			/*
+			 * Stage 6: Get the link
+			 *
+			 */
+                        plink = (uint8_t)( (tail>>26) & 0x7 );
+
+			if( cub == (uint8_t)(dev) ){
+#ifdef HMC_DEBUG
+				HMCSIM_PRINT_INT_TRACE( "LOCAL DEVICE REQUEST AT SLOT", (int)(i) );
+#endif
+				/*
+				 * local request
+				 *
+				 */
+
+				/*
+				 * 7a: Retrieve the vault id
+				 *
+				 */
+				hmcsim_util_decode_vault( hmc,
+							dev,
+							bsize,
+							addr,
+							&t_vault );
+
+				/*
+				 * 8a: Retrieve the quad id
+				 *
+				 */
+				hmcsim_util_decode_quad( hmc,
+							dev,
+							bsize,
+							addr,
+							&t_quad );
+
+
+				/*
+				 * if quad is not directly attached
+				 * to my link, print a trace message
+				 * indicating higher latency
+				 */
+				if( link != t_quad ){
+					/*
+					 * higher latency
+					 *
+					 */
+
+					if( (hmc->tracelevel & HMC_TRACE_LATENCY) > 0 ){ 
+						hmcsim_trace_latency( hmc,
+									dev,
+									link,
+									i,
+									t_quad,
+									t_vault );
+					}
+					if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){ 
+					  hmcsim_power_remote_route( hmc,
+					                        dev,
+					                        link,
+					                        i,
+					                        t_quad,
+					                        t_vault );
+                                        }
+				}else{
+                                  /* local route */
+				  if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+			            hmcsim_power_local_route( hmc,
+					                      dev,
+					                      link,
+					                      i,
+					                      t_quad,
+					                      t_vault );
+                                  }
+                                }/* end tracing route latency */
+
+				/*
+				 * 9a: Search the vault queue for valid slot
+				 *     Search bottom-up
+				 *
+				 */
+				cur    = hmc->queue_depth-1;
+                                t_slot = hmc->queue_depth+1;
+				for( j=0; j<hmc->queue_depth; j++ ){
+			          if( hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[cur].valid
+                                      == HMC_RQST_INVALID ){
+				    t_slot = cur;
+				  }
+				  cur--;
+				}
+
+				if( t_slot == hmc->queue_depth+1 ){
+
+
+#ifdef HMC_DEBUG
+					HMCSIM_PRINT_INT_TRACE( "STALLED REQUEST AT SLOT", (int)(i) );
+#endif
+
+					/* STALL */
+					hmc->devs[dev].xbar[link].xbar_rqst[i].valid = HMC_RQST_STALLED;
+
+					/*
+					 * print a stall trace
+					 *
+					 */
+					if ((hmc->tracelevel & HMC_TRACE_STALL) >0 ) {
+						hmcsim_trace_stall(	hmc,
+									dev,
+									t_quad,
+									t_vault,
+									0,
+									0,
+									0,
+									i,
+									0 );
+					}
+
+					success = 0;
+				}else {
+
+#ifdef HMC_DEBUG
+					HMCSIM_PRINT_INT_TRACE( "TRANSFERRING PACKET FROM SLOT", (int)(i) );
+					HMCSIM_PRINT_INT_TRACE( "TRANSFERRING PACKET TO SLOT", (int)(t_slot) );
+#endif
+					/*
+					 * push it into the designated queue slot
+					 *
+					 */
+					hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[t_slot].valid = HMC_RQST_VALID;
+					for( j=0; j<HMC_MAX_UQ_PACKET; j++ ){
+						hmc->devs[dev].quads[t_quad].vaults[t_vault].rqst_queue[t_slot].packet[j] = 
+							hmc->devs[dev].xbar[link].xbar_rqst[i].packet[j];
+					}
+
+					success = 1;
+
+				}
+
+			}else{
+
+#ifdef HMC_DEBUG
+				HMCSIM_PRINT_INT_TRACE( "REMOTE DEVICE REQUEST AT SLOT", (int)(i) );
+#endif
+				/*
+				 * forward request to remote device
+				 *
+				 */
+
+				/*
+				 * Stage 7b: Decide whether cub is accessible
+				 *
+				 */
+				found = 0;
+
+				while( (found != 1) && (j<hmc->num_links) ){
+
+					if( hmc->devs[dev].links[j].dest_cub == cub ){ 
+						found = 1;
+						t_link = j;
+					}
+
+					j++;
+				}
+
+				if( found == 0 ){
+					/*
+					 * oh snap! can't route to that CUB
+					 * Mark it as a zombie request
+					 * Future: return an error packet
+					 *
+					 */
+					hmc->devs[dev].xbar[link].xbar_rqst[i].valid = HMC_RQST_ZOMBIE;
+				}else{
+					/*
+					 * 8b: routing is good, look for an empty slot
+					 * in the target xbar link queue
+					 *
+					 */
+					t_slot = hmc->xbar_depth+1;
+					cur    = hmc->xbar_depth-1;
+					for( j=0; j<hmc->xbar_depth; j++ ){
+						/*
+						 * walk the queue from the bottom
+						 * up
+						 */
+						if( hmc->devs[cub].xbar[t_link].xbar_rqst[cur].valid == 
+							HMC_RQST_INVALID ) {
+							t_slot = cur;
+						}
+						cur--;
+					}
+
+					/*
+				 	 * 9b: If available, insert into remote xbar slot 
+					 *
+					 */
+					if( t_slot == hmc->xbar_depth+1 ){
+						/*
+						 * STALL!
+						 *
+						 */
+						hmc->devs[dev].xbar[link].xbar_rqst[i].valid = HMC_RQST_STALLED;
+						/*
+					 	 * print a stall trace
+					 	 *
+					 	 */
+						if ((hmc->tracelevel & HMC_TRACE_STALL) >0 ) {
+							hmcsim_trace_stall(	hmc, 
+										dev, 
+										0,
+										0, 
+										dev, 
+										cub,
+										link,
+										i, 
+										3 ); 
+						}
+
+						success = 0;
+					}else {
+						/*
+						 * put the new link in the link field
+						 *
+						 */
+						 hmc->devs[dev].xbar[link].xbar_rqst[i].packet[len-1] |= 
+										((uint64_t)(plink)<<24);
+
+						/*
+						 * transfer the packet to the target slot
+						 *
+						 */
+						hmc->devs[cub].xbar[t_link].xbar_rqst[t_slot].valid = 
+							HMC_RQST_VALID;
+						for( j=0; j<HMC_MAX_UQ_PACKET; j++ ){ 
+							hmc->devs[cub].xbar[t_link].xbar_rqst[t_slot].packet[j] = 
+							hmc->devs[dev].xbar[link].xbar_rqst[i].packet[j];
+						}
+
+                                                if((hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                                                  hmcsim_power_route_extern( hmc,
+                                                                             cub,
+                                                                             t_link,
+                                                                             t_slot,
+                                                                             dev,
+                                                                             link,
+                                                                             i );
+                                                }
 
 						/*
 						 * signal success
@@ -665,6 +1171,7 @@ static int hmcsim_clock_root_xbar( struct hmcsim_t *hmc )
 	/* vars */
 	uint32_t i	= 0;
 	uint32_t j	= 0;
+	uint32_t k	= 0;
 	uint32_t host_l	= 0;
 	/* ---- */
 
@@ -701,17 +1208,11 @@ static int hmcsim_clock_root_xbar( struct hmcsim_t *hmc )
 			 * incoming packets
 			 *
 			 */
-			for( j=0; j<hmc->num_links; j++ ){
-
-				hmcsim_clock_process_rqst_queue( hmc, i, j );
-
-				/*
-				 * no point in walking the response queues,
-				 * the host must drain these manually
-				 * using recv's
-				 *
-				 */
-			}
+                          for( k=0; k<hmc->xbar_depth; k++ ){
+                        for( j=0; j<hmc->num_links; j++ ){
+			    hmcsim_clock_process_rqst_queue_new( hmc, i, j, k );
+                          }
+                        }
 		}
 
 		/*
@@ -729,6 +1230,76 @@ static int hmcsim_clock_root_xbar( struct hmcsim_t *hmc )
  * HMCSIM_CLOCK_BANK_CONFLICTS
  *
  */
+static int hmcsim_clock_bank_update( struct hmcsim_t *hmc )
+{
+        /* vars */
+        uint32_t dev = 0;
+        uint32_t quad = 0;
+        uint32_t vault = 0;
+        uint32_t bank = 0;
+        uint32_t i = 0;
+        uint32_t t_slot = hmc->queue_depth+1;
+        uint32_t cur = hmc->queue_depth-1;
+
+        /* Iterate through all banks and decrement delay timestamp if needed */
+        for (dev = 0; dev < hmc->num_devs; dev++) {
+            for (quad = 0; quad < hmc->num_quads; quad++) {
+                for (vault = 0; vault < 8; vault++) {
+                    for (bank = 0; bank < hmc->num_banks; bank++) {
+                        if (hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay > 0) {
+                            hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay--;
+                            //printf( "quad:vault:bank %d:%d:%d has a latency\n", quad, vault, bank );
+
+                            /* If bank becomes available and a response is waiting, forward it */
+                            if ((hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay == 0) &&
+                                   ( hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid == HMC_RQST_VALID)) {
+                                   //( hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid != HMC_RQST_INVALID)) {
+                                t_slot = hmc->queue_depth+1;
+                                cur = hmc->queue_depth-1;
+                                for (i = 0; i < hmc->queue_depth; i++) {
+                                    if (hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[cur].valid == HMC_RQST_INVALID) {
+                                        t_slot = cur;
+                                    }
+                                    cur--;
+                                }
+
+                                /* Found slot, send response */
+                                if (t_slot != hmc->queue_depth+1) {
+                                    hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].valid = HMC_RQST_VALID;
+
+                                    for (i = 0; i < HMC_MAX_UQ_PACKET; i++) {
+                                        hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].packet[i] = 
+                                          hmc->devs[dev].quads[quad].vaults[vault].banks[bank].packet[i];
+                                        hmc->devs[dev].quads[quad].vaults[vault].banks[bank].packet[i] = 0x00ll;
+                                    }
+                                    if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                                      hmcsim_power_vault_rsp_slot( hmc, dev, quad, vault, t_slot );
+                                    }
+                                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_INVALID;
+                                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = 0;
+
+                                } else { /* Did not find free slot, delay for another cycle */
+                                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay=1;
+                                }/* end else */
+                            }/* end if delay==0 */
+                            /* we don't need an else case here, this was probably a flow control packet */
+                        }
+
+                    } // bank
+                } // vault
+            } // quad
+        } // dev
+
+        return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_CLOCK_BANK_CONFLICTS */
+/*
+ * HMCSIM_CLOCK_BANK_CONFLICTS
+ *
+ */
+#if 0
+/* -- currently disabled */
 static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 {
 	/* vars */
@@ -757,7 +1328,8 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 	 */
 	for( i=0; i<hmc->num_devs; i++){
 		for( j=0; j<hmc->num_quads; j++ ){
-			for( k=0; k<4; k++ ){
+			//for( k=0; k<4; k++ ){
+			for( k=0; k<8; k++ ){
 				for( x=0; x<hmc->queue_depth; x++ ){
 
 					/*
@@ -792,7 +1364,8 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
  	 */
 	for( i=0; i<hmc->num_devs; i++){
 		for( j=0; j<hmc->num_quads; j++ ){
-			for( k=0; k<4; k++ ){
+			//for( k=0; k<4; k++ ){
+			for( k=0; k<8; k++ ){
 
 				na = 0;
 
@@ -867,6 +1440,7 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
 
 	return 0;
 }
+#endif
 
 /* ----------------------------------------------------- HMCSIM_CLOCK_ANALYSIS_PHASE */
 /*
@@ -875,6 +1449,11 @@ static int hmcsim_clock_bank_conflicts( struct hmcsim_t *hmc )
  */
 static int hmcsim_clock_analysis_phase( struct hmcsim_t *hmc )
 {
+
+        /* Update bank delays */
+        if (hmcsim_clock_bank_update(hmc) != 0) {
+            return -1;
+        }
 	/*
 	 * This is where we put all the inner-clock
 	 * analysis phases.  The current phases
@@ -889,9 +1468,12 @@ static int hmcsim_clock_analysis_phase( struct hmcsim_t *hmc )
 	 * 1) Bank Conflict Analysis
 	 *
 	 */
+#if 0
+        // temporarily removing for performance
 	if( hmcsim_clock_bank_conflicts( hmc ) != 0 ){
 		return -1;
 	}
+#endif
 
 	/*
 	 * 2) Cache Detection Analysis
@@ -914,81 +1496,47 @@ static int hmcsim_clock_rw_ops( struct hmcsim_t *hmc )
 	uint32_t k	= 0;
 	uint32_t x	= 0;
 	uint32_t test	= 0x00000000;
+        uint32_t venable[8];
 	/* ---- */
 
+        /* reset the vault enable array */
+        for( i=0; i<8; i++ ){
+          venable[i] = 0;
+        }
+
 	for( i=0; i<hmc->num_devs; i++){
-		for( j=0; j<hmc->num_quads; j++ ){
-			//for( k=0; j<hmc->num_vaults; k++ ){
-			for( k=0; k<4; k++ ){
+	  for( j=0; j<hmc->num_quads; j++ ){
+	    for( k=0; k<8; k++ ){
+	      for( x=0; x<hmc->queue_depth; x++ ){
+	        test = 0x00000000;
+		test = hmc->devs[i].quads[j].vaults[k].rqst_queue[x].valid;
 
-				/*
-				 * process the first
-				 * min( HMC_NUM_BANKS, queue_depth )
-				 * queue slots and process the requests
-				 *
-				 */
+	        if( (test > 0 ) && (test != 2) ){
+                  /*
+                   * valid and no conflict
+                   * process the request
+                   *
+                   */
+                   hmcsim_process_rqst( hmc, i, j, k, x );
+                   venable[k] = 1;
+                }/* end if */
+               } /* end x<hmc->queue_depth */
+            } /* vaults */
+          } /* num_quads */
+        } /* num_devs */
 
-				if( hmc->queue_depth > HMC_MAX_BANKS ){
+        /* record the control power enable for each active vault */
+        for( i=0; i<8; i++ ){
+          if( venable[i] == 1 ){
+            if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+              hmcsim_power_vault_ctrl( hmc, i );
+            }
+          }
+        }
 
-					/*
-					 * queue_depth is > MAX_BANKS
-					 *
-					 */
-					for( x=0; x<hmc->num_banks; x++ ){
-
-						/*
-						 * determine whether the
-						 * queue slot is valid and not
-						 * a bank conflict
-						 *
-						 */
-						test = 0x00000000;
-						test = hmc->devs[i].quads[j].vaults[k].rqst_queue[x].valid;
-
-						if( (test > 0 ) && (test != 2) ){
-
-							/*
-							 * valid and no conflict
-							 * process the request
-							 *
-							 */
-							hmcsim_process_rqst( hmc, i, j, k, x );
-						}
-					}
-
-				} else {
-
-					/*
-					 * queue_depth is < NUM_BANKS
-					 *
-					 */
-					for( x=0; x<hmc->queue_depth; x++ ){
-
-						/*
-						 * determine whether the
-						 * queue slot is valid and not
-						 * a bank conflict
-						 *
-						 */
-						test = 0x00000000;
-						test = hmc->devs[i].quads[j].vaults[k].rqst_queue[x].valid;
-
-						if( (test > 0 ) && (test != 2) ){
-
-							/*
-							 * valid and no conflict
-							 * process the request
-							 *
-							 */
-							hmcsim_process_rqst( hmc, i, j, k, x );
-						}
-					}
-
-				}
-			}
-		}
-	}
-
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "COMPLETED PROCESSING RW_OP" );
+#endif
 	return 0;
 }
 
@@ -1010,7 +1558,9 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 	uint32_t r_slot		= hmc->xbar_depth+1;
 	struct hmc_queue_t *lq	= NULL;
 	/* ---- */
-
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE("STARTING HMCSIM_CLOCK_REG_RESPONSES");
+#endif
 
 	/*
 	 * Walk all the vault response queues
@@ -1020,8 +1570,7 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
  	 */
 	for( i=0; i<hmc->num_devs; i++){
 		for( j=0; j<hmc->num_quads; j++ ){
-			//for( k=0; k<hmc->num_vaults; k++ ){
-			for( k=0; k<4; k++ ){
+			for( k=0; k<8; k++ ){
 
 				lq = hmc->devs[i].quads[j].vaults[k].rsp_queue;
 
@@ -1034,17 +1583,53 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 					 *
 					 */
 					if( lq[x].valid != HMC_RQST_INVALID ){
-						
+
 						/*
 						 * determine which link response
 						 * queue we're supposed to route
 						 * use the SLID value
 						 *
 						 */
-						hmcsim_util_decode_slid( hmc,
-									lq,
+						hmcsim_util_decode_rsp_slid( hmc,
+									     lq,
+									     x,
+									     &r_link );
+
+                                                /* if link is not local, register latency */
+				                if( r_link != j ){
+					          /*
+					           * higher latency
+					           *
+					           */
+
+					          if( (hmc->tracelevel & HMC_TRACE_LATENCY) > 0 ){ 
+						    hmcsim_trace_latency( hmc,
+									i,
+									r_link,
 									x,
-									&r_link );
+									j,
+									k );
+					          }
+					          if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){ 
+					            hmcsim_power_remote_route( hmc,
+					                        i,
+					                        r_link,
+					                        x,
+					                        j,
+					                        k );
+                                                  }
+				                }else{
+                                                  /* local route */
+				                  if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+			                            hmcsim_power_local_route( hmc,
+					                      i,
+					                      r_link,
+					                      x,
+					                      j,
+					                      k );
+                                                  }
+                                                }/* end tracing route latency */
+
 
 						/*
 						 * determine if the response
@@ -1052,6 +1637,7 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 						 *
 						 */
 						cur = hmc->xbar_depth-1;
+                                                r_slot = hmc->xbar_depth+1;
 						for( y=0; y<hmc->xbar_depth; y++ ){	
 							if( hmc->devs[i].xbar[r_link].xbar_rsp[cur].valid == 
 									HMC_RQST_INVALID ){
@@ -1073,6 +1659,12 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 							 * transfer the data
 							 *
 							 */
+                                                        if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+                                                          hmcsim_power_xbar_rsp_slot( hmc,
+                                                                                      i,
+                                                                                      r_link,
+                                                                                      r_slot );
+                                                        }
 							hmc->devs[i].xbar[r_link].xbar_rsp[r_slot].valid = 
 									HMC_RQST_VALID;
 							for( y=0; y<HMC_MAX_UQ_PACKET; y++){ 
@@ -1086,6 +1678,14 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 							 *
 							 */
 							lq[x].valid = HMC_RQST_INVALID;
+
+                                                        /*
+                                                         * update the token log for the simple api
+                                                         *
+                                                         */
+                                                        hmcsim_token_update( hmc,
+                                                          &(hmc->devs[i].xbar[r_link].xbar_rsp[r_slot].packet[0]),
+                                                          i, r_link, r_slot );
 
 						}else{
 
@@ -1113,17 +1713,18 @@ static int hmcsim_clock_reg_responses( struct hmcsim_t *hmc )
 										2 );
 							}
 						}
-					}
-					/* else, request not valid */
-				}
+					}/* else, request not valid */
+				}/* queue_depth */
 
 #ifdef HMC_DEBUG
-				hmcsim_clock_print_vault_stats( hmc, hmc->devs[i].quads[j].vaults[k].rqst_queue );
-				hmcsim_clock_print_vault_stats( hmc, hmc->devs[i].quads[j].vaults[k].rsp_queue );
+				hmcsim_clock_print_vault_stats( hmc, k,
+                                                                hmc->devs[i].quads[j].vaults[k].rqst_queue, 0 );
+				hmcsim_clock_print_vault_stats( hmc, k,
+                                                                hmc->devs[i].quads[j].vaults[k].rsp_queue, 1 );
 #endif
-			}
-		}
-	}
+			} /* vaults */
+		} /* quads */
+	} /* devs */
 
 	return 0;
 }
@@ -1151,18 +1752,20 @@ static int hmcsim_clock_reorg_xbar_rqst( struct hmcsim_t *hmc, uint32_t dev, uin
 		 * if the slot is valid, look upstream in the queue
 		 *
 		 */
-		if( hmc->devs[dev].xbar[link].xbar_rqst[i].valid == HMC_RQST_VALID ){
+		//if( hmc->devs[dev].xbar[link].xbar_rqst[i].valid == HMC_RQST_VALID ){
+		if( hmc->devs[dev].xbar[link].xbar_rqst[i].valid != HMC_RQST_INVALID ){
 
 			/*
 			 * find the lowest appropriate slot
 			 *
 			 */
 			slot = i;
-			for( j=(i-1); j>0; j-- ){
-				if( hmc->devs[dev].xbar[link].xbar_rqst[j].valid == HMC_RQST_INVALID ){
-					slot = j;
-				}
-			}
+                        for( j=0; j<i; j++ ){
+                          if( hmc->devs[dev].xbar[link].xbar_rqst[j].valid == HMC_RQST_INVALID ){
+                            slot = j;
+                            break;
+                          }
+                        }
 
 			/*
 		 	 * check to see if a new slot was found
@@ -1181,7 +1784,6 @@ static int hmcsim_clock_reorg_xbar_rqst( struct hmcsim_t *hmc, uint32_t dev, uin
 						hmc->devs[dev].xbar[link].xbar_rqst[i].packet[j];	
 
 					hmc->devs[dev].xbar[link].xbar_rqst[i].packet[j] =0x00ll;	
-					
 				}
 
 				hmc->devs[dev].xbar[link].xbar_rqst[slot].valid = 1;	
@@ -1216,19 +1818,20 @@ static int hmcsim_clock_reorg_xbar_rsp( struct hmcsim_t *hmc, uint32_t dev, uint
 		 * if the slot is valid, look upstream in the queue
 		 *
 		 */
-		if( hmc->devs[dev].xbar[link].xbar_rsp[i].valid == HMC_RQST_VALID ){
+		//if( hmc->devs[dev].xbar[link].xbar_rsp[i].valid == HMC_RQST_VALID ){
+		if( hmc->devs[dev].xbar[link].xbar_rsp[i].valid != HMC_RQST_INVALID ){
 
 			/*
 			 * find the lowest appropriate slot
 			 *
 			 */
 			slot = i;
-			for( j=(i-1); j>0; j-- ){
-				if( hmc->devs[dev].xbar[link].xbar_rsp[j].valid == HMC_RQST_INVALID ){
-					slot = j;
-				}
-
-			}
+                        for( j=0; j<i; j++ ){
+                          if( hmc->devs[dev].xbar[link].xbar_rsp[j].valid == HMC_RQST_INVALID ){
+                            slot = j;
+                            break;
+                          }
+                        }
 
 			/*
 		 	 * check to see if a new slot was found
@@ -1247,7 +1850,6 @@ static int hmcsim_clock_reorg_xbar_rsp( struct hmcsim_t *hmc, uint32_t dev, uint
 						hmc->devs[dev].xbar[link].xbar_rsp[i].packet[j];	
 
 					hmc->devs[dev].xbar[link].xbar_rsp[i].packet[j] =0x00ll;	
-					
 				}
 
 				hmc->devs[dev].xbar[link].xbar_rsp[slot].valid = 1;	
@@ -1285,18 +1887,20 @@ static int hmcsim_clock_reorg_vault_rqst( 	struct hmcsim_t *hmc,
 		 * if the slot is valid, look upstream in the queue
 		 *
 		 */
-		if( hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[i].valid == HMC_RQST_VALID ){
+		//if( hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[i].valid == HMC_RQST_VALID ){
+		if( hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[i].valid != HMC_RQST_INVALID ){
 
 			/*
 			 * find the lowest appropriate slot
 			 *
 			 */
 			slot = i;
-			for( j=(i-1); j>0; j-- ){
-				if( hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[j].valid == HMC_RQST_INVALID ){
-					slot = j;
-				}
-			}
+                        for( j=0; j<i; j++ ){
+                          if( hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[j].valid == HMC_RQST_INVALID ){
+                            slot = j;
+                            break;
+                          }
+                        }
 
 			/*
 		 	 * check to see if a new slot was found
@@ -1315,7 +1919,7 @@ static int hmcsim_clock_reorg_vault_rqst( 	struct hmcsim_t *hmc,
 						hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[i].packet[j];	
 
 					hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[i].packet[j] =0x00ll;	
-					
+
 				}
 
 				hmc->devs[dev].quads[quad].vaults[vault].rqst_queue[slot].valid = 1;	
@@ -1353,18 +1957,20 @@ static int hmcsim_clock_reorg_vault_rsp( 	struct hmcsim_t *hmc,
 		 * if the slot is valid, look upstream in the queue
 		 *
 		 */
-		if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid == HMC_RQST_VALID ){
+		//if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid == HMC_RQST_VALID ){
+		if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid != HMC_RQST_INVALID ){
 
 			/*
 			 * find the lowest appropriate slot
 			 *
 			 */
 			slot = i;
-			for( j=(i-1); j>0; j-- ){
-				if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[j].valid == HMC_RQST_INVALID ){
-					slot = j;
-				}
-			}
+                        for(j=0; j<i; j++ ){
+                          if( hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[j].valid == HMC_RQST_INVALID ){
+                            slot = j;
+                            break;
+                          }
+                        }
 
 			/*
 		 	 * check to see if a new slot was found
@@ -1380,14 +1986,14 @@ static int hmcsim_clock_reorg_vault_rsp( 	struct hmcsim_t *hmc,
 				for( j=0; j<HMC_MAX_UQ_PACKET; j++ ){
 
 					hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[slot].packet[j] = 
-						hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].packet[j];	
+						hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].packet[j];
 
-					hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].packet[j] =0x00ll;	
-					
+					hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].packet[j] =0x00ll;
+
 				}
 
-				hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[slot].valid = 1;	
-				hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid    = 0;	
+				hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[slot].valid = 1;
+				hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[i].valid    = 0;
 			}
 		} /* else, slot not valid.. move along */
 	}
@@ -1435,8 +2041,7 @@ static int hmcsim_clock_queue_reorg( struct hmcsim_t *hmc )
 	{
 		for( j=0; j<hmc->num_quads; j++ )
 		{
-			//for( k=0; k<hmc->num_vaults; k++ )
-			for( k=0; k<4; k++ )
+			for( k=0; k<8; k++ )
 			{
 				/*
 				 * reorder:
@@ -1468,6 +2073,12 @@ extern int	hmcsim_clock( struct hmcsim_t *hmc )
 		return -1;
 	}
 
+        /*
+         * Clear the stats!
+         *
+         */
+        hmcsim_clear_stat( hmc );
+
 	/*
 	 * Overview of the clock handler structure
 	 *
@@ -1485,8 +2096,12 @@ extern int	hmcsim_clock( struct hmcsim_t *hmc )
 	 *
 	 * Stage 5: Register any necessary responses with
 	 * 	    the xbar
+         *
+         * Stage 6: Reorder the request queues
 	 *
-	 * Stage 6: Update the internal clock value
+         * Stage 7: [optional] Print power tracing data
+         *
+	 * Stage 8: Update the internal clock value
 	 *
 	 */
 
@@ -1552,7 +2167,7 @@ extern int	hmcsim_clock( struct hmcsim_t *hmc )
 	}
 
 	/*
-	 * Stage 5a: Reorder all the request queues
+	 * Stage 6: Reorder all the request queues
 	 *
 	 */
 #ifdef HMC_DEBUG
@@ -1562,12 +2177,27 @@ extern int	hmcsim_clock( struct hmcsim_t *hmc )
 		return -1;
 	}
 
+        /*
+         * Stage 7: optionally print all the power tracing data
+         *
+         */
+#ifdef HMC_DEBUG
+	HMCSIM_PRINT_TRACE( "STAGE6: OUTPUT POWER TRACING DATA" );
+#endif
+        if( (hmc->tracelevel & HMC_TRACE_POWER) > 0 ){
+          hmcsim_power_links( hmc );
+          hmcsim_trace_power( hmc );
+          if( hmc->power.tecplot == 1 ){
+            hmcsim_tecplot( hmc );
+          }
+        }
+
 	/*
-	 * Stage 6: update the clock value
+	 * Stage 8: update the clock value
 	 *
 	 */
 #ifdef HMC_DEBUG
-	HMCSIM_PRINT_TRACE( "STAGE6: UPDATE THE CLOCK" );
+	HMCSIM_PRINT_TRACE( "STAGE7: UPDATE THE CLOCK" );
 #endif
 	hmc->clk++;
 

@@ -22,8 +22,42 @@ extern "C" {
 #include <stdint.h>
 #include <sys/types.h>
 #include "hmc_sim_macros.h"
+#include "hmc_sim_tecplot.h"
 
 /* -------------------------------------------------- ENUMERATED TYPES */
+typedef enum{
+        XBAR_RQST_STALL_STAT,                /*! HMC-SIM: HMC_STAT_T: CROSSBAR REQUEST STALLS */
+        XBAR_RSP_STALL_STAT,                 /*! HMC-SIM: HMC_STAT_T: CROSSBAR RESPONSE STALLS */
+        VAULT_RQST_STALL_STAT,               /*! HMC-SIM: HMC_STAT_T: VAULT REQUEST STALLS */
+        VAULT_RSP_STALL_STAT,                /*! HMC-SIM: HMC_STAT_T: VAULT RESPONSE STALLS */
+        ROUTE_RQST_STALL_STAT,               /*! HMC-SIM: HMC_STAT_T: ROUTE REQUEST STALLS */
+        ROUTE_RSP_STALL_STAT,                /*! HMC-SIM: HMC_STAT_T: ROUTE RESPONSE STALLS */
+        UNDEF_STALL_STAT,                    /*! HMC-SIM: HMC_STAT_T: UNDEFINED STALL EVENT */
+        BANK_CONFLICT_STAT,                  /*! HMC-SIM: HMC_STAT_T: BANK CONFLICTS */
+        XBAR_LATENCY_STAT,                   /*! HMC-SIM: HMC_STAT_T: CROSSBAR LATENCY */
+        LINK_PHY_POWER_STAT,                 /*! HMC-SIM: HMC_STAT_T: LINK PHY POWER */
+        LINK_LOCAL_ROUTE_POWER_STAT,         /*! HMC-SIM: HMC_STAT_T: LINK LOCAL ROUTE POWER */
+        LINK_REMOTE_ROUTE_POWER_STAT,        /*! HMC-SIM: HMC_STAT_T: LINK REMOTE ROUTE POWER */
+        XBAR_RQST_SLOT_POWER_STAT,           /*! HMC-SIM: HMC_STAT_T: CROSSBAR REQUEST SLOT POWER */
+        XBAR_RSP_SLOT_POWER_STAT,            /*! HMC-SIM: HMC_STAT_T: CROSSBAR RESPONSE SLOT POWER */
+        XBAR_ROUTE_EXTERN_POWER_STAT,        /*! HMC-SIM: HMC_STAT_T: CROSSBAR ROUTE EXTERN POWER */
+        VAULT_RQST_SLOT_POWER_STAT,          /*! HMC-SIM: HMC_STAT_T: VAULT REQUEST SLOT POWER */
+        VAULT_RSP_SLOT_POWER_STAT,           /*! HMC-SIM: HMC_STAT_T: VAULT RESPONSE SLOT POWER */
+        VAULT_CTRL_POWER_STAT,               /*! HMC-SIM: HMC_STAT_T: VAULT CONTROL POWER */
+        ROW_ACCESS_POWER_STAT,               /*! HMC-SIM: HMC_STAT_T: ROW ACCESS POWER */
+        LINK_PHY_THERM_STAT,                 /*! HMC-SIM: HMC_STAT_T: LINK PHY THERM */
+        LINK_LOCAL_ROUTE_THERM_STAT,         /*! HMC-SIM: HMC_STAT_T: LINK LOCAL ROUTE THERM */
+        LINK_REMOTE_ROUTE_THERM_STAT,        /*! HMC-SIM: HMC_STAT_T: LINK REMOTE ROUTE THERM */
+        XBAR_RQST_SLOT_THERM_STAT,           /*! HMC-SIM: HMC_STAT_T: CROSSBAR REQUEST SLOT THERM */
+        XBAR_RSP_SLOT_THERM_STAT,            /*! HMC-SIM: HMC_STAT_T: CROSSBAR RESPONSE SLOT THERM */
+        XBAR_ROUTE_EXTERN_THERM_STAT,        /*! HMC-SIM: HMC_STAT_T: CROSSBAR ROUTE EXTERN THERM */
+        VAULT_RQST_SLOT_THERM_STAT,          /*! HMC-SIM: HMC_STAT_T: VAULT REQUEST SLOT THERM */
+        VAULT_RSP_SLOT_THERM_STAT,           /*! HMC-SIM: HMC_STAT_T: VAULT RESPONSE SLOT THERM */
+        VAULT_CTRL_THERM_STAT,               /*! HMC-SIM: HMC_STAT_T: VAULT CONTROL THERM */
+        ROW_ACCESS_THERM_STAT,               /*! HMC-SIM: HMC_STAT_T: ROW ACCESS THERM */
+        AVG_PACKET_LATENCY                   /*! HMC-SIM: HMC_STAT_T: AVERAGE PACKET LATENCY */
+}hmc_stat_t;
+
 typedef enum{
 	HMC_LINK_DEV_DEV,		/*! HMC-SIM: HMC_LINK_DEF_T: DEVICE TO DEVICE LINK */ 
 	HMC_LINK_HOST_DEV		/*! HMC-SIM: HMC_LINK_DEF_T: HOST TO DEVICE LINK */
@@ -183,6 +217,19 @@ typedef enum{
 
 /* -------------------------------------------------- DATA STRUCTURES */
 
+struct hmc_token_t{
+  uint8_t status;                       /*! HMC-SIM: HMC_TOKEN_T: Status bits
+                                          0 = unused; 1=set but no response;
+                                          2 = set and response ready
+                                          */
+  hmc_response_t rsp;                   /*! HMC-SIM: HMC_TOKEN_T: Response type */
+  uint32_t rsp_size;                    /*! HMC-SIM: HMC_TOKEN_T: Response data size */
+  uint32_t device;                      /*! HMC-SIM: HMC_TOKEN_T: Response device */
+  uint32_t link;                        /*! HMC-SIM: HMC_TOKEN_T: Response link */
+  uint32_t slot;                        /*! HMC-SIM: HMC_TOKEN_T: Response slot */
+  uint64_t en_clock;                    /*! HMC-SIM: HMC_TOKEN_T: Clock cycle of incoming packet */
+  uint8_t data[256];                    /*! HMC-SIM: HMC_TOKEN_T: Response data */
+};
 
 struct hmc_link_t{
 
@@ -203,10 +250,13 @@ struct hmc_dram_t{
 
 struct hmc_bank_t{
 
-	//struct hmc_dram_t *drams;	/*! HMC-SIM: HMC_BANK_T: DRAMS */
+	//struct hmc_dram_t *drams;	    /*! HMC-SIM: HMC_BANK_T: DRAMS */
 
-	uint32_t id;			/*! HMC-SIM: HMC_BANK_T: BANK ID */
-					/* 16-BYTE BANK INTERLEAVE */	
+	uint32_t id;			    /*! HMC-SIM: HMC_BANK_T: BANK ID */
+					    /* 16-BYTE BANK INTERLEAVE */
+        uint32_t delay;                     /*! HMC-SIM: HMC_BANK_T: CYCLES UNTIL BANK IS AVAILABLE */
+        uint32_t valid;                     /*! HMC-SIM: HMC_BANK_T: RESPONSE PACKET IS VALID */
+        uint64_t packet[HMC_MAX_UQ_PACKET]; /*! HMC-SIM: HMC_BANK_T: RESPONSE PACKET */
 };
 
 struct hmc_queue_t{
@@ -268,6 +318,8 @@ struct hmc_cmc_t{
         hmc_response_t rsp_cmd;         /*! HMC-SIM: HMC_CMC_T: RESPONSE COMMAND */
         uint8_t rsp_cmd_code;           /*! HMC-SIM: HMC_CMC_T: RESPONSE COMMAND CODE */
 
+        int track_power;                /*! HMC-SIM: HMC_CMC_T: DOES THIS CMC OP TRACK POWER? */
+
         uint32_t active;                /*! HMC-SIM: HMC_CMC_T: SIGNALS THAT THE COMMAND IS ACTIVE */
         void *handle;                   /*! HMC-SIM: HMC_CMC_T: DLSYM HANDLE */
 
@@ -279,7 +331,7 @@ struct hmc_cmc_t{
                             hmc_response_t *,
                             uint8_t *);
 
-        int (*cmc_execute)(void *,  /* hmc */
+        int (*cmc_execute)(void *,      /* hmc */
                            uint32_t,    /* dev */
                            uint32_t,    /* quad */
                            uint32_t,    /* vault */
@@ -291,7 +343,56 @@ struct hmc_cmc_t{
                            uint64_t *,  /* rqst_payload */
                            uint64_t *); /* rsp_payload */
         void (*cmc_str)(char *);
+        void (*cmc_power)(uint32_t *,   /* row_ops */
+                          float *);     /* transient power */
+};
 
+struct hmc_internal_stat_t{
+  uint64_t xbar_rqst_stall;   /*! HMC_INTERNAL_STAT_T: XBAR REQUEST STALLS */
+  uint64_t xbar_rsp_stall;    /*! HMC_INTERNAL_STAT_T: XBAR RESPONSE STALLS */
+  uint64_t vault_rqst_stall;  /*! HMC_INTERNAL_STAT_T: VAULT REQUEST STALLS */
+  uint64_t vault_rsp_stall;   /*! HMC_INTERNAL_STAT_T: VAULT RESPONSE STALLS */
+  uint64_t route_rqst_stall;  /*! HMC_INTERNAL_STAT_T: ROUTE REQUEST STALLS */
+  uint64_t route_rsp_stall;   /*! HMC_INTERNAL_STAT_T: ROUTE RESPONSE STALLS */
+  uint64_t undef_stall;       /*! HMC_INTERNAL_STAT_T: UNDEFINED STALLS */
+  uint64_t bank_conflict;     /*! HMC_INTERNAL_STAT_T: BANK CONFLICTS */
+  uint64_t xbar_latency;      /*! HMC_INTERNAL_STAT_T: XBAR LATENCY EVENTS */
+  uint64_t packets;           /*! HMC_INTERNAL_STAT_T: NUMBER OF PACKETS */
+  uint64_t t_latency;         /*! HMC_INTERNAL_STAT_T: TOTAL PACKET LATENCY */
+};
+
+struct hmc_power_t{
+  /* -- local values */
+  float link_phy;           /*! HMC_POWER_T: POWER FOR EACH LINK PHY PER CLOCK */
+  float link_local_route;   /*! HMC_POWER_T: POWER FOR LOCAL LINK ROUTE TO QUAD */
+  float link_remote_route;  /*! HMC_POWER_T: POWER FOR REMOTE LINK ROUTE TO QUAD */
+  float xbar_rqst_slot;     /*! HMC_POWER_T: POWER FOR XBAR REQUEST SLOT */
+  float xbar_rsp_slot;      /*! HMC_POWER_T: POWER FOR XBAR RESPONSE SLOT */
+  float xbar_route_extern;  /*! HMC_POWER_T: POWER FOR ROUTED REQUEST TO EXTERNAL CUBE */
+  float vault_rqst_slot;    /*! HMC_POWER_T: POWER FOR VAULT REQUEST SLOT */
+  float vault_rsp_slot;     /*! HMC_POWER_T: POWER FOR VAULT RESPONSE SLOT */
+  float vault_ctrl;         /*! HMC_POWER_T: POWER FOR VAULT CONTROLLER PER ACTIVE CLOCK */
+  float row_access;         /*! HMC_POWER_T: POWER FOR ROW ACCESS */
+
+  /* -- totals */
+  float t_link_phy;           /*! HMC_POWER_T: TOTAL POWER FOR EACH LINK PHY PER CLOCK */
+  float t_link_local_route;   /*! HMC_POWER_T: TOTAL POWER FOR LOCAL LINK ROUTE TO QUAD */
+  float t_link_remote_route;  /*! HMC_POWER_T: TOTAL POWER FOR REMOTE LINK ROUTE TO QUAD */
+  float t_xbar_rqst_slot;     /*! HMC_POWER_T: TOTAL POWER FOR XBAR REQUEST SLOT */
+  float t_xbar_rsp_slot;      /*! HMC_POWER_T: TOTAL POWER FOR XBAR RESPONSE SLOT */
+  float t_xbar_route_extern;  /*! HMC_POWER_T: TOTAL POWER FOR ROUTED REQUEST TO EXTERNAL CUBE */
+  float t_vault_rqst_slot;    /*! HMC_POWER_T: TOTAL POWER FOR VAULT REQUEST SLOT */
+  float t_vault_rsp_slot;     /*! HMC_POWER_T: TOTAL POWER FOR VAULT RESPONSE SLOT */
+  float t_vault_ctrl;         /*! HMC_POWER_T: TOTAL POWER FOR VAULT CONTROLLER PER ACTIVE CLOCK */
+  float t_row_access;         /*! HMC_POWER_T: TOTAL POWER FOR ROW ACCESS */
+
+  /* -- output formats */
+  int tecplot;                /*! HMC_POWER_T: INDICATES TECPLOT OUTPUT FORMAT */
+  char prefix[1024];          /*! HMC_POWER_T: TECPLOT FILE NAME PREFIX */
+
+  /* -- tecplot output data */
+  struct HMC4LinkTec H4L;     /*! HMC_POWER_T: 4Link Tecplot data */
+  struct HMC8LinkTec H8L;     /*! HMC_POWER_T: 8Link Tecplot data */
 };
 
 struct hmcsim_t{
@@ -311,7 +412,9 @@ struct hmcsim_t{
         uint32_t num_cmc;               /*! HMC-SIM: HMCSIM_T: NUMBER OF REGISTERED CMC OPERATIONS */
 
 	uint32_t queue_depth;		/*! HMC-SIM: HMCSIM_T: VAULT QUEUE DEPTH */
-	uint32_t xbar_depth;		/*! HMC-SIM: HMCSIM_T: VAULT QUEUE DEPTH */
+	uint32_t xbar_depth;		/*! HMC-SIM: HMCSIM_T: CROSSBAR QUEUE DEPTH */
+
+        uint32_t dramlatency;           /*! HMC-sIM: HMCSIM_T: DRAM ACCESS LATENCY IN CYCLES */
 
 	FILE *tfile;			/*! HMC-SIM: HMCSIM_T: TRACE FILE HANDLER */
 	uint32_t tracelevel;		/*! HMC-SIM: HMCSIM_T: TRACE LEVEL */
@@ -319,6 +422,14 @@ struct hmcsim_t{
 	uint8_t seq;			/*! HMC-SIM: HCMSIM_T: SEQUENCE NUMBER */
 
 	uint64_t clk;			/*! HMC-SIM: HMCSIM_T: CLOCK TICK */
+
+        uint32_t simple_link;           /*! HMC-SIM: HMCSIM_T: SIMPLIFIED API LINK HANDLER */
+
+        struct hmc_power_t power;       /*! HMC-SIM: HMCSIM_T: POWER MEASUREMENT VALUES */
+
+        struct hmc_internal_stat_t istat; /*! HMC-SIM: HMCSIM_T: INTERNAL STATUS COUNTERS */
+
+        struct hmc_token_t tokens[1024];/*! HMC-SIM: HMCSIM_T: SIMPLE API TOKEN HANDLERS */
 
         int (*readmem)(struct hmcsim_t *,
                        uint64_t,
@@ -344,8 +455,6 @@ struct hmcsim_t{
 	uint64_t 		*__ptr_stor;
 	uint64_t 		*__ptr_end;
 };
-
-
 
 #ifdef __cplusplus
 } /* extern C */

@@ -346,11 +346,11 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 	uint32_t cur_xbar	= 0;
 	/* ---- */
 
-	/* 
-	 * sanity check 
-	 * 
+	/*
+	 * sanity check
+	 *
 	 */
-	if( hmc == NULL ){ 
+	if( hmc == NULL ){
 		return -1;
 	}
 
@@ -361,60 +361,60 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
         hmcsim_config_cmc( hmc );
 
 
-	/* 
+	/*
 	 * set the device pointers
-	 * 
+	 *
 	 */
-	hmc->devs	= hmc->__ptr_devs;		
+	hmc->devs	= hmc->__ptr_devs;
 
-	/* 
+	/*
 	 * zero the sequence number
-	 * 
+	 *
 	 */
 	hmc->seq 	= 0x00;
 
-	/* 
+	/*
 	 * for each device, set the sub-device pointers
-	 * 
+	 *
 	 */
 
 	for( i=0; i<hmc->num_devs; i++ ){
 
-		/* 
-		 * set the id 
+		/*
+		 * set the id
 		 *
 		 */
 		hmc->devs[i].id	= i;
 
-		/* 
+		/*
 	 	 * zero the sequence number
-		 * 
+		 *
 		 */
 		hmc->devs[i].seq = 0x00;
 
-		/* 
-	 	 * config the register file 
-		 * 
+		/*
+	 	 * config the register file
+		 *
 		 */
 		hmcsim_config_dev_reg( hmc, i );
 
-		/* 
+		/*
 		 * links on each device
 		 *
 		 */
 		hmc->devs[i].links	= &(hmc->__ptr_links[cur_link]);
 
-		/* 
+		/*
 		 * xbars on each device
-		 * 
+		 *
 		 */
 		hmc->devs[i].xbar	= &(hmc->__ptr_xbars[cur_link]);
 
 		for( j=0; j<hmc->num_links; j++ ){
 
-			/* 
+			/*
 			 * xbar queues
-			 * 
+			 *
 			 */
 			hmc->devs[i].xbar[j].xbar_rqst= &(hmc->__ptr_xbar_rqst[cur_xbar]);
 			hmc->devs[i].xbar[j].xbar_rsp = &(hmc->__ptr_xbar_rsp[cur_xbar]);
@@ -424,24 +424,24 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 							(uint64_t)&(hmc->__ptr_xbar_rsp[cur_xbar]) );
 #endif
 
-			for( a=0; a<hmc->xbar_depth; a++){ 
+			for( a=0; a<hmc->xbar_depth; a++){
 				hmc->devs[i].xbar[j].xbar_rqst[a].valid	= HMC_RQST_INVALID;
 				hmc->devs[i].xbar[j].xbar_rsp[a].valid	= HMC_RQST_INVALID;
 			}
 
 			cur_xbar += hmc->xbar_depth;
 
-			/* 
-			 * set the id 
+			/*
+			 * set the id
 			 *
 			 */
 			hmc->devs[i].links[j].id	= j;
 
-			/* 
-			 * set the type and cubs 
+			/*
+			 * set the type and cubs
 			 * by default, everyone connects to the host
 			 *
-			 */	
+			 */
 			hmc->devs[i].links[j].type	= HMC_LINK_HOST_DEV;
 			hmc->devs[i].links[j].src_cub	= hmc->num_devs+1;
 			hmc->devs[i].links[j].dest_cub	= i;
@@ -455,77 +455,79 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 
 		cur_link += hmc->num_links;
 
-		/* 
+		/*
 		 * quads on each device
-		 * 
+		 *
 		 */
 		hmc->devs[i].quads	= &(hmc->__ptr_quads[cur_quad]);
 
-		for( j=0; j<hmc->num_links; j++ ){ 
+		for( j=0; j<hmc->num_links; j++ ){
 
-			/* 
-			 * set the id 
+			/*
+			 * set the id
 			 *
 			 */
 			hmc->devs[i].quads[j].id	= j;
 
-			/* 
+			/*
 			 * vaults in each quad
 			 *
 			 */
 			hmc->devs[i].quads[j].vaults	= &(hmc->__ptr_vaults[cur_vault]);
 
-			//for( k=0; k<hmc->num_vaults; k++ ){ 
-			for( k=0; k<4; k++ ){ 
+                        /* always 8 vaults per quad */
+			for( k=0; k<8; k++ ){
 
-				/* 
-				 * set the id 
+				/*
+				 * set the id
 				 *
 				 */
 				hmc->devs[i].quads[j].vaults[k].id	= k;
-	
-				/* 
+
+				/*
 				 * banks in each vault
-				 * 
+				 *
 				 */
 				hmc->devs[i].quads[j].vaults[k].banks	= &(hmc->__ptr_banks[cur_bank]);
 
-				/* 
-				 * request and response queues 
-				 * 
+				/*
+				 * request and response queues
+				 *
 				 */
 				hmc->devs[i].quads[j].vaults[k].rqst_queue	= &(hmc->__ptr_vault_rqst[cur_queue]);
 				hmc->devs[i].quads[j].vaults[k].rsp_queue	= &(hmc->__ptr_vault_rsp[cur_queue]);
-			
-				/* 
+
+				/*
 				 * clear the valid bits
-				 * 
-				 */	
+				 *
+				 */
 				for( a=0; a<hmc->queue_depth; a++ ){
 					hmc->devs[i].quads[j].vaults[k].rqst_queue[a].valid	= HMC_RQST_INVALID;
 					hmc->devs[i].quads[j].vaults[k].rsp_queue[a].valid	= HMC_RQST_INVALID;
 				}
-				
-				for( x=0; x<hmc->num_banks; x++ ){ 
 
-					/* 
-					 * set the id 
+				for( x=0; x<hmc->num_banks; x++ ){
+
+					/*
+					 * set the id and initial delay
 					 *
 					 */
 					hmc->devs[i].quads[j].vaults[k].banks[x].id	= x;
+                                        hmc->devs[i].quads[j].vaults[k].banks[x].delay  = 0;
+                                        hmc->devs[i].quads[j].vaults[k].banks[x].valid  = HMC_RQST_INVALID;
 
-					/* 
+                                        /*
 					 * drams in each bank
-					 * 
+					 *
 					 */
 #if 0
 					hmc->devs[i].quads[j].vaults[k].banks[x].drams = 
 									&(hmc->__ptr_drams[cur_dram]);	
 #endif
 
-					for( y=0; y<hmc->num_drams; y++ ){ 
-			
-						/* 
+					for( y=0; y<hmc->num_drams; y++ ){
+
+						/*
 						 * set the id
 						 *
 						 */
@@ -533,22 +535,13 @@ extern int	hmcsim_config_devices( struct hmcsim_t *hmc )
 						hmc->devs[i].quads[j].vaults[k].banks[x].drams[y].id = y;
 #endif
 					}
-
 					cur_dram += hmc->num_drams;
-
 				}
-			
-				cur_bank += hmc->num_banks; 
-
-				cur_queue += hmc->queue_depth;	
-			}
-
-			//cur_queue += hmc->queue_depth;	
-			//cur_vault += hmc->num_vaults;
-			cur_vault += 4;
-
+				cur_bank += hmc->num_banks;
+				cur_queue += hmc->queue_depth;
+			} /* k=0; k<8; k++ */
+			cur_vault += 8;
 		}
-
 		cur_quad+=hmc->num_quads;
 	}
 

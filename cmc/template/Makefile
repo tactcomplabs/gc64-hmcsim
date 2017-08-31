@@ -28,8 +28,10 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@echo " CC $<"; $(CC) $(CFLAGS) -MD -MF $(@:.o=.deps) -c -o $@ $<
 clean:
 	@echo " Cleaning..."; $(RM) -r $(BUILDDIR) $(TARGET)
+install: $(TARGET)
+	@echo " Installing $(TARGET)"; install $(TARGET) $(PREFIX)/cmc/
 -include $(DEPS)
 
-.PHONY: clean
+.PHONY: clean install
 
 #--EOF
