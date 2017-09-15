@@ -460,6 +460,9 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
 			break;
 	}
 
+#ifdef HMC_DEBUG
+  printf( "HMCSIM_BUILD_MEMREQUEST : COMMAND = %d\n", cmd );
+#endif
 	/*
 	 * build the request packet header
 	 *
@@ -487,6 +490,9 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
 	/* write the request header out */
 	*rqst_head	= tmp;
 
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_ADDR_TRACE( "HMCSIM_BUILD_MEMREQUEST: PACKET HEADER", *rqst_head );
+#endif
 	tmp = 0x00ll;
 
 	/*
@@ -525,6 +531,9 @@ extern int	hmcsim_build_memrequest( struct hmcsim_t *hmc,
 
 	/* write the request tail out */
 	*rqst_tail	= tmp;
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_ADDR_TRACE( "HMCSIM_BUILD_MEMREQUEST: PACKET TAIL", *rqst_tail );
+#endif
 
 	return 0;
 }

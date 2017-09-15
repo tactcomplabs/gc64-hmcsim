@@ -169,7 +169,9 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
 
 	/* -- cmd = [6:0] */
 	cmd	= (uint32_t)(head & 0x7F);
-
+#ifdef HMC_DEBUG
+        printf( "HMCSIM_PROCESS_PACKET: DECODED COMMAND: %d\n", cmd );
+#endif
 	if( cmd == 0x00 ){
 		/* command is flow control, dump out */
 		no_response = 1;
@@ -2115,6 +2117,9 @@ step4_vr:
 		/* -- decode the response command : see hmc_response.c */
                 if( use_cmc != 1 ){
                   /* only decode the response if not using cmc */
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "DECODING RESPONSE COMMAND");
+#endif
 		  hmcsim_decode_rsp_cmd( rsp_cmd, &(tmp8) );
                 }
 
@@ -2130,11 +2135,13 @@ step4_vr:
 		rsp_tail	|= (rsp_seq<<18);
 		rsp_tail	|= (rsp_rtc<<29);
 		rsp_tail	|= (rsp_crc<<32);
-
 		packet[0] 		= rsp_head;
 		packet[((rsp_len*2)-1)]	= rsp_tail;
 
                 /* build the cmc data payload */
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "BUILDING THE RESPONSE PAYLOAD");
+#endif
                 for( j=1; j<((rsp_len-1)*2); j++ ){
                   packet[j] = rsp_payload[j];
                 }
@@ -2158,9 +2165,6 @@ step4_vr:
                     }
 
                 } else { /* No delay, forward response immediately */
-#ifdef HMC_DEBUG
-  printf( "STALLING BANK %d %d CYCLES\n", bank, op_latency );
-#endif
                     hmc->devs[dev].quads[quad].vaults[vault].rsp_queue[t_slot].valid = HMC_RQST_VALID;
 		    //for( j=0; j<rsp_len; j++ ){
 		    for( j=0; j<HMC_MAX_UQ_PACKET; j++ ){
@@ -2174,6 +2178,9 @@ step4_vr:
 
 	} else { /* else, no response required, probably flow control */
             /* Stall the bank for op_latency cycles in the case where no response is generated */
+#ifdef HMC_DEBUG
+  printf( "STALLING BANK %d %d CYCLES\n", bank, op_latency );
+#endif
             hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_INVALID; 
             hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = op_latency;        
         }

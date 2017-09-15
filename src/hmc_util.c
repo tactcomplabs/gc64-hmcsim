@@ -772,6 +772,12 @@ extern int hmcsim_util_get_max_blocksize( struct hmcsim_t *hmc, uint32_t dev, ui
 	uint64_t code	= 0x00ll;
 	/* ---- */
 
+        // NOTE! THIS IS A TEMPORARY FIX TO MAINTAIN CONSISTENCY WITH LARGE
+        // PACKET REQUESTS.  GIVEN THAT THE GEN 2.1 OMITS THE REGISTER SPEC,
+        // WE JUST ASSUME 128 BYTE ADDRESSING FOR NOW
+        *bsize = 128;
+        return 0;
+
 	/* 
 	 * sanity check 
 	 * 
