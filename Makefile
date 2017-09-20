@@ -13,10 +13,16 @@ BUILDDIR := build
 SHBUILDDIR := shbuild
 LIBS :=
 TARGET := lib$(LIBNAME).a
-SHTARGET := lib$(LIBNAME).so
 LDFLAGS :=
 ARFLAGS := rcs
 SHLIB := -shared
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+SHTARGET := lib$(LIBNAME).dylib
+else
+SHTARGET := lib$(LIBNAME).so
+endif
 
 .PHONY : test tools cmc viz
 
@@ -75,7 +81,7 @@ install: $(TARGET) $(SHTARGET) cmc
 	mkdir -p $(PREFIX)/lib
 	mkdir -p $(PREFIX)/cmc
 	@echo " Installing libhmcsim.a..."; install ./libhmcsim.a $(PREFIX)/lib/
-	@echo " Installing libhmcsim.so..."; install ./libhmcsim.so $(PREFIX)/lib/
+	@echo " Installing $(SHTARGET)..."; install $(SHTARGET) $(PREFIX)/lib/
 	@echo " Installing headers..."; install ./include/*.h $(PREFIX)/include/
 	@echo " Installing CMC libs...";
 	install cmc/amo_popcount/libamopopcount.so $(PREFIX)/cmc/
@@ -94,7 +100,7 @@ install: $(TARGET) $(SHTARGET) cmc
 	install cmc/mutex/hmc_unlock/libhmc_unlock.so $(PREFIX)/cmc/
 	install cmc/template/libcmctemplate.so $(PREFIX)/cmc/
 	ln -fs $(PREFIX)/lib/libhmcsim.a $(PREFIX)/libhmcsim.a
-	ln -fs $(PREFIX)/lib/libhmcsim.so $(PREFIX)/libhmcsim.so
+	ln -fs $(PREFIX)/lib/$(SHTARGET) $(PREFIX)/$(SHTARGET)
 
 -include $(DEPS)
 
