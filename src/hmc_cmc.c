@@ -530,11 +530,21 @@ extern int    hmcsim_free_cmc( struct hmcsim_t *hmc ){
 extern int      hmcsim_load_cmc( struct hmcsim_t *hmc, char *cmc_lib ){
 
   if((hmc == NULL) || (cmc_lib == NULL)){
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "ERROR PROCESSING FUNCTION ARGUMENTS" );
+#endif
     return -1;
   }
 
+#ifdef HMC_DEBUG
+  printf( "ATTEMPTING TO LOAD CMC LIBRARY: %s\n", cmc_lib );
+#endif
+
   /* register the library functions */
   if( hmcsim_register_functions( hmc, cmc_lib ) != 0 ){
+#ifdef HMC_DEBUG
+  HMCSIM_PRINT_TRACE( "FAILED TO REGISTER CMC FUNCTIONS" );
+#endif
     return -1;
   }
 
