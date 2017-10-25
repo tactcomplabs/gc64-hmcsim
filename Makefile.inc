@@ -81,10 +81,10 @@ AR_OPTS=rcs
 
 #-- DOXYGEN
 #-- DOXYGEN BINARY
-DOXYGEN=`which doxygen`
+DOXYGEN=/usr/bin/doxygen
 
 #-- PREFIX
 #-- INSTALLATION PREFIX
-PREFIX=/opt/hmcsim/
+PREFIX=/jenkins/sst/install/volatile/TOT/hmcsim
 
 #-- EOF
