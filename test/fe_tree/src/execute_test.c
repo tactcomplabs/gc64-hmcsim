@@ -450,9 +450,11 @@ extern int execute_test(        struct hmcsim_t *hmc,
   }
 
   hmcsim_trace_handle( hmc, ofile );
+#if 0
   hmcsim_trace_level( hmc, (HMC_TRACE_CMD|
                             HMC_TRACE_STALL|
                             HMC_TRACE_LATENCY) );
+#endif
   hmcsim_trace_header( hmc );
 
   printf( "SUCCESS : INITIALIZED TRACE HANDLERS\n" );
