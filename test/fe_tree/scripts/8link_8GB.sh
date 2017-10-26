@@ -19,7 +19,7 @@ THREADS=2
 LIBSRC=../../../cmc/fullempty/
 
 
-while [ $THREADS -lt 101 ]
+while [ $THREADS -lt 86 ]
 do
 echo "Executing $MUTEX -L $LIBSRC -b $BANKS -c $CAPACITY -d $DRAMS -l $LINKS -m $BSIZE -n 1 -q $QDEPTH -v $VAULTS -x $XDEPTH -T $THREADS"
 $MUTEX -L $LIBSRC -b $BANKS -c $CAPACITY -d $DRAMS -l $LINKS -m $BSIZE -n 1 -q $QDEPTH -v $VAULTS -x $XDEPTH -T $THREADS >> $LINKS.$CAPACITY.$THREADS.txt 2>&1
