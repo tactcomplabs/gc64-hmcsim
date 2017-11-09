@@ -13,6 +13,7 @@ comp_cpu.addParams({
 	"generatorParams.startat" : 3,
 	"generatorParams.count" : 500000,
 	"generatorParams.max_address" : 512000,
+	"generatorParams.read_cmd" : 20,
 	"printStats" : 1,
 })
 
@@ -52,7 +53,7 @@ comp_memory.addParams({
       "backend.trace-cmds" : "1",
       "backend.trace-latency" : "1",
       "backend.trace-stalls" : "1",
-      "backend.cmd-map" : "[RD:64:RD96]"
+      "backend.cmd-map" : "[RD:20:64:RD96]"
 })
 
 
