@@ -2,12 +2,7 @@
 HMC-SIM TODO LIST
 -------------------------------------------------------------------------------
 
-
-- integration with SST statistics functions
-
 - integration with Kitfox for power/thermal modeling
-
-- NOFIX: revisit hmc register decoding: deprecated; no public spec available
 
 - add "hmc_init_sku()" to init the sim using a defined config
 
@@ -25,6 +20,7 @@ HMC-SIM TODO LIST
 -------------------------------------------------------------------------------
 Completed Items:
 -------------------------------------------------------------------------------
+-- integration with SST statistics functions
 -- add simplified api functions
 -- better integration with SST: DONE
 -- add thermal and power modeling functions: DONE
