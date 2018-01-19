@@ -4,6 +4,9 @@
  * Implementation file for the new HMC Stat functions that
  * permit us to derive stats from internal HMC-Sim counters
  *
+ * COPYRIGHT (c) 2018 TEXAS TECH UNIVERSITY
+ * SEE LICENSE FOR DETAILS
+ *
  */
 
 

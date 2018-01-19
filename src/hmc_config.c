@@ -3,6 +3,9 @@
  *
  * Reads the HMC configuration data from a file
  *
+ * COPYRIGHT (c) 2018 TEXAS TECH UNIVERSITY
+ * SEE LICENSE FOR DETAILS
+ *
  */
 
 #include <stdio.h>
