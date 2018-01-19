@@ -3,6 +3,9 @@
  *
  * HMC-Sim Tecplot Data Formats
  *
+ * COPYRIGHT (c) 2018 TEXAS TECH UNIVERSITY
+ * SEE LICENSE FOR DETAILS
+ *
  */
 
 #ifndef _HMC_SIM_TECPLOT_H_

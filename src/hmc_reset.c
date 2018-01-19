@@ -1,10 +1,13 @@
-/* 
+/*
  * _HMC_RESET_C_
- * 
- * HYBRID MEMORY CUBE SIMULATION LIBRARY 
- * 
+ *
+ * HYBRID MEMORY CUBE SIMULATION LIBRARY
+ *
  * HMC WARM RESET FUNCTION
- * 
+ *
+ * COPYRIGHT (c) 2018 TEXAS TECH UNIVERSITY
+ * SEE LICENSE FOR DETAILS
+ *
  */
 
 
@@ -14,9 +17,9 @@
 #include "hmc_sim.h"
 
 /* ----------------------------------------------------- HMCSIM_RESET_DEVICE */
-/* 
+/*
  * HMCSIM_RESET_DEVICE
- * 
+ *
  */
 extern int	hmcsim_reset_device( struct hmcsim_t *hmc, uint32_t dev )
 {
