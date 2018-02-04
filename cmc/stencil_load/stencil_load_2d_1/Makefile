@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# HMC-SIM 2.0 CMC TEMPLATE MAKEFILE
+# HMC-SIM 2.0 CMC 2D STENCIL LOAD OP FOR 1 BYTE DATA
 #
 #------------------------------------
 
