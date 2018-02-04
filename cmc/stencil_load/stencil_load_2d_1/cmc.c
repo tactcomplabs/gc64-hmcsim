@@ -174,7 +174,7 @@ extern int hmcsim_execute_cmc(  void *hmc,
   
   /* ensure stencil point <= #possible rsp_payload items */
   const uint8_t point = stencil_point(center_inclusive, neighborhood_type, radius, dims);
-  if (point > ((__rsp_len*128)/data_size)){
+  if (point == 0 || point > ((__rsp_len*128)/data_size)){
     return -1;
   }
 
@@ -256,7 +256,7 @@ extern int hmcsim_execute_cmc(  void *hmc,
           }
           pack_data(data, rsp_payload, rsp_count, data_size);
 
-	  fetch_addr = addr + (j*x_width*data_size);
+	  fetch_addr = addr + (i*x_width*data_size);
           if( (*readmem)(l_hmc, fetch_addr, &data, 1) != 0 ){
             /* error in data read */
             return -1;
@@ -272,6 +272,8 @@ extern int hmcsim_execute_cmc(  void *hmc,
 	}
       }
       break;
+    default:
+      return -1;
   }
   
   return 0;
