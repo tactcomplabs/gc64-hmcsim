@@ -1,0 +1,31 @@
+-------------------------------------------------
+HMC-Sim 2.0 CMC 2D Stencil Load with 1 Byte Cells 
+
+Adds a 1D stencil load operation which reads 1 byte data elements
+  using the CMC code CMC21.
+This operation supports the reading of up to 32 1-Byte cells with
+  a single call.
+This operation assumes the the array that is being read from is
+ stored contiguously within memory.
+
+The request payload is 2 FLITs long, and consists of the following:
+  -rqst_payload[0] : center-inclusive : 1 if center cell is part of
+    stencil, 0 otherwise.
+  -rqst_payload[3:1] : Neighborhood Type : determines the general
+    characteristics of the stencil layout. Can be one of :
+      0) Von Neumann Neighborhood: a stencil containing all cells
+           with a Manhattan Distance less than or equal to the
+           stencil radius.
+      1) Moore Neighborhood: a stencil containing all cells with a
+           Chebyshev Distance less than or equal to the stencil
+           radius.
+      2) Narrow Von Neumann Neighborhood: a stencil containing all
+           cells with MAnhattan Distance less than or equal to the
+           stencil radius which also lie along the axis created
+           with the center cell as the origin.
+  -rqst_payload[9:4] : Radius (or range) : determines the maximum
+     distance from the center cell which will be used in stencil,
+     as defined in the Neighborhood Type.
+  -rqst_payload[127:10] : UNUSED
+-------------------------------------------------
+EOF
