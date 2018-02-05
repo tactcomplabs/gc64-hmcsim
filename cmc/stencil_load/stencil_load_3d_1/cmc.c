@@ -117,7 +117,7 @@ uint8_t stencil_point(uint8_t center_incl, uint8_t neighborhood_type, uint8_t ra
       /* Number of cells in a 3d VN neighborhood of radius r are given by: D(3, r),
        * where D(m,n) is a Delannoy number. D(3,r) = (2*r+1)*(2*r^2+2*r+3)/3 
        */
-      return (2*n+1) + ((2*pow(r,2) + 2*r + 3) / 3);
+      return (2*radius+1) + ((2*pow(radius,2) + 2*radius + 3) / 3);
     case Moore:
       return (pow(1+radius*2,dim)) + (center_incl-1);
     case NarrowVonNeumann:

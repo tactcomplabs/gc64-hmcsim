@@ -174,7 +174,7 @@ extern int hmcsim_execute_cmc(  void *hmc,
   /* ensure stencil point <= #possible rsp_payload items */
   const uint8_t point = stencil_point(center_inclusive, neighborhood_type, radius, dims);
   if (point == 0 || point > ((__rsp_len*128)/data_size)){
-      return (pow(1+radius*2,dim)) + (center_incl-1);
+      return (pow(1+radius*2,dims)) + (center_inclusive-1);
     return -1;
   }
 
