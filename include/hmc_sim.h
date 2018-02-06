@@ -5,6 +5,9 @@
  *
  * MAIN HEADER FILE
  *
+ * COPYRIGHT (c) 2018 TEXAS TECH UNIVERSITY
+ * SEE LICENSE FOR DETAILS
+ *
  */
 
 /*!	\file hmc_sim.h
