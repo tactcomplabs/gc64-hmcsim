@@ -12,6 +12,44 @@
 #include <stdint.h>
 #include "hmc_sim.h"
 
+/* ----------------------------------------------------- HMCSIM_READ_CMCREG */
+extern int hmcsim_read_cmcreg( struct hmcsim_t *hmc,
+                               uint32_t dev,
+                               uint64_t idx,
+                               uint64_t *data ){
+  /* sanity check */
+  if( hmc == NULL ){
+    return -1;
+  }else if( dev > (hmc->num_devs-1) ){
+    return -1;
+  }else if( idx > (HMC_NUM_CMC_REGS-1) ){
+    return -1;
+  }else if( data == NULL ){
+    return -1;
+  }
+
+  *data = hmc->devs[dev].cmc_reg[idx];
+  return 0;
+}
+
+/* ----------------------------------------------------- HMCSIM_WRITE_CMCREG */
+extern int hmcsim_write_cmcreg( struct hmcsim_t *hmc,
+                                uint32_t dev,
+                                uint64_t idx,
+                                uint64_t data ){
+  /* sanity check */
+  if( hmc == NULL ){
+    return -1;
+  }else if( dev > (hmc->num_devs-1) ){
+    return -1;
+  }else if( idx > (HMC_NUM_CMC_REGS-1) ){
+    return -1;
+  }
+
+  hmc->devs[dev].cmc_reg[idx] = data;
+  return 0;
+}
+
 /* ----------------------------------------------------- HMCSIM_READMEM */
 extern int  hmcsim_readmem( struct hmcsim_t *hmc,
                             uint64_t addr,
