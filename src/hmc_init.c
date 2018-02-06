@@ -167,6 +167,7 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
 {
 	/* vars */
 	uint32_t i	= 0;
+        uint64_t j      = 0;
 	/* ---- */
 
 	/*
@@ -318,6 +319,10 @@ extern int hmcsim_init(	struct hmcsim_t *hmc,
 	 *
 	 */
 	for( i=0; i<hmc->num_devs; i++ ) {
+          /* zero all the cmc registers */
+          for( j=0; j<HMC_NUM_CMC_REGS; j++ ){
+            hmc->devs[i].cmc_reg[j] = 0x00ull;
+          }
 
 		//hmc_reset_device( hmc, i );
 	}

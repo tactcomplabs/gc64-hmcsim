@@ -22,6 +22,14 @@ extern int hmcsim_writemem( struct hmcsim_t *hmc,
                             uint64_t addr,
                             uint64_t *data,
                             uint32_t len);
+extern int hmcsim_read_cmcreg( struct hmcsim_t *hmc,
+                               uint32_t dev,
+                               uint64_t idx,
+                               uint64_t *data );
+extern int hmcsim_write_cmcreg( struct hmcsim_t *hmc,
+                                uint32_t dev,
+                                uint64_t idx,
+                                uint64_t data );
 
 
 /* ----------------------------------------------------- HMCSIM_FREE_MEMORY */
@@ -243,8 +251,10 @@ extern int	hmcsim_allocate_memory( struct hmcsim_t *hmc )
 		return -1;
 	}
 
-        hmc->readmem  = &(hmcsim_readmem);
-        hmc->writemem = &(hmcsim_writemem);
+        hmc->readmem      = &(hmcsim_readmem);
+        hmc->writemem     = &(hmcsim_writemem);
+        hmc->read_cmcreg  = &(hmcsim_read_cmcreg);
+        hmc->write_cmcreg = &(hmcsim_write_cmcreg);
 
 	return 0;
 }
