@@ -111,7 +111,36 @@ extern int hmcsim_execute_cmc(  void *hmc,
                                 uint64_t tail,
                                 uint64_t *rqst_payload,
                                 uint64_t *rsp_payload ){
-  /* perform your operation */
+
+  /* relevant function pointers */
+  struct hmcsim_t *l_hmc  = (struct hmcsim_t *)(hmc);
+  int (*readmem)(struct hmcsim_t *,
+                 uint64_t,
+                 uint64_t *,
+                 uint32_t ) = NULL;
+  int (*writemem)(struct hmcsim_t *,
+                  uint64_t,
+                  uint64_t *,
+                  uint32_t ) = NULL;
+  int (*read_cmcreg)(struct hmcsim_t *,
+                     uint32_t,
+                     uint64_t,
+                     uint64_t *) = NULL;
+  int (*write_cmcreg)(struct hmcsim_t *,
+                      uint32_t,
+                      uint64_t,
+                      uint64_t ) = NULL;
+
+  /* init the function pointers */
+  readmem       = l_hmc->readmem;
+  writemem      = l_hmc->writemem;
+  read_cmcreg   = l_hmc->read_cmcreg;
+  write_cmcreg  = l_hmc->write_cmcreg;
+
+  /*
+   * !!! perform your operation !!!
+   *
+   */
 
   return 0;
 }

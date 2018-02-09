@@ -94,6 +94,8 @@ extern "C" {
 
 #define		HMC_NUM_REGS		26
 
+#define         HMC_NUM_CMC_REGS        64
+
 #define		HMC_REG_EDR0		0x2B0000
 #define		HMC_REG_EDR1		0x2B0001
 #define		HMC_REG_EDR2		0x2B0002
