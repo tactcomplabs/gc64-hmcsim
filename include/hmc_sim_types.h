@@ -306,6 +306,8 @@ struct hmc_dev_t{
 
 	struct hmc_reg_t regs[HMC_NUM_REGS];	/*! HMC-SIM: HMC_DEV_T: DEVICE CONFIGURATION REGISTERS */
 
+        uint64_t cmc_reg[HMC_NUM_CMC_REGS];     /*! HMC-SIM: HMC_DEV_T: CMC CONFIGURATION REGISTERS */
+
 	uint32_t id;				/*! HMC-SIM: HMC_DEV_T: CUBE ID */
 
 	uint8_t seq;				/*! HMC-SIM: HMC_DEV_T: SEQUENCE NUMBER */
@@ -443,6 +445,16 @@ struct hmcsim_t{
                        uint64_t,
                        uint64_t *,
                        uint32_t );
+
+        int (*read_cmcreg)(struct hmcsim_t *hmc,
+                           uint32_t dev,
+                           uint64_t idx,
+                           uint64_t *data);
+
+        int (*write_cmcreg)(struct hmcsim_t hmc,
+                            uint32_t dev,
+                            uint64_t idx,
+                            uint64_t data);
 
 	struct hmc_dev_t	*__ptr_devs;
 	struct hmc_quad_t	*__ptr_quads;
