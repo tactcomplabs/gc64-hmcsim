@@ -215,6 +215,10 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
                      uint64_t *) = NULL;
   void (*cmc_str)(char *) = NULL;
   void (*cmc_power)(uint32_t *,float *) = NULL;
+  uint32_t (*cmc_dyn_rsp)() = NULL;
+  uint32_t (*cmc_dyn_rqst)() = NULL;
+  uint32_t (*cmc_dyn)() = NULL;
+  uint32_t dynamic = 0;
   /* ---- */
 
   /* attempt to load the library */
@@ -280,6 +284,18 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   /* -- hmcsim_cmc_power */
   cmc_power = (void (*)(uint32_t *,float *))dlsym(handle,"hmcsim_cmc_power");
 
+  /* hmcsim_cmc_dynamic */
+  cmc_dyn = (uint32_t (*)())dlsym(handle,"hmcsim_cmc_dynamic");
+  if( cmc_dyn != NULL ){
+    dynamic = (*cmc_dyn)();
+  }
+  if( dynamic ){
+    /* load the remainder of the dynamic rqst/rsp functions */
+    cmc_dyn_rsp = (uint32_t (*)())dlsym(handle,"hmcsim_cmc_dynamic_rsp_len");
+    cmc_dyn_rqst = (uint32_t (*)())dlsym(handle,"hmcsim_cmc_dynamic_rqst_len");
+  }
+
+
   /* done loading functions */
 
   idx = hmcsim_cmc_rawtoidx( cmd );
@@ -313,6 +329,10 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   hmc->cmcs[idx].cmc_register = cmc_register;
   hmc->cmcs[idx].cmc_execute  = cmc_execute;
   hmc->cmcs[idx].cmc_str      = cmc_str;
+
+  hmc->cmcs[idx].dynamic      = dynamic;
+  hmc->cmcs[idx].cmc_dyn_rsp  = cmc_dyn_rsp;
+  hmc->cmcs[idx].cmc_dyn_rqst = cmc_dyn_rqst;
 
   return 0;
 }

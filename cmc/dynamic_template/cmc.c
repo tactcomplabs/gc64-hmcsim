@@ -88,7 +88,7 @@ uint32_t __dynamic_rqst_len = 0;
 /* __dynamic_cmc : Determines if dynamic request and response packets
                  : are enabled; 0=no; 1=yes
 */
-static int __dynamic_cmc = 1;
+static uint32_t __dynamic_cmc = 1;
 
 /* ----------------------------------------------------- HMCSIM_EXECUTE_CMC */
 /*
@@ -205,7 +205,7 @@ extern int hmcsim_register_cmc( hmc_rqst_t *rqst,
  * values. 0=no; 1=yes
  *
  */
-int hmcsim_cmc_dynamic(){
+uint32_t hmcsim_cmc_dynamic(){
   return __dynamic_cmc;
 }
 
