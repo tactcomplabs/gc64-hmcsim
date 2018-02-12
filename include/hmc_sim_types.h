@@ -451,7 +451,7 @@ struct hmcsim_t{
                            uint64_t idx,
                            uint64_t *data);
 
-        int (*write_cmcreg)(struct hmcsim_t hmc,
+        int (*write_cmcreg)(struct hmcsim_t *hmc,
                             uint32_t dev,
                             uint64_t idx,
                             uint64_t data);
