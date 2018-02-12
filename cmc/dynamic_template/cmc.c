@@ -196,6 +196,10 @@ extern int hmcsim_register_cmc( hmc_rqst_t *rqst,
   *rsp_cmd      = __rsp_cmd;
   *rsp_cmd_code = __rsp_cmd_code;
 
+  /* initialize the dynamic packet lengths */
+  __dynamic_rsp_len = __rsp_len;
+  __dynamic_rqst_len = __rqst_len;
+
   return 0;
 }
 

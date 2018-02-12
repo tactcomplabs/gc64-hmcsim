@@ -344,6 +344,7 @@ extern int  hmcsim_query_cmc( struct hmcsim_t *hmc,
                               uint8_t *cmd ){
   /* vars */
   uint32_t idx      = HMC_MAX_CMC;
+  uint32_t (*cmc_dyn_rqst)() = NULL;
   /* ---- */
 
   idx = hmcsim_cmc_cmdtoidx( type );
@@ -365,6 +366,13 @@ extern int  hmcsim_query_cmc( struct hmcsim_t *hmc,
 
   *flits  = hmc->cmcs[idx].rqst_len;
   *cmd    = hmc->cmcs[idx].cmd;
+
+  /* check for a dynamic command */
+  if( hmc->cmcs[idx].dynamic == 1){
+    // this cmc command has a dynamic request or response length
+    cmc_dyn_rqst = hmc->cmcs[idx].cmc_dyn_rqst;
+    *flits = (*cmc_dyn_rqst)();
+  }
 
   return 0;
 }
@@ -405,6 +413,7 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                      uint64_t *) = NULL;
   void (*cmc_str)(char *);
   void (*cmc_power)(uint32_t *,float *) = NULL;
+  uint32_t (*cmc_dyn_rsp)() = NULL;
   /* ---- */
 
   /* resolve the index of the cmc in the lookup table */
@@ -450,7 +459,12 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
 #endif
 
   /* register all the response data */
-  *rsp_len      = hmc->cmcs[idx].rsp_len;
+  if( hmc->cmcs[idx].dynamic == 1 ){
+    cmc_dyn_rsp = hmc->cmcs[idx].cmc_dyn_rsp;
+    *rsp_len      = (*cmc_dyn_rsp)();
+  }else{
+    *rsp_len      = hmc->cmcs[idx].rsp_len;
+  }
   *rsp_cmd      = hmc->cmcs[idx].rsp_cmd;
 
   if( *rsp_len > 0 ){
