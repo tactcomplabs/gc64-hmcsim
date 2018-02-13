@@ -33,7 +33,7 @@ static hmc_rqst_t __rqst    = CMC04;
          : This MUST match the __rqst field.  For example, if we have
          : CMC32 as the __rqst, then the __cmd is (uint32_t)(32).
 */
-static uint32_t __cmd       = 1;
+static uint32_t __cmd       = 4;
 
 /* __rqst_len : Contains the respective command request packet len in flits
               : Permissible values are 1->17.  This must include the header
