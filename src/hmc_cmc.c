@@ -300,8 +300,8 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
 
   idx = hmcsim_cmc_rawtoidx( cmd );
 #ifdef HMC_DEBUG
-  printf( "HMCSIM_REGISTER_FUNCTIONS: Setting CMC command at IDX=%d to ACTIVE\n",
-          idx );
+  printf( "HMCSIM_REGISTER_FUNCTIONS: Setting CMC command (%d) at IDX=%d to ACTIVE\n",
+          cmd,idx );
 #endif
 
   if( hmc->cmcs[idx].active == 1 ){
