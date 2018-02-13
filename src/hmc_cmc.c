@@ -215,6 +215,10 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
                      uint64_t *) = NULL;
   void (*cmc_str)(char *) = NULL;
   void (*cmc_power)(uint32_t *,float *) = NULL;
+  uint32_t (*cmc_dyn_rsp)() = NULL;
+  uint32_t (*cmc_dyn_rqst)() = NULL;
+  uint32_t (*cmc_dyn)() = NULL;
+  uint32_t dynamic = 0;
   /* ---- */
 
   /* attempt to load the library */
@@ -280,12 +284,24 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   /* -- hmcsim_cmc_power */
   cmc_power = (void (*)(uint32_t *,float *))dlsym(handle,"hmcsim_cmc_power");
 
+  /* hmcsim_cmc_dynamic */
+  cmc_dyn = (uint32_t (*)())dlsym(handle,"hmcsim_cmc_dynamic");
+  if( cmc_dyn != NULL ){
+    dynamic = (*cmc_dyn)();
+  }
+  if( dynamic ){
+    /* load the remainder of the dynamic rqst/rsp functions */
+    cmc_dyn_rsp = (uint32_t (*)())dlsym(handle,"hmcsim_cmc_dynamic_rsp_len");
+    cmc_dyn_rqst = (uint32_t (*)())dlsym(handle,"hmcsim_cmc_dynamic_rqst_len");
+  }
+
+
   /* done loading functions */
 
   idx = hmcsim_cmc_rawtoidx( cmd );
 #ifdef HMC_DEBUG
-  printf( "HMCSIM_REGISTER_FUNCTIONS: Setting CMC command at IDX=%d to ACTIVE\n",
-          idx );
+  printf( "HMCSIM_REGISTER_FUNCTIONS: Setting CMC command (%d) at IDX=%d to ACTIVE\n",
+          cmd,idx );
 #endif
 
   if( hmc->cmcs[idx].active == 1 ){
@@ -314,6 +330,10 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   hmc->cmcs[idx].cmc_execute  = cmc_execute;
   hmc->cmcs[idx].cmc_str      = cmc_str;
 
+  hmc->cmcs[idx].dynamic      = dynamic;
+  hmc->cmcs[idx].cmc_dyn_rsp  = cmc_dyn_rsp;
+  hmc->cmcs[idx].cmc_dyn_rqst = cmc_dyn_rqst;
+
   return 0;
 }
 
@@ -324,6 +344,7 @@ extern int  hmcsim_query_cmc( struct hmcsim_t *hmc,
                               uint8_t *cmd ){
   /* vars */
   uint32_t idx      = HMC_MAX_CMC;
+  uint32_t (*cmc_dyn_rqst)() = NULL;
   /* ---- */
 
   idx = hmcsim_cmc_cmdtoidx( type );
@@ -345,6 +366,13 @@ extern int  hmcsim_query_cmc( struct hmcsim_t *hmc,
 
   *flits  = hmc->cmcs[idx].rqst_len;
   *cmd    = hmc->cmcs[idx].cmd;
+
+  /* check for a dynamic command */
+  if( hmc->cmcs[idx].dynamic == 1){
+    // this cmc command has a dynamic request or response length
+    cmc_dyn_rqst = hmc->cmcs[idx].cmc_dyn_rqst;
+    *flits = (*cmc_dyn_rqst)();
+  }
 
   return 0;
 }
@@ -385,6 +413,7 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                      uint64_t *) = NULL;
   void (*cmc_str)(char *);
   void (*cmc_power)(uint32_t *,float *) = NULL;
+  uint32_t (*cmc_dyn_rsp)() = NULL;
   /* ---- */
 
   /* resolve the index of the cmc in the lookup table */
@@ -430,7 +459,12 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
 #endif
 
   /* register all the response data */
-  *rsp_len      = hmc->cmcs[idx].rsp_len;
+  if( hmc->cmcs[idx].dynamic == 1 ){
+    cmc_dyn_rsp = hmc->cmcs[idx].cmc_dyn_rsp;
+    *rsp_len      = (*cmc_dyn_rsp)();
+  }else{
+    *rsp_len      = hmc->cmcs[idx].rsp_len;
+  }
   *rsp_cmd      = hmc->cmcs[idx].rsp_cmd;
 
   if( *rsp_len > 0 ){

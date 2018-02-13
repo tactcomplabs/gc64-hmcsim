@@ -326,6 +326,7 @@ struct hmc_cmc_t{
         int track_power;                /*! HMC-SIM: HMC_CMC_T: DOES THIS CMC OP TRACK POWER? */
 
         uint32_t active;                /*! HMC-SIM: HMC_CMC_T: SIGNALS THAT THE COMMAND IS ACTIVE */
+        uint32_t dynamic;               /*! HMC-SIM: HMC_CMC_T: SIGNALS THAT THE COMMAND IS DYNAMIC */
         void *handle;                   /*! HMC-SIM: HMC_CMC_T: DLSYM HANDLE */
 
         /* -- fptrs */
@@ -350,6 +351,8 @@ struct hmc_cmc_t{
         void (*cmc_str)(char *);
         void (*cmc_power)(uint32_t *,   /* row_ops */
                           float *);     /* transient power */
+        uint32_t (*cmc_dyn_rsp)();      /* dynamic response length */
+        uint32_t (*cmc_dyn_rqst)();     /* dynamic request length */
 };
 
 struct hmc_internal_stat_t{
@@ -451,7 +454,7 @@ struct hmcsim_t{
                            uint64_t idx,
                            uint64_t *data);
 
-        int (*write_cmcreg)(struct hmcsim_t hmc,
+        int (*write_cmcreg)(struct hmcsim_t *hmc,
                             uint32_t dev,
                             uint64_t idx,
                             uint64_t data);
