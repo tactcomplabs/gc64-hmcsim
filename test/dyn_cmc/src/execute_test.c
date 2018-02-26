@@ -17,7 +17,7 @@
 uint32_t rqst_packet_length( uint64_t header ){
   uint32_t var = 0x00;
 
-  var = (uint32_t)((header&0x1F)>>7);
+  var = (uint32_t)((header>>7)&0x1F);
   return var;
 }
 

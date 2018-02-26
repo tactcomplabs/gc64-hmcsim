@@ -1,0 +1,39 @@
+-------------------------------------------------
+HMC-Sim 2.0 CMC 1D Stencil Read with 1-Byte Array Elements 
+
+Adds a 1D stencil read operation which reads a set of array values
+  as specified by the stencil neighborhood passed as a request packet.
+This operation supports the read of a stencil with up to 512 elements.
+  Attempting to read a stencil with more elements will return in error.
+This operation returns the elements as a collection of 1-16 128-bit
+  packets, which taken together form an unordered set of 4-bit array
+  elements.
+It is assumed that the array being read from is stored contiguously in
+  memory. Otherwise, behavior is undefined.
+It is assumed that all array elements within the specified neighborhood
+  have a value in memory. Otherwise, behavior is undefined.
+
+The request payload is 2 FLITs in length, and consists of:
+ -rqst_payload[0] : center-inclusive : 1 if center cell is part of
+    stencil neighborhood, 0 otherwise.
+ -rqst_payload[3:1] : neighborhood type : marks the general
+    characteristics of the stencil neighbrhood layout.
+    0) Von Neumann Neighborhood: a stencil containing all cells with
+         Manhattan Distance less than or equal to the stencil radius.
+    1) Moore Neighborhood: a stencil containing all cells with a
+         Chebyshev Distance less than or equal to the stencil radius.
+    2) Narrow Von Neumann Neighborhood: a stencil containing all cells
+         with a Manhattan Distance less than or equal to the stencil
+         radius, whcih also lies along the axis created with the
+         the stencil center cell as the origin.
+ -rqst_payload[9:4] : Radius (Range) : the maximum distance from the
+    center cell which will be included as stencil, as defined in the
+    neighborhood type.
+ -rqst_payload[127:10] : UNUSED
+
+The response payload is of dynamic length, varying from 1-16 FLITs.
+The length of the response payload is determined by the stencil
+  layout chosen.
+
+-------------------------------------------------
+EOF
