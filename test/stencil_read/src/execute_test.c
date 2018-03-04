@@ -13,8 +13,6 @@
 #include "hmc_sim.h"
 
 
-enum nh_t{von_neumann, moore, narrow_von_neumann};
-
 /* ------------------------------------------------- RQST_PACKET_LENGTH */
 uint32_t rqst_packet_length( uint64_t header ){
   uint32_t var = 0x00;
@@ -41,24 +39,38 @@ uint64_t i = 0x00ll;
 
   return ;
 }
+
 /* ------------------------------------------------- BUILD_STENCIL_PAYLOAD */
-/*
- * BUILD_STENCIL_PAYLOAD
+/* BUILD_STENCIL_PAYLOAD
+ *
  */
-uint64_t build_stencil_payload( uint8_t center_incl,
-				 enum nh_t nh_type,
-				 uint32_t radius,
-				 uint32_t array_width,
-				 uint32_t array_height,
-				 uint32_t array_depth ){
-  uint64_t payload = 0x0ll;
-  payload += center_incl & 0x1;
-  payload += (nh_type & 0x7) << 0x1;
-  payload += (radius & 0x3F) << 0x4;
-  payload += ((uint64_t) array_width & 0xFFFF) << 0x10;
-  payload += ((uint64_t) array_height & 0xFFFF) << 0x20;
-  return payload;
+static void build_stencil_payload( uint8_t point, 
+				   uint8_t array_width, 
+				   uint8_t array_height,
+				   uint8_t * stencil_layout,
+				   uint64_t * payload ){
+  payload[0] = 0x0ll;
+  *(payload) += (point & 0xFF);
+  *(payload) += (array_width & 0xFF) << 0x8;
+  *(payload) += (array_height & 0xFF) << 0x10;
+
+  const uint8_t num_packets = 1 + ((point * 8 * 3) / 64);
+  uint8_t i = 0;
+  for(i=0; i < num_packets; i++){
+    uint8_t cur_pos = 0;
+    if(i==0){
+      payload[0] = 0x0ll;
+      *(payload) += (point & 0xFF);
+      *(payload) += (array_width & 0xFF) << 0x8;
+      *(payload) += (array_height & 0xFF) << 0x10;
+      cur_pos += 24;
+    }
+    for(;cur_pos < 64; cur_pos+=8){
+      payload[i] += *(stencil_layout+cur_pos*(i+1)) << cur_pos;
+    }
+  }
 }
+
 /* ------------------------------------------------- EXECUTE_TEST */
 /*
  * EXECUTE TEST
@@ -83,6 +95,8 @@ extern int execute_test(        struct hmcsim_t *hmc,
   uint16_t tag		= 1;
   uint32_t done		= 0;
   uint32_t i		= 0;
+  uint32_t j		= 0;
+  uint32_t k		= 0;
   uint64_t packet[HMC_MAX_UQ_PACKET];
 
   FILE *ofile		= NULL;
@@ -134,14 +148,33 @@ extern int execute_test(        struct hmcsim_t *hmc,
   zero_packet( &(packet[0]) );
 
   printf( "BEGINNING EXECUTION\n" );
-  
+ 
+ 
   //defines center-inclusive moore neighborhood of r=1
-  payload[0] = build_stencil_payload( 1, moore, 1, array_width, array_height, array_depth ); 
+  const uint8_t r = 1;
+  const uint8_t dims = 3;
+  uint8_t stencil_point = 27;
+  uint8_t stencil_layout[stencil_point][dims];
+  uint8_t l = 0;
+  for(i=-r; i<=r; i++){
+    for(j=-r; j<=r; j++){
+      for(k=-r; k<=r; k++){
+        stencil_layout[l][0] = i & 0xFF;
+        stencil_layout[l][1] = j & 0xFF;
+        stencil_layout[l][2] = k & 0xFF;
+        l++;
+      }
+    }
+  }
+  
+
+  build_stencil_payload(stencil_point, array_width, array_height, (uint8_t *)stencil_layout, payload);
+   
   uint32_t array_size = array_width * array_height * array_depth;
   uint32_t data_width = 4;  
 
   /* -- begin cycle cycle loop */
-  printf("GENERATING ADDRESSES FOR ARRAY OF SIZE: %d\n", array_size);
+  printf("GENERATING REQUEST ADDRESSES FOR ARRAY OF SIZE: %d\n", array_size);
   uint64_t addr[array_size];
   uint32_t l_size = 0;
   uint32_t curX, curY, curZ;
@@ -169,7 +202,54 @@ extern int execute_test(        struct hmcsim_t *hmc,
   uint32_t sreads_recvd = 0;
   // number of stores system is waiting on
   while( done != 1 ){
-    if( q_start - q_end != 0 ){
+    if( cycles == 0){
+      // first cycle; init the stencil register
+      ret = hmcsim_build_memrequest( hmc,
+                                     0,
+                                     0,
+                                     tag,
+                                     CMC23,    /* STENCIL_LOAD_3D_1_INIT */
+                                     link,
+                                     &(packet[0]),
+                                     &head,
+                                     &tail);
+    if( ret == 0 ){
+        plen = rqst_packet_length(head);
+        printf( "SENDING PACKET WITH %d FLITS\n", plen );
+        if( plen > 1 ){
+          // lay out packet
+          packet[0] = head;
+          for(i=0; i<((plen-1)*2); i++ ){
+            packet[i+1] = payload[i];
+          }
+          packet[(plen*2)-1] = tail;
+        }else{
+          packet[0] = head;
+          packet[1] = tail;
+        }
+        printf("ATTEMPTING TO SET CMC STENCIL REG WITH DATA: 0x%016lx\n", payload[0]);
+        ret = hmcsim_send( hmc, &(packet[0]) );
+      }else{
+        printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
+      }
+
+      switch( ret ){
+      case 0:
+      /* success */
+        printf( "SUCCESS : SET STENCIL_READ CMC REG IN DEVICE\n" );
+        tag++;
+        break;
+      case HMC_STALL:
+        printf( "FAILED : HMC DEVICE WAS STALLED\n" );
+        break;
+      case -1:
+      default:
+        printf( "FAILED : STENCIL_READ_INIT PACKET SEND FAILURE\n" );
+        goto complete_failure;
+        break;
+      }
+      zero_packet(&(packet[0]));
+    }else if( q_start - q_end != 0 ){
       // if the size of the write queue > 0
       /* push out a store */
 

@@ -36,28 +36,32 @@ static int load_cmc_libs( struct hmcsim_t *hmc, char *libsrc ){
   /* vars */
   int srclen  = strlen( libsrc ) + 1;
   char *lib   = NULL;
-  char *mlib = "/stencil_read/stencil_read_3d_1/libstencil_read_3d_1.so";
+  char *mlib[] = { "/stencil_read/stencil_read_3d_1_reg/libstencil_read_3d_1.so",
+		   "/stencil_read/stencil_read_init/libstencil_read_init.so"};
   /* ---- */
+  uint32_t i;
+  for( i=0; i<2; i++){
 
-  lib = malloc( sizeof( char ) * (strlen(mlib)+srclen) );
-  if( lib == NULL ){
-    printf( "ERROR : COULD NOT ALLOCATE MEMORY FOR LIB: %s\n", mlib );
-    return -1;
+    lib = malloc( sizeof( char ) * (strlen(mlib[i])+srclen) );
+    if( lib == NULL ){
+      printf( "ERROR : COULD NOT ALLOCATE MEMORY FOR LIB: %s\n", mlib[i] );
+      return -1;
+    }
+
+    sprintf( lib, "%s%s%s", libsrc, "/", mlib[i] );
+
+
+    printf( "LOADING CMC LIBRARY: %s\n", mlib[i] );
+    if( hmcsim_load_cmc( hmc, lib ) != 0 ){
+      printf( "ERROR : COULD NOT LOAD CMC LIBRARY : %s\n", mlib[i] );
+      return -1;
+    }else{
+      printf( "LOADED CMC LIBRARY: %s\n", mlib[i] );
+    }
+
+    free( lib );
+    lib = NULL;
   }
-
-  sprintf( lib, "%s%s%s", libsrc, "/", mlib );
-
-
-  printf( "LOADING CMC LIBRARY: %s\n", mlib );
-  if( hmcsim_load_cmc( hmc, lib ) != 0 ){
-    printf( "ERROR : COULD NOT LOAD CMC LIBRARY : %s\n", mlib );
-    return -1;
-  }else{
-    printf( "LOADED CMC LIBRARY: %s\n", mlib );
-  }
-
-  free( lib );
-  lib = NULL;
 
   fflush( stdout );
 
@@ -95,7 +99,6 @@ extern int main( int argc, char **argv ){
 
   while(( ret = getopt( argc, argv, "b:c:d:h:l:m:n:q:v:x:t:N:T:C:L:i:j:k:" )) != -1 )
   {
-    printf("got: %c\n", ret);
     switch( ret )
     {
       case 'b':
@@ -262,6 +265,23 @@ extern int main( int argc, char **argv ){
   }else {
     printf( "SUCCESS : INITIALIZED MAX BLOCK SIZE\n" );
   }
+
+  /*
+   * init dram latency
+   *
+   */
+  ret = hmcsim_init_dram_latency( &hmc, 93);
+  
+  if( ret != 0 ){
+    printf( "FAILED TO INIT DRAM LATENCY\n" );
+    hmcsim_free( &hmc );
+    free( libsrc );
+    libsrc = NULL;
+    return -1;
+  }else {
+    printf( "SUCCESS : INITIALIZED DRAM LATENCY\n" );
+  }
+
 
   /*
    * load the cmc libs

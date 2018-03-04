@@ -1,0 +1,40 @@
+-------------------------------------------------
+HMC-Sim 2.0 CMC Stencil Read Initialization
+
+Adds a stencil read initialization operation which stores the
+  stencil initialization settings for a specific stencil config
+  in the CMC registers 0-31.
+
+The request payload is 17 FLITs in length, and depending on number
+  of array dimension, consists of one of the following:
+
+1-DIMENSIONAL STENCIL:
+ -rqst_payload[7:0] : stencil point : the number of cells in the
+    stencil to be initialized.
+ -rqst_payload[2048:8] : stencil layout : 1d array containing the
+    relative positions of each cell within the stencil to be
+    initialized.
+
+2-DIMENSIONAL STENCIL:
+ -rqst_payload[7:0] : stencil point : the number of cells in the
+    stencil to be initialized.
+ -rqst_payload[15:8] : array width : the number of array elements
+    within each row of the array.
+ -rqst_payload[2048:16] : stencil layout : 2d array containing the
+    relative positions of each cell within the stencil to be
+    initialized.
+
+3-DIMENSIONAL STENCIL:
+ -rqst_payload[7:0] : stencil point : the number of cells in the
+    stencil to be initialized.
+ -rqst_payload[15:8] : array width : the number of array elements
+    within each row of the array.
+  -rqst_payload[23:16] : array height : the number of array elements
+    within each column of the array.
+ -rqst_payload[2048:24] : stencil layout : 3d array containing the
+    relative positions of each cell within the stencil to be
+    initialized.
+
+
+-------------------------------------------------
+EOF
