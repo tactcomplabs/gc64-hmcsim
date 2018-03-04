@@ -20,20 +20,20 @@
 
 
 /* __op_name : Contains a string representative for the trace logs */
-static char *__op_name      = "STENCIL_READ_3D_1";
+static char *__op_name      = "STENCIL_READ_3D_INIT";
 
 /* __rqst : Contains the respective command enum that the simulated
           : application uses to initiate a request for this command.
           : See hmc_rqst_t enums from hmc_sim_types.h
           : MUST BE UNIQUE ACROSS CMC LIBS
 */
-static hmc_rqst_t __rqst    = CMC22;
+static hmc_rqst_t __rqst    = CMC23;
 
 /* __cmd : Contains the respective command code for this CMC operation.
          : This MUST match the __rqst field.  For example, if we have
          : CMC32 as the __rqst, then the __cmd is (uint32_t)(32).
 */
-static uint32_t __cmd       = 22;
+static uint32_t __cmd       = 23;
 
 /* __rqst_len : Contains the respective command request packet len in flits
               : Permissible values are 1->17.  This must include the header
@@ -41,7 +41,7 @@ static uint32_t __cmd       = 22;
               : Commands with data will include at least two flits.
               : It is up to the implementor to decode the data flits
 */
-static uint32_t __rqst_len  = 2;
+static uint32_t __rqst_len  = 17;
 
 /* __rsp_len : Contains the respective command response packet len in flits
              : Permissible values are 0->17.  This must include the header
@@ -78,76 +78,17 @@ static uint32_t __row_ops = 2;
 /* __dynamic_rsp_len : Contains the instantaneous dynamic response len
                      : for the packet currently being processed in flits
 */
-uint32_t __dynamic_rsp_len = 2;
+uint32_t __dynamic_rsp_len = 0;
 
 /* __dynamic_rqst_len : Contains the instantaneous dynamic request len
                       : for the packet currently being processed in flits
 */
-uint32_t __dynamic_rqst_len = 1;
+uint32_t __dynamic_rqst_len = 0;
 
 /* __dynamic_cmc : Determines if dynamic request and response packets
                  : are enabled; 0=no; 1=yes
 */
-static uint32_t __dynamic_cmc = 1;
-
-/* nh_type : neighborhood type enum
-*/
-enum nh_type{VonNeumann, Moore, NarrowVonNeumann};
-
-
-/* ----------------------------------------------------- helper functions   */
-
-int pow(int base, int exp){
-  int r = 1;
-  int i = 0;
-  for (i=0; i < exp; i++){
-    r *= base;
-  }
-  return r;
-}
-
-/* ----------------------------------------------------- PACK_DATA          */
-/* Pushes data onto payload truncated to the correct size
- *
- * data is the data from cache line
- * *payload is the payload that the data will be pushed to. Note: It's assumed
- *   that unused bits in payload are zero'd
- * count is the number of items already pushed to the payload
- * data_width is the size in bits of payload data elements
- *
- */
-void pack_data(uint64_t data, uint64_t *payload, uint8_t count, uint8_t data_width){
-  uint8_t payload_index = count / (64/data_width);
-  uint8_t payload_count = count % (64/data_width);
-  payload[payload_index] += (data & ((int) (1 << data_width)-1)) << (payload_count * data_width);
-}
-
-/* ----------------------------------------------------- STENCIL_POINT      */
-/* Returns the stencil point value for the stencil specified by passed arguments
- * returns 0 if neighborhood not defined as a valid nh_type
- *
- * center_incl is a boolean that is true iff the center cell is included in the stencil
- * neighborhood_type is the layout of the neighborhood and must be chosen a valid
- *   nh_type as defined in the nh_type enum
- * radius is the radius (range) of the stencil
- * dim is the number of dimensions which the stencil is operating over
- *
- */
-uint8_t stencil_point(uint8_t center_incl, uint8_t neighborhood_type, uint8_t radius, uint8_t dim){
-  switch(neighborhood_type){
-    case VonNeumann:
-      /* Number of cells in a 3d VN neighborhood of radius r are given by: D(3, r),
-       * where D(m,n) is a Delannoy number. D(3,r) = (2*r+1)*(2*r^2+2*r+3)/3 
-       */
-      return (2*radius+1) + ((2*radius*radius + 2*radius + 3) / 3);
-    case Moore:
-      return (pow(1+radius*2,dim)) + (center_incl-1);
-    case NarrowVonNeumann:
-      return radius*2*dim + center_incl;
-    default:
-      return 0;
-  }
-}
+static uint32_t __dynamic_cmc = 0;
 
 
 /* ----------------------------------------------------- HMCSIM_EXECUTE_CMC */
@@ -186,150 +127,27 @@ extern int hmcsim_execute_cmc(  void *hmc,
                                 uint64_t tail,
                                 uint64_t *rqst_payload,
                                 uint64_t *rsp_payload ){
-
   /* relevant function pointers */
   struct hmcsim_t *l_hmc  = (struct hmcsim_t *)(hmc);
-  int (*readmem)(struct hmcsim_t *,
-                 uint64_t,
-                 uint64_t *,
-                 uint32_t ) = NULL;
-
-  /* init the function pointers */
-  readmem       = l_hmc->readmem;
-
-  /* operation constants */
-  const uint8_t data_width = 4;   // in bits
-  const uint8_t dims = 3;
-
-  /* extract request payload data */
-  /* rqst_payload size : 1 FLIT */
-  const uint8_t center_inclusive = rqst_payload[0] & 0x1;
-  const uint8_t neighborhood_type = rqst_payload[0] >> 1 & 0x7;
-  const uint8_t radius = rqst_payload[0] >> 4 & 0x3F;
-  const uint8_t x_width = rqst_payload[0] >> 16 & 0xFFFF;
-  const uint8_t y_width = rqst_payload[0] >> 32 & 0xFFFF;
-  /* ensure stencil return data <= max rsp_payload size (256 Bytes) */
-  const uint8_t point = stencil_point(center_inclusive, neighborhood_type, radius, dims);
-  if (point == 0){
-    printf("ERROR: invalid stencil neighborhood defined\n");
-    return -1;
-  }else if (point*data_width > 256*8){
-    printf("Error: stencil read exceeds maximum packet return size\n");
-    return -1;
-  }
   
-  /* set dynamic response length using stencil point */
-  __dynamic_rsp_len = ((point * data_width) +127 )/ 128;
-  
-  /* data variable for read ops */
-  uint64_t data = 0x00ull;
-
-   /* count variable for number of items in rsp_payload */
-  uint8_t rsp_count = 0x0;
-
-  /* address variable for read ops */
-  uint64_t fetch_addr = 0x00ull;
-
-  /* init function pointer */
-  readmem = l_hmc->readmem;
-
-  uint8_t i, j, k;
-  switch (neighborhood_type){
-    case VonNeumann:
-      for(i=-radius; i<=radius; i++){
-        for(j=-radius; j<=radius;j++){
-          for(k=-radius; k<=radius; k++){
-            // only read values whose Manhattan Distance < the stencil radius
-            if(abs(i)+abs(j)+abs(k) <= radius){
-              // only read center value if it hasn't been excluded
-              if (!(j==0 && i==0 && k==0)){
-                fetch_addr = addr +
-                        (i*data_width) +
-                        (j*x_width*data_width) +
-                        (k*y_width*x_width*data_width);
-                if( (*readmem)(l_hmc, fetch_addr, &data, 1) != 0 ){
-                  /* error in data read */
-                  return -1;
-                }
-                pack_data(data, rsp_payload, rsp_count, data_width);
-              }else if(center_inclusive){
-                fetch_addr = addr;
-                if( (*readmem)(l_hmc, fetch_addr, &data, 1) != 0 ){
-                  /* error in data read */
-                  return -1;
-                }
-                pack_data(data, rsp_payload, rsp_count, data_width);
-              }
-            }
-          }
-        }
-      }
-      break;
-    case Moore:
-      for(i=-radius; i<=radius; i++){
-        for(j=-radius; j<=radius; j++){
-          for(k=-radius; k<=radius; k++){
-            // only read center value if it hasn't been excluded
-            if (!(i==0 && j==0 && k==0)){
-              fetch_addr = addr +
-                      (i*data_width) +
-                      (j*x_width*data_width) +
-                      (k*y_width*x_width*data_width);
-              if( (*readmem)(l_hmc, fetch_addr, &data, 1) != 0 ){
-                /* error in data read */
-                return -1;
-              }
-              pack_data(data, rsp_payload, rsp_count, data_width);
-            }else if(center_inclusive){
-              fetch_addr = addr;
-              if( (*readmem)(l_hmc, fetch_addr, &data, 1) != 0 ){
-                /* error in data read */
-                return -1;
-              }
-              pack_data(data, rsp_payload, rsp_count, data_width);
-            }
-          }
-        }
-      }
-      break;
-    case NarrowVonNeumann:
-      for(i=-radius; i<=radius; i++){
-        if (i != 0){
-          fetch_addr = addr + (i*data_width);
-          if( (*readmem)(l_hmc, fetch_addr, &data, 1) != 0 ){
-            /* error in data read */
-            return -1;
-          }
-          pack_data(data, rsp_payload, rsp_count, data_width);
-
-          fetch_addr = addr + (i*x_width*data_width);
-          if( (*readmem)(l_hmc, fetch_addr, &data, 1) != 0 ){
-            /* error in data read */
-            return -1;
-          }
-          pack_data(data, rsp_payload, rsp_count, data_width);
-
-          fetch_addr = addr + (i*y_width*x_width*data_width);
-          if( (*readmem)(l_hmc, fetch_addr, &data, 1) != 0 ){
-            /* error in data read */
-            return -1;
-          }
-          pack_data(data, rsp_payload, rsp_count, data_width);
-
-        }else if(center_inclusive){
-          fetch_addr = addr;
-          if( (*readmem)(l_hmc, fetch_addr, &data, 1) != 0 ){
-            /* error in data read */
-            return -1;
-          }
-          pack_data(data, rsp_payload, rsp_count, data_width);
-        }
-      }
-      break;
-    default:
-      printf("ERROR: invalid neighborhood type\n");
+  int (*write_cmcreg)(struct hmcsim_t *,
+                     uint32_t,
+                     uint64_t,
+                     uint64_t) = NULL;
+  write_cmcreg = l_hmc->write_cmcreg;
+  uint8_t i, j;
+  j=0;
+  for(i = 0; i < length; i++){
+    if( (*write_cmcreg)(l_hmc, 0, j, rqst_payload[j]) != 0 ){
+      printf("ERROR: failed to write to stencil CMC register\n");
       return -1;
-  }
+    }
+    if( (*write_cmcreg)(l_hmc, 0, j+1, rqst_payload[j+1]) != 0 ){
+      printf("ERROR: failed to write to stencil CMC register\n");
+      return -1;
+    }
+    j+=2;
+  } 
 
   return 0;
 }
