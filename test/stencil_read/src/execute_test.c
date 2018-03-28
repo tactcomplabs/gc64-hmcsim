@@ -1,4 +1,4 @@
-/*
+	/*
  * _EXECUTE_TEST_C_
  *
  * HMCSIM DYNAMIC_CMC EXECUTION FUNCTIONS
@@ -78,6 +78,7 @@ static void build_stencil_payload( uint8_t point,
  */
 extern int execute_test(        struct hmcsim_t *hmc,
                                 uint32_t num_threads,
+                                uint32_t num_cores,
 				uint32_t shiftamt,
 				uint32_t array_width,
 				uint32_t array_height,
@@ -93,7 +94,6 @@ extern int execute_test(        struct hmcsim_t *hmc,
   uint8_t cub		= 0;
   uint8_t link		= 0;
   uint16_t tag		= 1;
-  uint32_t done		= 0;
   uint32_t i		= 0;
   uint32_t j		= 0;
   uint32_t k		= 0;
@@ -150,13 +150,19 @@ extern int execute_test(        struct hmcsim_t *hmc,
   printf( "BEGINNING EXECUTION\n" );
  
  
-  //defines center-inclusive moore neighborhood of r=1
+  /* Initialize the stencil_layout array
+   * In this case, we are loading a creating a stencil_layout that defines
+   * a Moore neighborhood of r radius in dims dimensions.
+   * We must ensure that stencil_point = the number of cells in our stencil.
+   * The number of cells in a Moore neighborhood with radius r and dimension dims
+   * is given by cells=(2r+1)^dims
+   */
   const uint8_t r = 1;
   const uint8_t dims = 3;
-  uint8_t stencil_point = 27;
+  uint8_t stencil_point = 6;
   uint8_t stencil_layout[stencil_point][dims];
   uint8_t l = 0;
-  for(i=-r; i<=r; i++){
+/*  for(i=-r; i<=r; i++){
     for(j=-r; j<=r; j++){
       for(k=-r; k<=r; k++){
         stencil_layout[l][0] = i & 0xFF;
@@ -165,11 +171,42 @@ extern int execute_test(        struct hmcsim_t *hmc,
         l++;
       }
     }
-  }
+  }*/
   
+  stencil_layout[l][0] = 0;
+  stencil_layout[l][1] = 0;
+  stencil_layout[l][2] = 1;
+  l++;
 
+  stencil_layout[l][0] = 0;
+  stencil_layout[l][1] = 0;
+  stencil_layout[l][2] = -1;
+  l++;
+  
+  stencil_layout[l][0] = 0;
+  stencil_layout[l][1] = 1;
+  stencil_layout[l][2] = 0;
+  l++;
+  
+  stencil_layout[l][0] = 0;
+  stencil_layout[l][1] = -1;
+  stencil_layout[l][2] = 0;
+  l++;
+  
+  stencil_layout[l][0] = 1;
+  stencil_layout[l][1] = 0;
+  stencil_layout[l][2] = 0;
+  l++;
+
+  stencil_layout[l][0] = -1;
+  stencil_layout[l][1] = 0;
+  stencil_layout[l][2] = 0;
+  l++;
+  
+  /* Build the payload to pass into the CMC using the stencil_layout */
   build_stencil_payload(stencil_point, array_width, array_height, (uint8_t *)stencil_layout, payload);
-   
+  
+  /* Init data about array that stencil will be operating on */ 
   uint32_t array_size = array_width * array_height * array_depth;
   uint32_t data_width = 4;  
 
@@ -178,195 +215,215 @@ extern int execute_test(        struct hmcsim_t *hmc,
   uint64_t addr[array_size];
   uint32_t l_size = 0;
   uint32_t curX, curY, curZ;
-  for(curX = 1; curX < (array_width - 1); curX++) {
-    for(curY = 1; curY < (array_height - 1); curY++){
-      for(curZ = 1; curZ < (array_depth - 1); curZ++){
+  uint8_t buffer = 1;
+  for(curX = buffer; curX < (array_width - buffer); curX++) {
+    for(curY = buffer; curY < (array_height - buffer); curY++){
+      for(curZ = buffer; curZ < (array_depth - buffer); curZ++){
         addr[l_size] = (data_width * curX) + (data_width * curY * array_width) + (data_width * curZ * array_width * array_height);
         l_size++;
       }
     }
   }
+  printf("SUCCESSFULLY CREATED %d REQUEST ADDRESSES\n", l_size);
   struct dict_entry{
-    uint16_t key;
-    uint16_t val;
+    uint64_t key;
+    uint64_t val;
   };
   struct dict_entry dict[l_size];
+  uint64_t dict_size = 0; 
   // queue for addresses waiting to be written to 
   // because we set queue size to l_size, we don't
   // need to worry about exceeding queue size or wrapping
   uint64_t addr_q[l_size]; 
-  uint16_t q_start = 0;
-  uint16_t q_end = 0;
+  uint64_t q_start = 0;
+  uint64_t q_end = 0;
 
-  uint32_t sreads_sent = 0;
-  uint32_t sreads_recvd = 0;
+  uint64_t sreads_sent = 0;
+  uint64_t sreads_recvd = 0;
+  uint64_t bytes_read = 0;
+  uint64_t bytes_written = 0;
+  uint64_t writes = 0;
+
+  uint8_t ongoing_rqsts = 0;
+  uint8_t cur_core = 0;
   // number of stores system is waiting on
-  while( done != 1 ){
-    if( cycles == 0){
-      // first cycle; init the stencil register
-      ret = hmcsim_build_memrequest( hmc,
-                                     0,
-                                     0,
-                                     tag,
-                                     CMC23,    /* STENCIL_LOAD_3D_1_INIT */
-                                     link,
-                                     &(packet[0]),
-                                     &head,
-                                     &tail);
-    if( ret == 0 ){
-        plen = rqst_packet_length(head);
-        printf( "SENDING PACKET WITH %d FLITS\n", plen );
-        if( plen > 1 ){
-          // lay out packet
-          packet[0] = head;
-          for(i=0; i<((plen-1)*2); i++ ){
-            packet[i+1] = payload[i];
-          }
-          packet[(plen*2)-1] = tail;
-        }else{
-          packet[0] = head;
-          packet[1] = tail;
-        }
-        printf("ATTEMPTING TO SET CMC STENCIL REG WITH DATA: 0x%016lx\n", payload[0]);
-        ret = hmcsim_send( hmc, &(packet[0]) );
-      }else{
-        printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
-      }
-
-      switch( ret ){
-      case 0:
-      /* success */
-        printf( "SUCCESS : SET STENCIL_READ CMC REG IN DEVICE\n" );
-        tag++;
-        break;
-      case HMC_STALL:
-        printf( "FAILED : HMC DEVICE WAS STALLED\n" );
-        break;
-      case -1:
-      default:
-        printf( "FAILED : STENCIL_READ_INIT PACKET SEND FAILURE\n" );
-        goto complete_failure;
-        break;
-      }
-      zero_packet(&(packet[0]));
-    }else if( q_start - q_end != 0 ){
-      // if the size of the write queue > 0
-      /* push out a store */
-
-      // dequeue oldest element
-      uint32_t addr_temp = addr_q[q_start];
-      q_start++;
-      /* build the request */
-      hmcsim_build_memrequest( hmc,
-                               0,
-			       addr_temp,
-                               tag,
-                               WR64,
-                               link,
-                               &(payload[0]),
-                               &head,
-                               &tail );
-
-      packet[0]       = head;
-      packet[1]       = 0x02ll;
-      packet[2]       = 0x03ll;
-      packet[3]       = 0x04ll;
-      packet[4]       = 0x05ll;
-      packet[5]       = 0x06ll;
-      packet[6]       = 0x07ll;
-      packet[7]       = 0x08ll;
-      packet[8]       = 0x09ll;
-      packet[9]       = tail;
-      packet[1]       = tail;
-
-      /* send it */
-      ret     = hmcsim_send( hmc, &(packet[0]) );
-      /* handle the response */
-      switch( ret ){
-      case 0:
-        /* success */
-        printf("SUCCESS : PACKET WRITTEN TO HMC\n");
-        tag++;
-        break;
-      case HMC_STALL:
-        /* stalled */
-        printf( "STALL: HMC STALLED\n" );
-        break;
-      case -1:
-      default:
-        printf( "FAILED : PACKET SEND FAILED\n" );
-        goto complete_failure;
-        break;
-      }
-
-      /* 
-       * zero the packet 
-       *
-       */
-      zero_packet( &(packet[0]) );
-
-    }else if( sreads_sent < l_size ){  
-      // send a request
-      ret = hmcsim_build_memrequest( hmc,
-                                     0,
-                                     addr[sreads_sent],
-                                     tag,
-                                     CMC22,    /* STENCIL_LOAD_3D_1 */
-                                     link,
-                                     &(packet[0]),
-                                     &head,
-                                     &tail);
-      //add dict entry for tag-addr pair for addr retrieval
-      dict[sreads_sent].key = tag;
-      dict[sreads_sent].val = addr[sreads_sent];
-      // ensure each tag used is unique
-      tag++;
-      sreads_sent++;
-      if( ret == 0 ){
-        plen = rqst_packet_length(head);
-        printf( "SENDING PACKET WITH %d FLITS\n", plen );
-        if( plen > 1 ){
-          // lay out packet
-          packet[0] = head;
-          for(i=0; i<((plen-1)*2); i++ ){
-            packet[i+1] = payload[i];
-          }
-          packet[(plen*2)-1] = tail;
-        }else{
-          packet[0] = head;
-          packet[1] = tail;
-        }
-        printf("ATTMEPTING TO SEND REQUEST WITH ADDR: 0x%016lx\n", addr[sreads_sent-1]);
-        ret = hmcsim_send( hmc, &(packet[0]) );
-      }else{
-        printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
-      }
-
-      switch( ret ){
-      case 0:
-      /* success */
-        printf( "SUCCESS : INJECTED STENCIL_READ PACKET INTO DEVICE\n" );
-        tag++;
-        break;
-      case HMC_STALL:
-        printf( "FAILED : HMC DEVICE WAS STALLED\n" );
-        break;
-      case -1:
-      default:
-        printf( "FAILED : STENCIL_READ PACKET SEND FAILURE\n" );
-        goto complete_failure;
-        break;
-      }
-
-    }
-    // check for response
-    for( i=0; i<hmc->num_links; i++ ){
-      ret = HMC_OK;
-      while( ret != HMC_STALL ){
-        ret = hmcsim_recv( hmc, cub, i, &(packet[0]) );
+  
+  printf("BEGIN SIMULATION\n");
+  /* -- begin cycle loop */
+  while( writes < l_size ){
+    for(cur_core = 0; cur_core < num_cores; cur_core++){
+      if( cycles == 0){
+        // first cycle; init the stencil register
+        ret = hmcsim_build_memrequest( hmc,
+                                       0,
+                                       0,
+                                       tag,
+                                       CMC23,    /* STENCIL_LOAD_3D_1_INIT */
+                                       link,
+                                       &(packet[0]),
+                                       &head,
+                                       &tail);
         if( ret == 0 ){
-          /* decode the response */
-          hmcsim_decode_memresponse( hmc,
+          plen = rqst_packet_length(head);
+          //printf( "SENDING PACKET WITH %d FLITS\n", plen );
+          if( plen > 1 ){
+            // lay out packet
+            packet[0] = head;
+            for(i=0; i<((plen-1)*2); i++ ){
+              packet[i+1] = payload[i];
+            }
+            packet[(plen*2)-1] = tail;
+          }else{
+            packet[0] = head;
+            packet[1] = tail;
+          }
+          //printf("ATTEMPTING TO SET CMC STENCIL REG WITH DATA: 0x%016lx\n", payload[0]);
+          ret = hmcsim_send( hmc, &(packet[0]) );
+        }else{
+          printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
+        }
+
+        switch( ret ){
+        case 0:
+        /* success */
+          //printf( "SUCCESS : SET STENCIL_READ CMC REG IN DEVICE\n" );
+          tag++;
+          if( tag > 1023) tag = 0;
+          ongoing_rqsts++;
+          break;
+        case HMC_STALL:
+          printf( "FAILED : HMC DEVICE WAS STALLED\n" );
+          break;
+        case -1:
+        default:
+          printf( "FAILED : STENCIL_READ_INIT PACKET SEND FAILURE\n" );
+          goto complete_failure;
+          break;
+        }
+        zero_packet(&(packet[0]));
+      }else if( q_start - q_end != 0){
+        // if the size of the write queue > 0
+        /* execute a store */
+
+        // dequeue oldest element
+        uint32_t addr_temp = addr_q[q_start];
+        q_start++;
+        /* build the request */
+        hmcsim_build_memrequest( hmc,
+                                 0,
+	                         addr_temp,
+                                 tag,
+                                 WR64,
+                                 link,
+                                 &(payload[0]),
+                                 &head,
+                                 &tail );
+
+        packet[0]       = head;
+        packet[1]       = 0x02ll;
+        packet[2]       = 0x03ll;
+        packet[3]       = 0x04ll;
+        packet[4]       = 0x05ll;
+        packet[5]       = 0x06ll;
+        packet[6]       = 0x07ll;
+        packet[7]       = 0x08ll;
+        packet[8]       = 0x09ll;
+        packet[9]       = tail;
+        packet[1]       = tail;
+
+        /* send it */
+        ret     = hmcsim_send( hmc, &(packet[0]) );
+        /* handle the response */
+        switch( ret ){
+        case 0:
+          /* success */
+          //printf("SUCCESS : PACKET WRITTEN TO HMC WITH TAG %d\n", tag);
+          bytes_written += 1;
+          writes++;
+          tag++;
+          if( tag > 1023 ) tag = 0;
+          break;
+        case HMC_STALL:
+          /* stalled */
+          printf( "STALL: HMC STALLED\n" );
+          break;
+        case -1:
+        default:
+          printf( "FAILED : PACKET SEND FAILED\n" );
+          goto complete_failure;
+          break;
+        }
+
+        /* 
+         * zero the packet 
+         *
+         */
+        zero_packet( &(packet[0]) );
+
+      }else if( sreads_sent < l_size && ongoing_rqsts < num_threads ){ 
+        // send a stencil read request as long as we havent't sent one to
+        // each address generated, as long as there is a free thread
+        ret = hmcsim_build_memrequest( hmc,
+                                       0,
+                                       addr[sreads_sent],
+                                       tag,
+                                       CMC22,    /* STENCIL_LOAD_3D_1 */
+                                       link,
+                                       &(packet[0]),
+                                       &head,
+                                       &tail);
+        //add dict entry for tag-addr pair for addr retrieval
+        dict[dict_size].key = tag;
+        dict[dict_size].val = addr[sreads_sent];
+        dict_size++;
+        // ensure each tag used is unique
+        if( ret == 0 ){
+          plen = rqst_packet_length(head);
+          //printf( "SENDING PACKET WITH %d FLITS\n", plen );
+          if( plen > 1 ){
+            // lay out packet
+            packet[0] = head;
+            for(i=0; i<((plen-1)*2); i++ ){
+              packet[i+1] = payload[i];
+            }
+            packet[(plen*2)-1] = tail;
+          }else{
+            packet[0] = head;
+            packet[1] = tail;
+          }
+          //printf("ATTMEPTING TO SEND REQUEST WITH ADDR: 0x%016lx, TAG: %d\n", addr[sreads_sent], tag);
+          ret = hmcsim_send( hmc, &(packet[0]) );
+        }else{
+          printf( "ERROR : FATAL : MALFORMED PACKET FROM THREAD %d\n", i );
+        }
+
+        switch( ret ){
+        case 0:
+          /* success */
+          //printf( "SUCCESS : INJECTED STENCIL_READ PACKET INTO DEVICE\n" );
+          ongoing_rqsts++;
+	  tag++;
+	  if( tag > 1023 ) tag=0;
+          sreads_sent++;
+          break;
+        case HMC_STALL:
+          printf( "FAILED : HMC DEVICE WAS STALLED\n" );
+          break;
+        case -1:
+        default:
+          printf( "FAILED : STENCIL_READ PACKET SEND FAILURE\n" );
+          goto complete_failure;
+          break;
+        } 
+      }
+      // check for response
+      for( i=0; i<hmc->num_links; i++ ){
+        ret = HMC_OK;
+        while( ret != HMC_STALL ){
+          ret = hmcsim_recv( hmc, cub, i, &(packet[0]) );
+          if( ret == 0 ){
+            /* decode the response */
+            hmcsim_decode_memresponse( hmc,
                                     &(packet[0]),
                                     &d_response_head,
                                     &d_response_tail,
@@ -382,30 +439,36 @@ extern int execute_test(        struct hmcsim_t *hmc,
                                     &d_errstat,
                                     &d_rtc,
                                     &d_crc );
-          printf( "RECEIVED PACKET WITH %d FLITS\n", d_length );
-          if( d_type != WR_RS ){
-            uint32_t k;
-            for(k=0;k<sreads_sent;k++){
-	      //enqueue addr that is paired with the tag recieved
-              if(dict[k].key == d_tag){
-                addr_q[q_end] = dict[k].val;
-                q_end++;
+            //printf( "RECEIVED PACKET WITH %d FLITS AND TYPE %d, tag: %d\n", d_length, d_type, d_tag );
+            if( d_type == RD_RS ){
+              uint32_t i;
+              for(i=dict_size-1;i>=0;i--){
+	        //enqueue addr that is paired with the tag recieved
+                if(dict[i].key == d_tag){
+                  addr_q[q_end] = dict[i].val;
+                  q_end++;
+                  break;
+                }
               }
+
+              sreads_recvd++;
+              bytes_read += d_length * 16;
+              ongoing_rqsts--;
             }
-            sreads_recvd++;
-          }
-        }/* -- good response */
-      }/* -- get all the responses */
-    }/* -- end response loop */
-    if(sreads_recvd >= l_size){
-      done = 1;
-    }
+          }/* -- good response */
+        }/* -- get all the responses */
+      }/* -- end response loop */
+    }/* completed clock cycle for one core */
     cycles++;
     hmcsim_clock( hmc );
+    //printf("CYCLE:%lu, sreads_sent:%lu, sreads_recvd:%lu, writes:%lu\n", cycles, sreads_sent, sreads_recvd, writes);
   }
 
   printf( "COMPLETED TEST IN %" PRIu64 " CYCLES\n", cycles );
-  printf( "Simulated time: %.2f us\n", (double) cycles / (clock_ghz * 1000.0) );
+  printf( "Stencil reads: %lu\n", sreads_recvd );
+  printf( "Bytes read: %lu bytes\n", bytes_read );
+  printf( "Bytes written: %lu bytes\n", bytes_written );
+  printf( "Simulated time: %.4f us\n", (double) cycles / (clock_ghz * 1000.0) );
 complete_failure:
   fclose( ofile );
   ofile = NULL;
