@@ -54,14 +54,14 @@ static uint32_t __rsp_len   = 1;
              : enum in hmc_sim_types.h.  All normal commands are permissible.
              : If RSP_CMC is selected, you must also set __rsp_cmd_code
 */
-static hmc_response_t __rsp_cmd = RD_RS;
+static hmc_response_t __rsp_cmd = RSP_CMC;
 
 
 /* __rsp_cmd_code : Contains the command code for RSP_CMC command
                   : responses.  The code must be <= 127 decimal.
                   : Unused response commands are 64->127
 */
-static uint8_t __rsp_cmd_code = 0x00;
+static uint8_t __rsp_cmd_code = 23;
 
 /* __transient_power : Contains the transient power of the respective
                      : CMC operation.  If this field is unknown,

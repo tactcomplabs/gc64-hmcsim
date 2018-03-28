@@ -21,6 +21,7 @@ extern int getshiftamount( 	uint32_t num_links,
 				uint32_t *shiftamt );
 extern int execute_test(        struct hmcsim_t *hmc,
                                 uint32_t num_threads,
+                                uint32_t num_cores,
 				uint32_t shiftamt,
 				uint32_t array_width,
 				uint32_t array_height,
@@ -86,6 +87,7 @@ extern int main( int argc, char **argv ){
   uint32_t capacity	= 0;
   uint32_t xbar_depth	= 0;
   uint32_t num_threads	= 1;
+  uint32_t num_cores	= 1;
   uint32_t bsize	= 128;
   uint32_t shiftamt	= 0;
   uint32_t nX		= 0;
@@ -97,7 +99,7 @@ extern int main( int argc, char **argv ){
   struct hmcsim_t hmc;
   /* ---- */
 
-  while(( ret = getopt( argc, argv, "b:c:d:h:l:m:n:q:v:x:t:N:T:C:L:i:j:k:" )) != -1 )
+  while(( ret = getopt( argc, argv, "b:c:d:h:l:m:n:q:v:x:t:o:N:T:C:L:i:j:k:" )) != -1 )
   {
     switch( ret )
     {
@@ -125,12 +127,16 @@ extern int main( int argc, char **argv ){
 	printf( " -j <array_height>\n" );
 	printf( " -k <array_depth>\n" );
         printf( " -t <num_threads>\n" );
+        printf( " -o <num_cores>\n" );
         printf( " -C <clock_ghz>\n" );
         printf( " -h ...print help\n" );
         return 0;
         break;
       case 't':
 	num_threads = (uint32_t)(atoi(optarg));
+        break;
+      case 'o':
+        num_cores = (uint32_t)(atoi(optarg));
         break;
       case 'l':
         num_links = (uint32_t)(atoi(optarg));
@@ -299,6 +305,7 @@ extern int main( int argc, char **argv ){
    */
   if( execute_test( &hmc,
                     num_threads,
+                    num_cores,
                     shiftamt,
 		    nX,
 		    nY,
