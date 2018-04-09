@@ -270,4 +270,12 @@ extern void hmcsim_cmc_power( uint32_t *row_ops, float *tpower ){
   *tpower  = __transient_power;
 }
 
+extern uint32_t hmcsim_cmc_mem_ops(){
+    /*
+          * this can be a value or some other custom variable,
+             * we use __row_ops here as an example
+                */
+    return (uint32_t)(__row_ops);
+}
+
 /* EOF */
