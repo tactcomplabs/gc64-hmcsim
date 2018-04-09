@@ -218,6 +218,7 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   uint32_t (*cmc_dyn_rsp)() = NULL;
   uint32_t (*cmc_dyn_rqst)() = NULL;
   uint32_t (*cmc_dyn)() = NULL;
+  uint32_t (*cmc_mem_ops)() = NULL;
   uint32_t dynamic = 0;
   /* ---- */
 
@@ -295,6 +296,13 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
     cmc_dyn_rqst = (uint32_t (*)())dlsym(handle,"hmcsim_cmc_dynamic_rqst_len");
   }
 
+  /* hmcsim_cmc_mem_ops */
+  cmc_mem_ops = (uint32_t (*))dlsym(handle,"hmcsim_cmc_mem_ops");
+#ifdef HMC_DEBUG
+  if( cmc_mem_ops != NULL ){
+    printf( "HMCSIM_REGISTER_FUNCTIONS: Found hmcsim_cmc_mem_ops symbol\n");
+  }
+#endif
 
   /* done loading functions */
 
@@ -333,6 +341,7 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   hmc->cmcs[idx].dynamic      = dynamic;
   hmc->cmcs[idx].cmc_dyn_rsp  = cmc_dyn_rsp;
   hmc->cmcs[idx].cmc_dyn_rqst = cmc_dyn_rqst;
+  hmc->cmcs[idx].cmc_mem_ops  = cmc_mem_ops;
 
   return 0;
 }
@@ -394,7 +403,8 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                                 hmc_response_t *rsp_cmd,
                                 uint8_t *raw_rsp_cmd,
                                 uint32_t *row_ops,
-                                float *tpower ){
+                                float *tpower,
+                                uint32_t *cmc_ops ){
 
   /* vars */
   uint32_t idx  = 0;
@@ -414,6 +424,7 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
   void (*cmc_str)(char *);
   void (*cmc_power)(uint32_t *,float *) = NULL;
   uint32_t (*cmc_dyn_rsp)() = NULL;
+  uint32_t (*cmc_mem_ops)() = NULL;
   /* ---- */
 
   /* resolve the index of the cmc in the lookup table */
@@ -523,6 +534,13 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
   }else{
     *row_ops = 1;
     *tpower  = 0.;
+  }
+
+  if( hmc->cmcs[idx].cmc_mem_ops != NULL ){
+    cmc_mem_ops = hmc->cmcs[idx].cmc_mem_ops;
+    *cmc_ops = (*cmc_mem_ops)();
+  }else{
+    *cmc_ops = 1;
   }
 
 #ifdef HMC_DEBUG

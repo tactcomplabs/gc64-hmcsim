@@ -77,7 +77,8 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
                                 hmc_response_t *rsp_cmd,
                                 uint8_t *raw_rsp_cmd,
                                 uint32_t *row_ops,
-                                float *tpower );
+                                float *tpower,
+                                uint32_t *cmc_mem_ops );
 
 
 
@@ -131,6 +132,7 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
         uint32_t row_ops                = 0x00;
         float tpower                    = 0.;
         uint32_t op_latency             = 0;
+        uint32_t cmc_mem_ops            = 1;
 	/* ---- */
 
 
@@ -2063,7 +2065,8 @@ extern int	hmcsim_process_rqst( 	struct hmcsim_t *hmc,
                                                 &rsp_cmd,
                                                 &tmp8,
                                                 &row_ops,
-                                                &tpower)!=0){
+                                                &tpower,
+                                                &cmc_mem_ops)!=0){
                           /* error occurred */
                           return HMC_ERROR;
                         }
@@ -2185,7 +2188,7 @@ step4_vr:
   printf( "STALLING BANK %d %d CYCLES\n", bank, op_latency );
 #endif
             hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_INVALID; 
-            hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = op_latency;        
+            hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = (op_latency * cmc_mem_ops);        
         }
 	/*
 	 * Step 5: invalidate the request queue slot

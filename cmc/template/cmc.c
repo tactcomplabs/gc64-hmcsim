@@ -33,7 +33,7 @@ static hmc_rqst_t __rqst    = CMC04;
          : This MUST match the __rqst field.  For example, if we have
          : CMC32 as the __rqst, then the __cmd is (uint32_t)(32).
 */
-static uint32_t __cmd       = 1;
+static uint32_t __cmd       = 4;
 
 /* __rqst_len : Contains the respective command request packet len in flits
               : Permissible values are 1->17.  This must include the header
@@ -74,6 +74,11 @@ static float __transient_power = 0.5;
              : infrastructure will assume a value of 1.
 */
 static uint32_t __row_ops = 2;
+
+/* __dynamic_cmc : Determines if dynamic request and response packets
+                    : are enabled; 0=no; 1=yes
+                    */
+static uint32_t __dynamic_cmc = 0;
 
 /* ----------------------------------------------------- HMCSIM_EXECUTE_CMC */
 /*
@@ -209,6 +214,37 @@ extern void hmcsim_cmc_str( char *out ){
 extern void hmcsim_cmc_power( uint32_t *row_ops, float *tpower ){
   *row_ops = __row_ops;
   *tpower  = __transient_power;
+}
+
+/* ----------------------------------------------------- HMCSIM_CMC_MEM_OPS */
+/*
+ * Returns the number of non-contiguous parallel memory requests
+ * If the respective CMC operation dispatches multiple, internal
+ * memory operations, this value will be utilized to the enforce
+ * the correct number of delay cycles for the executing device.
+ * For example, if a CMC device executes a memory operation across
+ * two separate vaults, then this value will be "1" (because the
+ * entire operation can be completed with a single set of
+ * DRAM row operations).  However, if the CMC operation
+ * requires two DRAM operations from the vault, this value would
+ * be "2", thus delaying the total operation for (op_latency * 2) cycles
+ */
+extern uint32_t hmcsim_cmc_mem_ops(){
+  /*
+   * this can be a value or some other custom variable,
+   * we use __row_ops here as an example
+   */
+  return (uint32_t)(__row_ops);
+}
+
+/* ----------------------------------------------------- HMCSIM_CMC_DYNAMIC */
+/*
+ * Returns whether or not this packet contains dynamic request or response
+ * values. 0=no; 1=yes
+ *
+ */
+uint32_t hmcsim_cmc_dynamic(){
+    return __dynamic_cmc;
 }
 
 /* EOF */
