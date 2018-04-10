@@ -218,7 +218,7 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   uint32_t (*cmc_dyn_rsp)() = NULL;
   uint32_t (*cmc_dyn_rqst)() = NULL;
   uint32_t (*cmc_dyn)() = NULL;
-  uint32_t (*cmc_mem_ops)(uint64_t) = NULL;
+  uint32_t (*cmc_mem_ops)(uint64_t,void *) = NULL;
   uint32_t dynamic = 0;
   /* ---- */
 
@@ -297,7 +297,7 @@ static int    hmcsim_register_functions( struct hmcsim_t *hmc, char *cmc_lib ){
   }
 
   /* hmcsim_cmc_mem_ops */
-  cmc_mem_ops = (uint32_t (*)(uint64_t))dlsym(handle,"hmcsim_cmc_mem_ops");
+  cmc_mem_ops = (uint32_t (*)(uint64_t,void *))dlsym(handle,"hmcsim_cmc_mem_ops");
 #ifdef HMC_DEBUG
   if( cmc_mem_ops != NULL ){
     printf( "HMCSIM_REGISTER_FUNCTIONS: Found hmcsim_cmc_mem_ops symbol\n");
@@ -424,7 +424,7 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
   void (*cmc_str)(char *);
   void (*cmc_power)(uint32_t *,float *) = NULL;
   uint32_t (*cmc_dyn_rsp)() = NULL;
-  uint32_t (*cmc_mem_ops)(uint64_t) = NULL;
+  uint32_t (*cmc_mem_ops)(uint64_t,void *) = NULL;
   /* ---- */
 
   /* resolve the index of the cmc in the lookup table */
@@ -538,7 +538,7 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
 
   if( hmc->cmcs[idx].cmc_mem_ops != NULL ){
     cmc_mem_ops = hmc->cmcs[idx].cmc_mem_ops;
-    *cmc_ops = (*cmc_mem_ops)(addr);
+    *cmc_ops = (*cmc_mem_ops)(addr,(void *)(hmc));
   }else{
     *cmc_ops = 1;
   }

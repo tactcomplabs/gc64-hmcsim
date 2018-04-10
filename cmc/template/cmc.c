@@ -229,7 +229,7 @@ extern void hmcsim_cmc_power( uint32_t *row_ops, float *tpower ){
  * requires two DRAM operations from the vault, this value would
  * be "2", thus delaying the total operation for (op_latency * 2) cycles
  */
-extern uint32_t hmcsim_cmc_mem_ops(){
+extern uint32_t hmcsim_cmc_mem_ops(uint64_t addr, void *hmc){
   /*
    * this can be a value or some other custom variable,
    * we use __row_ops here as an example

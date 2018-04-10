@@ -353,7 +353,8 @@ struct hmc_cmc_t{
                           float *);     /* transient power */
         uint32_t (*cmc_dyn_rsp)();      /* dynamic response length */
         uint32_t (*cmc_dyn_rqst)();     /* dynamic request length */
-        uint32_t (*cmc_mem_ops)(uint64_t);/* memory operation parallelism */
+        uint32_t (*cmc_mem_ops)(uint64_t,
+                                void *);/* memory operation parallelism */
 };
 
 struct hmc_internal_stat_t{
