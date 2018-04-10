@@ -243,7 +243,7 @@ extern uint32_t hmcsim_cmc_mem_ops(){
  * values. 0=no; 1=yes
  *
  */
-uint32_t hmcsim_cmc_dynamic(){
+uint32_t hmcsim_cmc_dynamic(uint64_t addr){
     return __dynamic_cmc;
 }
 
