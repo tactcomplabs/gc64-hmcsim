@@ -2162,7 +2162,7 @@ step4_vr:
   printf( "STALLING BANK %d %d CYCLES\n", bank, op_latency );
 #endif
                     hmc->devs[dev].quads[quad].vaults[vault].banks[bank].valid = HMC_RQST_VALID;
-                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = op_latency;
+                    hmc->devs[dev].quads[quad].vaults[vault].banks[bank].delay = op_latency* cmc_mem_ops;
 
                     /* Record the response packet to be sent after the delay */
                     //for (j=0; j<rsp_len; j++) {

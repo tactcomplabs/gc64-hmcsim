@@ -538,7 +538,7 @@ extern int  hmcsim_process_cmc( struct hmcsim_t *hmc,
 
   if( hmc->cmcs[idx].cmc_mem_ops != NULL ){
     cmc_mem_ops = hmc->cmcs[idx].cmc_mem_ops;
-    *cmc_ops = (*cmc_mem_ops)(addr,(void *)(hmc));
+    *cmc_ops = (*cmc_mem_ops)(addr, hmc);
   }else{
     *cmc_ops = 1;
   }

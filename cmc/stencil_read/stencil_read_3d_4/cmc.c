@@ -20,20 +20,20 @@
 
 
 /* __op_name : Contains a string representative for the trace logs */
-static char *__op_name      = "STENCIL_READ_3D_1";
+static char *__op_name      = "STENCIL_READ_3D_4";
 
 /* __rqst : Contains the respective command enum that the simulated
           : application uses to initiate a request for this command.
           : See hmc_rqst_t enums from hmc_sim_types.h
           : MUST BE UNIQUE ACROSS CMC LIBS
 */
-static hmc_rqst_t __rqst    = CMC22;
+static hmc_rqst_t __rqst    = CMC41;
 
 /* __cmd : Contains the respective command code for this CMC operation.
          : This MUST match the __rqst field.  For example, if we have
          : CMC32 as the __rqst, then the __cmd is (uint32_t)(32).
 */
-static uint32_t __cmd       = 22;
+static uint32_t __cmd       = 41;
 
 /* __rqst_len : Contains the respective command request packet len in flits
               : Permissible values are 1->17.  This must include the header
@@ -167,7 +167,7 @@ extern int hmcsim_execute_cmc(  void *hmc,
   uint8_t y_width = 0x0;  
 
   /* operation constants */
-  const uint8_t data_width = 4;   // in bits
+  const uint8_t data_width = 16;   // in bits
   const uint8_t dims = 3;
 
   // read first cmc register into temp to get stencil point and array sizes
@@ -179,34 +179,24 @@ extern int hmcsim_execute_cmc(  void *hmc,
   stencil_point = temp & 0xFF;
   x_width = (temp >> 0x8) & 0xFF;
   y_width = (temp >> 0x10) & 0xFF;
-  
+
   /* create a holder for the data from the stencil register */
   const uint32_t stencil_length = stencil_point*dims*8;
   const uint32_t reg_length = 1 + (8+8+8+stencil_length)/64;
   uint64_t stencil_reg_data[reg_length];  
   uint16_t i;
-  uint16_t p = 0;
   for(i = 0; i < reg_length; i++){
     if( (*read_cmcreg)(l_hmc, 0, i, &(stencil_reg_data[i]) ) != 0 ){
       printf("ERROR: failed to retrieve stencil register data\n");
       return -1;
     }
   }
-  
+
   /* extract cmc register stencil data */
-  int8_t stencil[stencil_point*dims];
- 
-  for(i=0; i < reg_length; i++){
-    if( i != 0 ){
-      stencil[p++] = (int8_t) stencil_reg_data[i] & 0xFF;
-      stencil[p++] = (int8_t) (stencil_reg_data[i] >> 8) & 0xFF;
-      stencil[p++] = (int8_t) (stencil_reg_data[i] >> 16) & 0xFF;
-    }
-    stencil[p++] = (int8_t) (stencil_reg_data[i] >> 24) & 0xFF;
-    stencil[p++] = (int8_t) (stencil_reg_data[i] >> 32) & 0xFF;
-    stencil[p++] = (int8_t) (stencil_reg_data[i] >> 40) & 0xFF;
-    stencil[p++] = (int8_t) (stencil_reg_data[i] >> 48) & 0xFF;
-    stencil[p++] = (int8_t) (stencil_reg_data[i] >> 56) & 0xFF;
+  uint8_t stencil[stencil_length];
+
+  for(i=0; i < stencil_length; i++){
+    stencil[i] = *(stencil_reg_data + 8 + 8 + 8 + i*8);
   }
   
   /* set dynamic response length using stencil point */
@@ -223,14 +213,13 @@ extern int hmcsim_execute_cmc(  void *hmc,
 
   /* init function pointer */
   readmem = l_hmc->readmem;
-  int8_t x_offset, y_offset, z_offset;
+  uint8_t x_offset, y_offset, z_offset;
   uint16_t j = 0x0;
-  printf("addr: %x\n", addr);
   for(i = 0; i < stencil_point; i++){
-    printf("(%d, %d, %d)\n", x_offset, y_offset, z_offset);
     x_offset = stencil[j];
     y_offset = stencil[j+1];
     z_offset = stencil[j+2];
+
     fetch_addr = addr +
                  (x_offset*data_width) +
                  (y_offset*x_width*data_width) +
@@ -353,93 +342,6 @@ extern void hmcsim_cmc_str( char *out ){
 extern void hmcsim_cmc_power( uint32_t *row_ops, float *tpower ){
   *row_ops = __row_ops;
   *tpower  = __transient_power;
-}
-
-/* ----------------------------------------------------- HMCSIM_CMC_MEM_OPS */
-/*
- * Returns the number of non-contiguous parallel memory requests
- * If the respective CMC operation dispatches multiple, internal
- * memory operations, this value will be utilized to the enforce
- * the correct number of delay cycles for the executing device.
- * For example, if a CMC device executes a memory operation across
- * two separate vaults, then this value will be "1" (because the
- * entire operation can be completed with a single set of
- * DRAM row operations).  However, if the CMC operation
- * requires two DRAM operations from the vault, this value would
- * be "2", thus delaying the total operation for (op_latency * 2) cycles
- */
-extern uint32_t hmcsim_cmc_mem_ops(uint64_t address, void * hmc){
-  struct hmcsim_t *l_hmc  = (struct hmcsim_t *)(hmc);
-  int (*read_cmcreg)(struct hmcsim_t *,
-                     uint32_t,
-                     uint64_t,
-                     uint64_t *) = NULL;
-
-  read_cmcreg   = l_hmc->read_cmcreg;
-  
-  uint8_t stencil_point = 0x0;
-  uint64_t temp = 0x0ll;
-  uint8_t x_width = 0x0;
-  uint8_t y_width = 0x0;
-  uint32_t nonpar_reqs = 0;
-
-  /* operation constants */
-  const uint8_t data_width = 4;   // in bits
-  const uint8_t dims = 3;
-
-  // read first cmc register into temp to get stencil point and array sizes
-  if( (*read_cmcreg)(l_hmc, 0, 0, &temp) != 0 ){
-    printf("ERROR: failed to retrieve stencil register data\n");
-    return -1;
-  }
-  // extract data from temp
-  stencil_point = temp & 0xFF;
-  x_width = (temp >> 0x8) & 0xFF;
-  y_width = (temp >> 0x10) & 0xFF;
-  
-  /* create a holder for the data from the stencil register */
-  const uint32_t stencil_length = stencil_point*dims*8;
-  const uint32_t reg_length = 1 + (8+8+8+stencil_length)/64;
-  uint64_t stencil_reg_data[reg_length];
-  uint16_t i;
-  for(i = 0; i < reg_length; i++){
-    if( (*read_cmcreg)(l_hmc, 0, i, &(stencil_reg_data[i]) ) != 0 ){
-      printf("ERROR: failed to retrieve stencil register data\n");
-      return -1;
-    }
-  }
-
-  /* extract cmc register stencil data */
-  uint8_t stencil[stencil_length];
-
-  for(i=0; i < stencil_length; i++){
-    stencil[i] = *(stencil_reg_data + 8 + 8 + 8 + i*8);
-  }
-   /* address array for checking for duplicates */
-  uint64_t addr[stencil_length];
-
-  uint8_t x_offset, y_offset, z_offset;
-  uint16_t j = 0x0;
-  uint16_t k = 0x0;
-  for(i = 0; i < stencil_point; i++){
-    x_offset = stencil[j];
-    y_offset = stencil[j+1];
-    z_offset = stencil[j+2];
-
-    addr[i] = address +
-                 (x_offset*data_width) +
-                 (y_offset*x_width*data_width) +
-                 (z_offset*y_width*x_width*data_width);
-    // check if we've already added an addr with same vault addr, if so inc nonpar_reqs
-    for(k = 0; k < i; k++){
-      if((addr[i] & 0x3C0) == (addr[k] & 0x3C0)){
-        nonpar_reqs++;
-        break;
-      }
-    }
-    j+=3;
-  }
-  return (uint32_t)(nonpar_reqs + 1);
 }
 
 /* EOF */
