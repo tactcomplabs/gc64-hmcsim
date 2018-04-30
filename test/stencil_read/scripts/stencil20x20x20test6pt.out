@@ -1,0 +1,24 @@
+Executing ../stencil_read -L ../../../cmc/ -b 16 -c 4 -d 20 -l 4 -m 64 -n 1 -q 64 -v 32 -x 128 -i 20 -j 20 -k 20 -t 16 -C 2.0 -o 2
+SUCCESS : INITIALIZED HMCSIM
+SUCCESS : INITIALIZED LINK 0
+SUCCESS : INITIALIZED LINK 1
+SUCCESS : INITIALIZED LINK 2
+SUCCESS : INITIALIZED LINK 3
+SUCCESS : INITIALIZED MAX BLOCK SIZE
+SUCCESS : INITIALIZED DRAM LATENCY
+LOADING CMC LIBRARY: /stencil_read/stencil_read_3d_1_reg/libstencil_read_3d_1.so
+LOADED CMC LIBRARY: /stencil_read/stencil_read_3d_1_reg/libstencil_read_3d_1.so
+LOADING CMC LIBRARY: /stencil_read/stencil_read_init/libstencil_read_init.so
+LOADED CMC LIBRARY: /stencil_read/stencil_read_init/libstencil_read_init.so
+...INITIALIZING TRACE FILE
+SUCCESS : INITIALIZED TRACE HANDLERS
+BEGINNING EXECUTION
+GENERATING REQUEST ADDRESSES FOR ARRAY OF SIZE: 8000
+SUCCESSFULLY CREATED 5832 REQUEST ADDRESSES
+BEGIN SIMULATION
+COMPLETED TEST IN 82410 CYCLES
+Stencil reads: 5832
+Bytes read: 93312 bytes
+Bytes written: 5832 bytes
+Simulated time: 41.2050 us
+SUCCESS : FREE'D HMCSIM
