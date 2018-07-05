@@ -30,6 +30,9 @@ struct htog_count_t{
         uint64_t *hlock;
         uint64_t *hunlock;
         uint64_t *inc8;
+        uint64_t *p_wr64;
+        uint64_t *plat;
+        uint64_t *vrs;
 };
 struct htog_t{
 	struct htog_count_t counts;
@@ -112,6 +115,21 @@ static int htog_free( struct htog_t *htog ) {
 		free( htog->counts.inc8 );
 		htog->counts.inc8 = NULL;
 	}
+
+        if( htog->counts.p_wr64 != NULL ){
+                free( htog->counts.p_wr64 );
+                htog->counts.p_wr64 = NULL;
+        }
+
+        if( htog->counts.plat != NULL ){
+                free( htog->counts.plat );
+                htog->counts.plat = NULL;
+        }
+
+        if( htog->counts.vrs != NULL ){
+                free( htog->counts.vrs );
+                htog->counts.vrs = NULL;
+        }
 
 	return 0;
 }
@@ -297,6 +315,48 @@ static int print_results( struct htog_t *htog ) {
 	fclose( ofile );
 	ofile = NULL;
 
+        /*
+         * p_wr64
+         *
+         */
+	ofile = fopen( "p_wr64.out", "w+" );
+	if( ofile == NULL ){
+		return -1;
+	}
+	for( i=0; i<htog->num_clocks; i++ ){
+		fprintf( ofile, "%"PRIu64 " %"PRIu64 "\n", i, htog->counts.p_wr64[i] );
+	}
+	fclose( ofile );
+	ofile = NULL;
+
+        /*
+         * plat
+         *
+         */
+	ofile = fopen( "plat.out", "w+" );
+	if( ofile == NULL ){
+		return -1;
+	}
+	for( i=0; i<htog->num_clocks; i++ ){
+		fprintf( ofile, "%"PRIu64 " %"PRIu64 "\n", i, htog->counts.plat[i] );
+	}
+	fclose( ofile );
+	ofile = NULL;
+
+        /*
+         * vrs
+         *
+         */
+	ofile = fopen( "vrs.out", "w+" );
+	if( ofile == NULL ){
+		return -1;
+	}
+	for( i=0; i<htog->num_clocks; i++ ){
+		fprintf( ofile, "%"PRIu64 " %"PRIu64 "\n", i, htog->counts.vrs[i] );
+	}
+	fclose( ofile );
+	ofile = NULL;
+
 	return 0;
 }
 
@@ -371,23 +431,41 @@ static int alloc_mem( struct htog_t *htog ) {
 		return -1;
 	}
 
+	htog->counts.p_wr64 = malloc( sizeof( uint64_t ) * htog->num_clocks );
+	if( htog->counts.p_wr64 == NULL ){
+		return -1;
+	}
+
+	htog->counts.plat = malloc( sizeof( uint64_t ) * htog->num_clocks );
+	if( htog->counts.plat == NULL ){
+		return -1;
+	}
+
+	htog->counts.vrs = malloc( sizeof( uint64_t ) * htog->num_clocks );
+	if( htog->counts.vrs == NULL ){
+		return -1;
+	}
+
 	/*
 	 * zero the arrays
 	 *
 	 */
 	for( i=0; i<htog->num_clocks; i++ ){
-		htog->counts.bank_conflict[i]	= 0x00ll;
-		htog->counts.xbar_rqst_stall[i]	= 0x00ll;
-		htog->counts.xbar_latency[i]	= 0x00ll;
-		htog->counts.wr64[i]		= 0x00ll;
-		htog->counts.rd64[i]		= 0x00ll;
-		htog->counts.wr16[i]		= 0x00ll;
-		htog->counts.rd16[i]		= 0x00ll;
-		htog->counts.wr32[i]		= 0x00ll;
-		htog->counts.rd32[i]		= 0x00ll;
-		htog->counts.hlock[i]		= 0x00ll;
-		htog->counts.hunlock[i]		= 0x00ll;
-		htog->counts.inc8[i]		= 0x00ll;
+		htog->counts.bank_conflict[i]	= 0x00ull;
+		htog->counts.xbar_rqst_stall[i]	= 0x00ull;
+		htog->counts.xbar_latency[i]	= 0x00ull;
+		htog->counts.wr64[i]		= 0x00ull;
+		htog->counts.rd64[i]		= 0x00ull;
+		htog->counts.wr16[i]		= 0x00ull;
+		htog->counts.rd16[i]		= 0x00ull;
+		htog->counts.wr32[i]		= 0x00ull;
+		htog->counts.rd32[i]		= 0x00ull;
+		htog->counts.hlock[i]		= 0x00ull;
+		htog->counts.hunlock[i]		= 0x00ull;
+		htog->counts.inc8[i]		= 0x00ull;
+                htog->counts.p_wr64[i]          = 0x00ull;
+                htog->counts.plat[i]            = 0x00ull;
+                htog->counts.vrs[i]             = 0x00ull;
 	}
 
 	return 0;
@@ -404,6 +482,7 @@ static int scan_clocks( FILE *infile, struct htog_t *htog ) {
 	char buf[BUFLEN];
 	char *pch	= NULL;
 	char *pend	= NULL;
+        char *rtn       = NULL;
 	int ne		= 0;
 	int flag	= 1;
 	uint64_t tc	= 0x00ll;
@@ -439,7 +518,7 @@ static int scan_clocks( FILE *infile, struct htog_t *htog ) {
 		 * get a line from the file
 		 *
 		 */
-		fgets( buf, 1024, infile );
+		rtn = fgets( buf, 1024, infile );
 
 		/*
 		 * make sure its not a comment or a partial line
@@ -502,6 +581,7 @@ static int parse( FILE *infile, struct htog_t *htog ){
 	char buf[BUFLEN];
 	char *pch	= NULL;
 	char *pend	= NULL;
+        char *rtn       = NULL;
 	uint64_t tc	= 0x00ll;
 	/* ---- */
 
@@ -513,7 +593,7 @@ static int parse( FILE *infile, struct htog_t *htog ){
 		 *
 		 */
 		memset( buf, 0, sizeof( char ) * BUFLEN );
-		fgets( buf, 1024, infile );
+		rtn = fgets( buf, 1024, infile );
 
 		/*
 		 * make sure its not a comment or a partial line
@@ -597,6 +677,12 @@ static int parse( FILE *infile, struct htog_t *htog ){
 				htog->counts.hunlock[tc]++;
 			}else if( strcmp( pch, "INC8" ) == 0 ){
 				htog->counts.inc8[tc]++;
+                        }else if( strcmp( pch, "P_WR64" ) == 0 ){
+                                htog->counts.p_wr64[tc]++;
+                        }else if( strcmp( pch, "PACKET_LATENCY" ) == 0 ){
+                                htog->counts.plat[tc]++;
+                        }else if( strcmp( pch, "VAULT_RQST_STALL" ) == 0 ){
+                                htog->counts.vrs[tc]++;
 			}else{
 				printf( "Found a bogus value : %s\n", pch );
 			}
@@ -709,6 +795,9 @@ static int init_structs( struct htog_t *htog ){
         htog->counts.hlock              = NULL;
         htog->counts.hunlock            = NULL;
         htog->counts.inc8               = NULL;
+        htog->counts.p_wr64             = NULL;
+        htog->counts.plat               = NULL;
+        htog->counts.vrs                = NULL;
 
 	htog->num_clocks		= 0x00ll;
 	htog->fname			= NULL;

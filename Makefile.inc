@@ -85,6 +85,6 @@ DOXYGEN=/usr/bin/doxygen
 
 #-- PREFIX
 #-- INSTALLATION PREFIX
-PREFIX=/jenkins/sst/install/volatile/TOT/hmcsim
+PREFIX=/jenkins/volatile/hmcsim
 
 #-- EOF
