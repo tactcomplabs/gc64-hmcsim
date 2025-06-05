@@ -1,0 +1,28 @@
+set(SRC
+    hmc_bank_conflict.c
+    hmc_clock.c
+    hmc_cmc.c
+    hmc_config.c
+    hmc_config_devs.c
+    hmc_config_parser.lex
+    hmc_config_parser.yy.c
+    hmc_init.c
+    hmc_io.c
+    hmc_jtag.c
+    hmc_links.c
+    hmc_mem.c
+    hmc_power.c
+    hmc_process_packet.c
+    hmc_recv.c
+    hmc_reset.c
+    hmc_response.c
+    hmc_rqst.c
+    hmc_send.c
+    hmc_simple.c
+    hmc_stat.c
+    hmc_tecplot.c
+    hmc_trace.c
+    hmc_util.c
+)
+target_sources(hmcsim PRIVATE ${SRC})
+unset(SRC)

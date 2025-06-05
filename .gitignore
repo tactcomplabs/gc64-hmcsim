@@ -1,0 +1,7 @@
+*.a
+*.dylib
+*.so
+*.o
+build/
+compile_commands.json
+shbuild/
