@@ -70,7 +70,7 @@ void print_tree( struct node *tnodes,
     printf( "-- lnode  = %d\n", tnodes[i].lnode );
     printf( "-- rnode  = %d\n", tnodes[i].rnode );
     printf( "-- nchild = %d\n", tnodes[i].nchild );
-    printf( "-- lock   = 0x%016llx\n", tnodes[i].lock );
+    printf( "-- lock   = 0x%016" PRIx64 "\n", tnodes[i].lock );
   }
 }
 
