@@ -206,7 +206,7 @@ extern int execute_test(	struct hmcsim_t *hmc,
 			 * Step 2: Send it 
 			 *
 			 */
-			printf( "...sending packet : base addr=0x%016llx\n", addr[iter] );
+			printf( "...sending packet : base addr=0x%016" PRIx64 "\n", addr[iter] );
 
 #if 0
 			for( i=0; i<HMC_MAX_UQ_PACKET; i++){ 

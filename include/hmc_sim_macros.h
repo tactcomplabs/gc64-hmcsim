@@ -13,6 +13,7 @@
 #ifndef _HMC_SIM_MACROS_H_
 #define _HMC_SIM_MACROS_H_
 
+#include <inttypes.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -155,7 +156,7 @@ extern "C" {
 
 /* -------------------------------------------- TRACE MACROS */
 #define HMCSIM_PRINT_TRACE( s )		( fprintf( stdout, "HCMSIM_TRACE %s:%d : %s\n", __FUNCTION__, __LINE__, s ) )
-#define HMCSIM_PRINT_ADDR_TRACE( s, a )	( fprintf( stdout, "HCMSIM_TRACE %s:%d : %s : 0x%016llx\n", __FUNCTION__, __LINE__, s, a ) )
+#define HMCSIM_PRINT_ADDR_TRACE( s, a )	( fprintf( stdout, "HCMSIM_TRACE %s:%d : %s : 0x%016" PRIx64 "\n", __FUNCTION__, __LINE__, s, a ) )
 #define HMCSIM_PRINT_INT_TRACE( s, d )	( fprintf( stdout, "HCMSIM_TRACE %s:%d : %s : %d\n", __FUNCTION__, __LINE__, s, d ) )
 
 #ifdef __cplusplus

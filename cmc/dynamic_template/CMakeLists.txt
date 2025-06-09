@@ -1,0 +1,1 @@
+gc64_hmcsim_add_cmc(dynamic_cmctemplate)

@@ -1,0 +1,33 @@
+macro(gc64_hmcsim_add_test name sources)
+    add_executable(${name} ${sources})
+    target_link_libraries(${name} hmcsim)
+    if(UNIX)
+        target_link_libraries(${name} dl)
+    endif()
+endmacro()
+
+# Not compiled in original build
+# add_subdirectory(1dfft)
+# Not compiled in original build
+# add_subdirectory(2dfft)
+add_subdirectory(decode_physrand)
+add_subdirectory(dyn_cmc)
+add_subdirectory(fe_linear)
+add_subdirectory(fe_tree)
+add_subdirectory(gups)
+add_subdirectory(hmc_physrand)
+add_subdirectory(load_fe)
+add_subdirectory(mutex)
+add_subdirectory(mutex_linear)
+add_subdirectory(simple)
+add_subdirectory(simple_api)
+add_subdirectory(simple_cmc)
+# Not compiled in original build
+# add_subdirectory(spmv)
+# Not compiled in original build
+# add_subdirectory(sst)
+add_subdirectory(sst_init)
+add_subdirectory(stream)
+add_subdirectory(stream_power)
+add_subdirectory(stream_power_config)
+add_subdirectory(stream_power_tecplot)
